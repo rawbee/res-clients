@@ -13,7 +13,7 @@ Solutions-oriented engineering leader with 20+ years shipping software at scale 
 ## PROFESSIONAL EXPERIENCE
 
 ### Co-Founder & Principal | Res AI, LLC
-*Apr 2026 – Present* | *CRM architecture, systems integration, marketing technology*
+*Nov 2025 – Present* | *CRM architecture, systems integration, marketing technology*
 * Co-founded a senior-operator consultancy with Hai Tran, delivering CRM data architecture, cross-platform martech integration, attribution infrastructure, and technical operations support.
 * [DRAFT — Robby to expand with current Res engagements and results before this goes in Appendix A.]
 
@@ -44,9 +44,10 @@ Solutions-oriented engineering leader with 20+ years shipping software at scale 
 * Integrated third-party tools and APIs, and led the front-end migration to React.js, improving developer velocity and user experience.
 
 ### Principal Software Engineer | Zocdoc
-*Mar 2018 – Jul 2019* | *iOS, Android, Node.js, CloudFormation*
-* Tech lead for the mobile team at a leading consumer health platform, managing cross-functional priorities and representing the team in executive leadership forums.
-* Delivered features across iOS and Android focused on user growth, booking experience, and engagement—partnering closely with product, design, and business teams.
+*Mar 2018 – Jul 2019* | *Node.js, Salesforce, marketing systems, CloudFormation*
+* Principal engineer on the growth team at a leading consumer health platform, working on the marketing stack behind patient acquisition and engagement.
+* Hands-on Salesforce experience in an enterprise CRM environment, operated as part of the growth team's marketing systems.
+* Managed cross-functional priorities with product, design, and business stakeholders and represented the team in executive leadership forums.
 
 ### Senior Software Engineer | WonderUnit
 *Jun 2017 – Mar 2018* | *iOS, Node.js, Electron*

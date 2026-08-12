@@ -8,7 +8,7 @@
 
 | | |
 | :--- | :--- |
-| **Robby Abaya** | Engineering. 20+ yrs. Co-founder/CTO Worthy (2025–Apr 2026); Principal SWE Masterworks; Pinwheel (payroll APIs → Cash App, Discover); **Zocdoc — direct Salesforce experience**; Zynga; Carat. |
+| **Robby Abaya** | Engineering. 20+ yrs. Co-founder/CTO Worthy (2025–Apr 2026); Principal SWE Masterworks; Pinwheel (payroll APIs → Cash App, Discover); **Zocdoc — principal engineer, growth team, marketing stack, direct Salesforce experience**; Zynga; Carat. |
 | **Hai Tran** | Marketing/product. 25 yrs. Co-founder + CMO then CPO, Masterworks (marketing org 0→25 people, up to **$4M/mo** paid media, **HubSpot** extensively); Zynga art/creative director; Mind Pirate (acq. HP); R/GA; Digitas; Carat. |
 
 They have worked together across **four companies since 2004**: Carat → Zynga → Masterworks → Res.
@@ -51,6 +51,8 @@ They have worked together across **four companies since 2004**: Carat → Zynga 
 
 **D7 — Robby's resume was edited Aug 12** to reflect facts he supplied: Carat corrected to 2004–Nov 2008 (contract 2004–2006, full-time from Oct 2006 — this is what substantiates the 2004 partnership claim); Worthy corrected to Jan 2025–Apr 2026; Res AI entry added and **still marked `[DRAFT]`**; summary 15+ → 20+ years.
 
+**D8 — Robby's resume, second edit Aug 12** (Robby's direct instruction): (1) Zocdoc entry refocused from mobile-team tech lead to **principal engineer on the growth team working on the marketing stack**, with the Salesforce experience now stated in the entry itself — this closes the D6 gap where §A's "Salesforce at Zocdoc" claim had no corroboration in the required attachment. (2) Res AI start date changed **Apr 2026 → Nov 2025** to match Hai's LinkedIn. *Consequence:* the resume now shows Worthy (Jan 2025–Apr 2026) and Res AI (Nov 2025–present) overlapping by ~6 months — Robby to confirm the concurrent-roles presentation is intended, or adjust one entry. Tracked in the G-39 Open Items row.
+
 ## Key intelligence
 
 - **Evaluation weights:** 50% ability/capacity · 20% cost clarity/reasonability · 20% examples of work product (integration maps, SOPs, training materials) · 10% references. Spend effort accordingly.
@@ -62,7 +64,7 @@ They have worked together across **four companies since 2004**: Carat → Zynga 
 - [x] RFP parsed; proposal skeleton, gathering guide, technical brief written
 - [x] Session 0 triage — questions round declined (D1)
 - [x] Session 1 — firm identity. **§A Firm Overview is drafted and substantially complete**, pending entity verification
-- [x] Robby's resume corrected (D7)
+- [x] Robby's resume corrected (D7, D8 — Zocdoc refocused to growth/marketing stack; Res AI start aligned to Nov 2025)
 - [ ] **§B, §C, §D, §E, §F, §G all still skeleton — 76 `[G-` tokens remain**
 - [ ] **Work samples (G-14/G-40) — worth 20%, longest lead item, UNDECIDED:** sanitize existing artifacts or author originals? Blocking, asked repeatedly
 - [ ] Case studies with hard numbers (G-11–13) — **assigned to Hai**
