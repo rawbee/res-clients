@@ -1,0 +1,819 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Inside the InvestPR Stack</title>
+<style>
+  :root {
+    --bg: #F5F8F7;
+    --surface: #FFFFFF;
+    --surface-2: #EBF1F0;
+    --ink: #182A2D;
+    --muted: #56696B;
+    --line: #D6E0DE;
+    --accent: #0E7C86;
+    --accent-soft: #DDEEEF;
+    --deep: #29507C;
+    --warn: #A85B22;
+    --warn-soft: #F6E8DC;
+    --good: #2F7D53;
+    --good-soft: #E1EFE7;
+    --code-bg: #EDF2F1;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0F191B;
+      --surface: #162225;
+      --surface-2: #1C2B2E;
+      --ink: #E2ECEA;
+      --muted: #97ABA9;
+      --line: #2B3C3E;
+      --accent: #4CBCC5;
+      --accent-soft: #143A3E;
+      --deep: #8FB4D9;
+      --warn: #D9945C;
+      --warn-soft: #3A2A1B;
+      --good: #6CBE93;
+      --good-soft: #1B3428;
+      --code-bg: #1E2E31;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0F191B;
+    --surface: #162225;
+    --surface-2: #1C2B2E;
+    --ink: #E2ECEA;
+    --muted: #97ABA9;
+    --line: #2B3C3E;
+    --accent: #4CBCC5;
+    --accent-soft: #143A3E;
+    --deep: #8FB4D9;
+    --warn: #D9945C;
+    --warn-soft: #3A2A1B;
+    --good: #6CBE93;
+    --good-soft: #1B3428;
+    --code-bg: #1E2E31;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: "Charter", "Iowan Old Style", "Palatino", Georgia, serif;
+    font-size: 1.04rem;
+    line-height: 1.68;
+  }
+  .wrap { max-width: 1000px; margin: 0 auto; padding: 0 24px 96px; }
+  .prose { max-width: 66ch; }
+
+  h1, h2, h3, .sans {
+    font-family: "Avenir Next", "Avenir", "Segoe UI", "Trebuchet MS", system-ui, sans-serif;
+  }
+  h1 { font-size: clamp(2.1rem, 5vw, 3rem); line-height: 1.08; letter-spacing: -0.015em; margin: 0.4em 0 0.3em; text-wrap: balance; }
+  h2 { font-size: 1.45rem; letter-spacing: -0.01em; margin: 0 0 0.5em; text-wrap: balance; }
+  h3 { font-size: 1.08rem; margin: 1.4em 0 0.4em; }
+  p { margin: 0 0 1em; }
+  a { color: var(--accent); }
+  code { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; font-size: 0.86em; background: var(--code-bg); padding: 0.1em 0.35em; border-radius: 4px; }
+
+  .eyebrow {
+    font-family: "Avenir Next", "Avenir", "Segoe UI", system-ui, sans-serif;
+    font-size: 0.72rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.12em;
+    color: var(--accent); margin: 0 0 0.6em;
+  }
+  header.masthead { padding-top: 56px; border-bottom: 1px solid var(--line); padding-bottom: 28px; margin-bottom: 8px; }
+  .subtitle { color: var(--muted); font-size: 1.12rem; max-width: 62ch; }
+  .meta-line { font-family: "Avenir Next", "Segoe UI", system-ui, sans-serif; font-size: 0.8rem; color: var(--muted); margin-top: 18px; display: flex; flex-wrap: wrap; gap: 6px 18px; }
+
+  nav.toc { display: flex; flex-wrap: wrap; gap: 8px; padding: 18px 0 6px; }
+  nav.toc a {
+    font-family: "Avenir Next", "Segoe UI", system-ui, sans-serif; font-size: 0.82rem; font-weight: 500;
+    text-decoration: none; color: var(--ink); background: var(--surface); border: 1px solid var(--line);
+    padding: 5px 12px; border-radius: 999px;
+  }
+  nav.toc a:hover { border-color: var(--accent); color: var(--accent); }
+
+  section { margin-top: 64px; scroll-margin-top: 24px; }
+
+  .note {
+    border: 1px solid var(--line); border-left: 4px solid var(--accent);
+    background: var(--surface); border-radius: 8px; padding: 16px 20px; margin: 20px 0;
+  }
+  .note.warn { border-left-color: var(--warn); }
+  .note p:last-child { margin-bottom: 0; }
+
+  .funnel { display: flex; flex-wrap: wrap; align-items: stretch; gap: 8px; margin: 20px 0 8px; }
+  .funnel .stage {
+    flex: 1 1 150px; background: var(--surface); border: 1px solid var(--line); border-radius: 8px;
+    padding: 12px 14px; position: relative;
+  }
+  .funnel .stage b { font-family: "Avenir Next", "Segoe UI", system-ui, sans-serif; display: block; font-size: 0.9rem; color: var(--accent); }
+  .funnel .stage span { font-size: 0.86rem; color: var(--muted); line-height: 1.45; display: block; margin-top: 4px; }
+
+  figure { margin: 28px 0; }
+  figure svg { max-width: 100%; height: auto; display: block; }
+  figcaption { font-size: 0.86rem; color: var(--muted); margin-top: 10px; max-width: 70ch; }
+  .diagram-frame { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 18px; overflow-x: auto; }
+
+  /* ecosystem SVG */
+  .eco-node { cursor: pointer; }
+  .eco-node rect { fill: var(--surface-2); stroke: var(--line); stroke-width: 1.5; rx: 10; transition: stroke 0.15s; }
+  .eco-node text { fill: var(--ink); font-family: "Avenir Next", "Segoe UI", system-ui, sans-serif; font-size: 13px; font-weight: 600; }
+  .eco-node .nodesub { fill: var(--muted); font-size: 10.5px; font-weight: 400; }
+  .eco-node:hover rect, .eco-node:focus-visible rect { stroke: var(--accent); stroke-width: 2; }
+  .eco-node:focus-visible { outline: none; }
+  .eco-node.selected rect { stroke: var(--accent); stroke-width: 2.5; fill: var(--accent-soft); }
+  .eco-edge { stroke: var(--muted); stroke-width: 1.4; fill: none; }
+  .eco-edge.loop { stroke: var(--accent); stroke-dasharray: 5 4; stroke-width: 1.8; }
+  .eco-label { fill: var(--muted); font-family: "Avenir Next", "Segoe UI", system-ui, sans-serif; font-size: 10.5px; }
+  .eco-label.loop { fill: var(--accent); font-weight: 600; }
+  #arrowMuted polygon { fill: var(--muted); }
+  #arrowAccent polygon { fill: var(--accent); }
+  .hub-badge { fill: var(--accent); font-family: "Avenir Next", "Segoe UI", system-ui, sans-serif; font-size: 9.5px; font-weight: 700; letter-spacing: 0.08em; }
+
+  .eco-panel {
+    border: 1px solid var(--line); border-radius: 12px; background: var(--surface);
+    padding: 20px 24px; margin-top: 14px; min-height: 150px;
+  }
+  .eco-panel h3 { margin-top: 0; }
+  .eco-panel .field { margin: 10px 0; }
+  .eco-panel .field b {
+    font-family: "Avenir Next", "Segoe UI", system-ui, sans-serif; font-size: 0.72rem; text-transform: uppercase;
+    letter-spacing: 0.1em; display: block; margin-bottom: 2px;
+  }
+  .eco-panel .field.role b { color: var(--deep); }
+  .eco-panel .field.evidence b { color: var(--accent); }
+  .eco-panel .field.breaks b { color: var(--warn); }
+  .eco-panel .field.good b { color: var(--good); }
+  .eco-panel .placeholder { color: var(--muted); font-style: italic; }
+
+  /* problem cards */
+  .problem { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 22px 26px; margin: 18px 0; }
+  .problem h3 { margin: 0 0 2px; display: flex; align-items: baseline; gap: 10px; }
+  .problem .pnum { color: var(--accent); font-size: 0.9rem; font-family: ui-monospace, "SF Mono", Menlo, monospace; }
+  .problem .rfp-map { font-family: "Avenir Next", "Segoe UI", system-ui, sans-serif; font-size: 0.76rem; color: var(--muted); margin-bottom: 12px; }
+  .pgrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; margin-top: 12px; }
+  .pcell { border-radius: 8px; padding: 12px 14px; font-size: 0.92rem; line-height: 1.55; }
+  .pcell b { font-family: "Avenir Next", "Segoe UI", system-ui, sans-serif; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.1em; display: block; margin-bottom: 4px; }
+  .pcell.sym { background: var(--warn-soft); } .pcell.sym b { color: var(--warn); }
+  .pcell.why { background: var(--surface-2); } .pcell.why b { color: var(--deep); }
+  .pcell.fix { background: var(--good-soft); } .pcell.fix b { color: var(--good); }
+  .pcell ul { margin: 0; padding-left: 18px; }
+  .pcell li { margin: 2px 0; }
+
+  /* data table toggle */
+  .toggle-row { display: flex; align-items: center; gap: 14px; margin: 14px 0 10px; flex-wrap: wrap; }
+  button.btn {
+    font-family: "Avenir Next", "Segoe UI", system-ui, sans-serif; font-size: 0.86rem; font-weight: 600;
+    background: var(--accent); color: var(--bg); border: none; border-radius: 8px; padding: 9px 16px; cursor: pointer;
+  }
+  button.btn.secondary { background: var(--surface); color: var(--ink); border: 1px solid var(--line); }
+  button.btn:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+  button.btn[disabled] { opacity: 0.4; cursor: default; }
+  .state-chip { font-family: "Avenir Next", "Segoe UI", system-ui, sans-serif; font-size: 0.78rem; font-weight: 600; padding: 4px 12px; border-radius: 999px; }
+  .state-chip.messy { background: var(--warn-soft); color: var(--warn); }
+  .state-chip.clean { background: var(--good-soft); color: var(--good); }
+
+  .tablewrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); }
+  table.data { border-collapse: collapse; width: 100%; min-width: 640px; font-size: 0.9rem; font-variant-numeric: tabular-nums; }
+  table.data th {
+    font-family: "Avenir Next", "Segoe UI", system-ui, sans-serif; font-size: 0.72rem; text-transform: uppercase;
+    letter-spacing: 0.08em; text-align: left; color: var(--muted); padding: 10px 14px; border-bottom: 1px solid var(--line);
+  }
+  table.data td { padding: 9px 14px; border-bottom: 1px solid var(--line); font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 0.82rem; }
+  table.data tr:last-child td { border-bottom: none; }
+  .v-clean { display: none; color: var(--good); }
+  .is-clean .v-clean { display: inline; }
+  .is-clean .v-messy { display: none; }
+  .v-messy .bad { color: var(--warn); }
+  tr.dup td { color: var(--warn); }
+  .is-clean tr.dup td { color: var(--muted); text-decoration: line-through; }
+  .is-clean tr.dup td .merged-note { text-decoration: none; font-style: italic; }
+  .merged-note { display: none; }
+  .is-clean .merged-note { display: inline; }
+
+  /* stepper */
+  .step-node rect { fill: var(--surface-2); stroke: var(--line); stroke-width: 1.5; }
+  .step-node text { fill: var(--ink); font-family: "Avenir Next", "Segoe UI", system-ui, sans-serif; font-size: 12px; font-weight: 600; }
+  .step-node .stepsub { fill: var(--muted); font-size: 10px; font-weight: 400; }
+  .step-node circle { fill: var(--surface); stroke: var(--line); stroke-width: 1.5; }
+  .step-node .stepnum { fill: var(--muted); font-size: 11px; font-weight: 700; }
+  .step-node.active rect { fill: var(--accent-soft); stroke: var(--accent); stroke-width: 2.5; }
+  .step-node.active circle { fill: var(--accent); stroke: var(--accent); }
+  .step-node.active .stepnum { fill: var(--bg); }
+  .step-edge { stroke: var(--muted); stroke-width: 1.4; fill: none; }
+  .step-edge.return { stroke: var(--accent); stroke-dasharray: 5 4; stroke-width: 1.8; opacity: 0.35; }
+  .step-edge.return.active { opacity: 1; }
+  .step-caption { border: 1px solid var(--line); border-radius: 10px; background: var(--surface); padding: 14px 18px; margin-top: 12px; min-height: 72px; font-size: 0.95rem; }
+  .step-caption b { font-family: "Avenir Next", "Segoe UI", system-ui, sans-serif; color: var(--accent); }
+
+  /* landscape tables */
+  .land { border: 1px solid var(--line); border-radius: 10px; background: var(--surface); overflow-x: auto; margin: 18px 0; }
+  table.landscape { border-collapse: collapse; width: 100%; min-width: 680px; font-size: 0.92rem; }
+  table.landscape th { font-family: "Avenir Next", "Segoe UI", system-ui, sans-serif; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; text-align: left; color: var(--muted); padding: 10px 16px; border-bottom: 1px solid var(--line); }
+  table.landscape td { padding: 11px 16px; border-bottom: 1px solid var(--line); vertical-align: top; line-height: 1.5; }
+  table.landscape tr:last-child td { border-bottom: none; }
+  table.landscape td:first-child { font-family: "Avenir Next", "Segoe UI", system-ui, sans-serif; font-weight: 600; font-size: 0.86rem; white-space: nowrap; }
+
+  /* checklist */
+  ul.check { list-style: none; padding: 0; max-width: 70ch; }
+  ul.check li { padding: 8px 0 8px 30px; position: relative; border-bottom: 1px solid var(--line); }
+  ul.check li:last-child { border-bottom: none; }
+  ul.check li::before { content: "✓"; position: absolute; left: 4px; color: var(--good); font-weight: 700; font-family: "Avenir Next", system-ui, sans-serif; }
+
+  ol.qs { max-width: 70ch; padding-left: 22px; }
+  ol.qs li { margin: 8px 0; }
+  ol.qs .why-q { color: var(--muted); font-size: 0.9rem; }
+
+  details { border: 1px solid var(--line); border-radius: 8px; background: var(--surface); margin: 8px 0; max-width: 76ch; }
+  details summary { cursor: pointer; padding: 11px 16px; font-family: "Avenir Next", "Segoe UI", system-ui, sans-serif; font-weight: 600; font-size: 0.94rem; }
+  details summary:focus-visible { outline: 3px solid var(--accent); outline-offset: -3px; border-radius: 8px; }
+  details p { padding: 0 16px 12px; margin: 0; font-size: 0.94rem; }
+  details[open] summary { border-bottom: 1px solid var(--line); margin-bottom: 8px; }
+
+  footer.sources { margin-top: 72px; border-top: 1px solid var(--line); padding-top: 24px; font-size: 0.88rem; color: var(--muted); }
+  footer.sources ul { padding-left: 20px; }
+  footer.sources li { margin: 4px 0; }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; }
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+<header class="masthead">
+  <p class="eyebrow">InvestPR RFP · Internal technical briefing · Not for submission</p>
+  <h1>Inside the InvestPR Stack</h1>
+  <p class="subtitle">What Invest Puerto Rico actually wants built, why their systems hurt today, and what a winning solution looks like — written so anyone on the proposal team can follow it, diagrams included.</p>
+  <div class="meta-line sans">
+    <span>Prepared Aug 12, 2026</span>
+    <span>Companion to <code>PROPOSAL.md</code> and <code>GATHER.md</code></span>
+    <span>RFP: CRM Architecture, Systems Integration &amp; Ops Support</span>
+  </div>
+  <nav class="toc" aria-label="Sections">
+    <a href="#business">The business</a>
+    <a href="#ecosystem">The ecosystem</a>
+    <a href="#problems">The seven problems</a>
+    <a href="#loop">The attribution loop</a>
+    <a href="#good">What good looks like</a>
+    <a href="#landscape">Tool landscape</a>
+    <a href="#questions">Questions to ask</a>
+    <a href="#glossary">Glossary</a>
+  </nav>
+</header>
+
+<section id="intel">
+  <p class="eyebrow">First, the headline</p>
+  <h2>We can make a strong inference about their platforms</h2>
+  <div class="prose">
+    <p>The RFP deliberately withholds platform names — they're disclosed to shortlisted finalists under NDA. But public evidence points clearly at a specific architecture:</p>
+  </div>
+  <div class="note">
+    <p><strong>Their CRM is Salesforce.</strong> InvestPR's own careers page currently lists a <em>CRM Administrator</em> opening that names the role "the system owner and technical steward of the CRM platform, Salesforce." (The fact that they're hiring an internal admin at the same time as this RFP also tells us they want a vendor who <em>builds capability</em>, not one who creates dependency.)</p>
+    <p><strong>Their marketing layer is HubSpot.</strong> investpr.org loads HubSpot tracking scripts (<code>hs-scripts</code>), plus Google Tag Manager, the Meta Pixel, the LinkedIn Insight Tag, and Microsoft Clarity. That's a live paid-media footprint on Google, Meta, and LinkedIn.</p>
+  </div>
+  <div class="note warn">
+    <p><strong>How to use this intel:</strong> the proposal itself should stay platform-neutral (the RFP asks vendors not to assume). But our case studies, certifications, and team bios should quietly lead with Salesforce + HubSpot depth — and we should be ready to talk fluently about the Salesforce↔HubSpot connector at the finalist stage. The RFP's entire problem list reads like a textbook description of a drifted HubSpot↔Salesforce integration.</p>
+  </div>
+</section>
+
+<section id="business">
+  <p class="eyebrow">Context</p>
+  <h2>The business in one picture</h2>
+  <div class="prose">
+    <p>InvestPR is Puerto Rico's investment-attraction agency: a small nonprofit whose job is to convince companies and investors to bring operations, jobs, and capital to the island (helped by incentives like Act 60). Their "sales pipeline" doesn't sell a product — it lands <em>investment projects</em>, and deals take months or years. Every system in this RFP exists to serve one funnel:</p>
+  </div>
+  <div class="funnel" role="list">
+    <div class="stage" role="listitem"><b>1 · Attract</b><span>Ads, content, events, and PR put Puerto Rico in front of site selectors, executives, and investors.</span></div>
+    <div class="stage" role="listitem"><b>2 · Capture</b><span>A prospect fills a form, downloads a report, or books a meeting. A lead record is born.</span></div>
+    <div class="stage" role="listitem"><b>3 · Qualify &amp; route</b><span>Scoring and routing decide which Business Development director owns the lead, by sector and geography.</span></div>
+    <div class="stage" role="listitem"><b>4 · Advance</b><span>BD works the relationship through pipeline stages — from inquiry to active project to commitment.</span></div>
+    <div class="stage" role="listitem"><b>5 · Land &amp; report</b><span>Jobs and capital investment land. Leadership, the board, and government stakeholders see the numbers.</span></div>
+  </div>
+  <div class="prose">
+    <p>Why this matters for the proposal: their KPIs are <strong>jobs created and capital landed</strong>, reported to a board and to government. When data is messy, the pain isn't abstract — it's a leadership meeting where two dashboards disagree about the pipeline, or a marketing budget that can't prove which campaigns produced real projects. Speak to that.</p>
+  </div>
+</section>
+
+<section id="ecosystem">
+  <p class="eyebrow">Architecture</p>
+  <h2>The ecosystem they want stitched together</h2>
+  <div class="prose">
+    <p>The RFP describes a hub-and-spoke system with the CRM at the center. <strong>Click (or tab to) any box</strong> to see what it does, what typically breaks there, and what a good fix looks like.</p>
+  </div>
+  <figure>
+    <div class="diagram-frame">
+      <svg viewBox="0 0 960 580" role="img" aria-label="Ecosystem map: ad platforms drive traffic to the website, which feeds HubSpot; HubSpot syncs two-way with Salesforce at the center; scheduling and outreach tools log into Salesforce; Salesforce feeds reporting; a dashed loop sends conversions from Salesforce back to the ad platforms." id="ecoMap">
+        <defs>
+          <marker id="arrowMuted" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><polygon points="0,0 10,5 0,10"></polygon></marker>
+          <marker id="arrowAccent" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><polygon points="0,0 10,5 0,10"></polygon></marker>
+        </defs>
+
+        <!-- edges -->
+        <line class="eco-edge" x1="240" y1="84" x2="384" y2="84" marker-end="url(#arrowMuted)"></line>
+        <text class="eco-label" x="312" y="72" text-anchor="middle">ad clicks + click IDs</text>
+
+        <line class="eco-edge" x1="570" y1="84" x2="714" y2="84" marker-end="url(#arrowMuted)"></line>
+        <text class="eco-label" x="642" y="72" text-anchor="middle">form fills, visits</text>
+
+        <line class="eco-edge" x1="800" y1="116" x2="566" y2="256" marker-end="url(#arrowMuted)"></line>
+        <line class="eco-edge" x1="556" y1="266" x2="790" y2="126"></line>
+        <text class="eco-label" x="705" y="182" text-anchor="middle">two-way contact sync</text>
+
+        <path class="eco-edge loop" d="M 368 288 C 240 240, 170 190, 145 134" marker-end="url(#arrowAccent)"></path>
+        <text class="eco-label loop" x="212" y="200" text-anchor="middle">offline conversions</text>
+        <text class="eco-label loop" x="212" y="214" text-anchor="middle">sent back</text>
+
+        <line class="eco-edge" x1="220" y1="312" x2="364" y2="310" marker-end="url(#arrowMuted)"></line>
+        <text class="eco-label" x="292" y="298" text-anchor="middle">meetings logged</text>
+
+        <line class="eco-edge" x1="740" y1="312" x2="596" y2="310" marker-end="url(#arrowMuted)"></line>
+        <text class="eco-label" x="668" y="298" text-anchor="middle">calls &amp; emails logged</text>
+
+        <line class="eco-edge" x1="540" y1="356" x2="668" y2="464" marker-end="url(#arrowMuted)"></line>
+        <text class="eco-label" x="632" y="410" text-anchor="middle">pipeline &amp; KPIs</text>
+
+        <line class="eco-edge" x1="300" y1="464" x2="416" y2="360" marker-end="url(#arrowMuted)" stroke-dasharray="4 4"></line>
+        <text class="eco-label" x="322" y="418" text-anchor="middle">dedupe · cleanup</text>
+        <text class="eco-label" x="322" y="432" text-anchor="middle">sync monitoring</text>
+
+        <!-- nodes -->
+        <g class="eco-node" data-node="ads" tabindex="0" role="button" aria-label="Paid media: Google, Meta, LinkedIn">
+          <rect x="40" y="40" width="200" height="88"></rect>
+          <text x="140" y="68" text-anchor="middle">Paid media</text>
+          <text class="nodesub" x="140" y="86" text-anchor="middle">Google Ads · Meta ads</text>
+          <text class="nodesub" x="140" y="101" text-anchor="middle">LinkedIn ads</text>
+          <text class="nodesub" x="140" y="118" text-anchor="middle" style="font-style:italic">tags seen on their site</text>
+        </g>
+
+        <g class="eco-node" data-node="website" tabindex="0" role="button" aria-label="Website and tag manager">
+          <rect x="390" y="52" width="180" height="64"></rect>
+          <text x="480" y="79" text-anchor="middle">Website</text>
+          <text class="nodesub" x="480" y="97" text-anchor="middle">investpr.org · GTM · forms</text>
+        </g>
+
+        <g class="eco-node" data-node="hubspot" tabindex="0" role="button" aria-label="Marketing automation, likely HubSpot">
+          <rect x="720" y="52" width="200" height="64"></rect>
+          <text x="820" y="79" text-anchor="middle">Marketing automation</text>
+          <text class="nodesub" x="820" y="97" text-anchor="middle">HubSpot (scripts on site)</text>
+        </g>
+
+        <g class="eco-node" data-node="salesforce" tabindex="0" role="button" aria-label="CRM, Salesforce, the hub">
+          <rect x="370" y="256" width="220" height="100"></rect>
+          <text class="hub-badge" x="480" y="280" text-anchor="middle">THE HUB</text>
+          <text x="480" y="303" text-anchor="middle">CRM — Salesforce</text>
+          <text class="nodesub" x="480" y="322" text-anchor="middle">every contact, company,</text>
+          <text class="nodesub" x="480" y="337" text-anchor="middle">meeting &amp; deal lives here</text>
+        </g>
+
+        <g class="eco-node" data-node="scheduling" tabindex="0" role="button" aria-label="Scheduling tools">
+          <rect x="40" y="280" width="180" height="64"></rect>
+          <text x="130" y="307" text-anchor="middle">Scheduling</text>
+          <text class="nodesub" x="130" y="325" text-anchor="middle">Calendly-type booking</text>
+        </g>
+
+        <g class="eco-node" data-node="outreach" tabindex="0" role="button" aria-label="Outreach and business development tools">
+          <rect x="740" y="280" width="180" height="64"></rect>
+          <text x="830" y="307" text-anchor="middle">BD outreach tools</text>
+          <text class="nodesub" x="830" y="325" text-anchor="middle">sequences · Sales Navigator</text>
+        </g>
+
+        <g class="eco-node" data-node="dataops" tabindex="0" role="button" aria-label="Data quality and middleware">
+          <rect x="150" y="470" width="220" height="70"></rect>
+          <text x="260" y="497" text-anchor="middle">Data quality &amp; middleware</text>
+          <text class="nodesub" x="260" y="515" text-anchor="middle">the layer this RFP hires —</text>
+          <text class="nodesub" x="260" y="529" text-anchor="middle">dedupe, monitoring, glue</text>
+        </g>
+
+        <g class="eco-node" data-node="reporting" tabindex="0" role="button" aria-label="Reporting and dashboards">
+          <rect x="600" y="470" width="220" height="70"></rect>
+          <text x="710" y="497" text-anchor="middle">Reporting &amp; dashboards</text>
+          <text class="nodesub" x="710" y="515" text-anchor="middle">board KPIs · pipeline health</text>
+          <text class="nodesub" x="710" y="529" text-anchor="middle">campaign ROI</text>
+        </g>
+      </svg>
+    </div>
+    <figcaption>The map the RFP implies. Solid arrows are data that should flow automatically today; the dashed teal loop — conversions flowing <em>back</em> to the ad platforms — is the piece most organizations are missing, and the RFP asks for it explicitly ("offline conversion tracking, campaign attribution, and automated source mapping").</figcaption>
+  </figure>
+  <div class="eco-panel" id="ecoPanel" aria-live="polite">
+    <p class="placeholder">Select a box in the diagram to see its role, the evidence, what typically breaks, and what good looks like.</p>
+  </div>
+</section>
+
+<section id="problems">
+  <p class="eyebrow">Scope, decoded</p>
+  <h2>The seven problems they're paying to make go away</h2>
+  <div class="prose">
+    <p>The RFP's scope section is written in vendor language. Here is each item translated into what InvestPR's team is actually experiencing, why it happens, and the outcome a winning vendor commits to. These seven map one-to-one onto the RFP's scope bullets (two maintenance bullets are merged into #6).</p>
+  </div>
+
+  <div class="problem">
+    <h3><span class="pnum">1</span> The data foundation is almost — but not — done</h3>
+    <p class="rfp-map sans">RFP: "Data Architecture Review &amp; Cleanup" · Deliverable: Data Health Review &amp; Remediation Summary</p>
+    <div class="pgrid">
+      <div class="pcell sym"><b>What it feels like</b>Someone already did a cleanup project, but nobody fully trusts it. Three fields hold the same thing. "Puerto Rico" is spelled four ways. Filters and reports quietly miss records.</div>
+      <div class="pcell why"><b>Why it happens</b>Years of ad-hoc fields created per-campaign, imports from event lists and purchased data, and no single owner for the data dictionary. Cleanups decay without enforcement rules.</div>
+      <div class="pcell fix"><b>What good looks like</b><ul><li>A field dictionary: every property, its owner system, its allowed values</li><li>Picklists enforced, redundant fields merged and retired</li><li>Dedupe run and <em>kept</em> clean by scheduled jobs</li><li>A before/after report proving it (see the demo below)</li></ul></div>
+    </div>
+  </div>
+
+  <div class="problem">
+    <h3><span class="pnum">2</span> Marketing and the CRM disagree about who a lead is</h3>
+    <p class="rfp-map sans">RFP: "Marketing Automation &amp; Lead Management Integration"</p>
+    <div class="pgrid">
+      <div class="pcell sym"><b>What it feels like</b>A contact is "qualified" in the marketing tool but brand-new in the CRM — or exists twice. Lead scores exist but BD ignores them. Sync errors pile up in a queue nobody watches.</div>
+      <div class="pcell why"><b>Why it happens</b>The HubSpot↔Salesforce connector is powerful but drifts: field mappings added ad hoc, mismatched picklist values, lifecycle-stage logic defined differently on each side, no inclusion-list discipline.</div>
+      <div class="pcell fix"><b>What good looks like</b><ul><li>Every synced field has one declared owner system</li><li>Lifecycle stages and lead statuses mean the same thing on both sides</li><li>Sync-error queue at zero, with alerts when it isn't</li><li>A scoring model BD helped define and actually uses</li></ul></div>
+    </div>
+  </div>
+
+  <div class="problem">
+    <h3><span class="pnum">3</span> Ad spend can't see which leads became real projects</h3>
+    <p class="rfp-map sans">RFP: "Paid Media &amp; Conversion Tracking Integration"</p>
+    <div class="pgrid">
+      <div class="pcell sym"><b>What it feels like</b>The ad platforms report "conversions" that don't match reality. Marketing can't prove which campaigns produced actual pipeline, so budget debates run on anecdotes.</div>
+      <div class="pcell why"><b>Why it happens</b>Platforms only see the form fill. Qualification happens weeks later, offline, in the CRM — and nothing sends that signal back. Click IDs aren't captured on forms, so the thread is cut at the front door.</div>
+      <div class="pcell fix"><b>What good looks like</b><ul><li>Forms capture UTMs + click IDs into hidden fields</li><li>CRM stage changes flow back via Google Enhanced Conversions for Leads, Meta CAPI, LinkedIn CAPI</li><li>Bidding optimizes toward <em>qualified projects</em>, not form fills</li></ul></div>
+    </div>
+  </div>
+
+  <div class="problem">
+    <h3><span class="pnum">4</span> Meetings and outreach happen off the record</h3>
+    <p class="rfp-map sans">RFP: "Sales Enablement &amp; External Tool Alignment"</p>
+    <div class="pgrid">
+      <div class="pcell sym"><b>What it feels like</b>A site selector books a meeting, but it never appears on their CRM record. Two BD directors email the same prospect. "When did we last talk to them?" requires asking around.</div>
+      <div class="pcell why"><b>Why it happens</b>Scheduling and outreach tools were adopted individually and never wired to the CRM — or the integration exists but logging is optional and routing is manual.</div>
+      <div class="pcell fix"><b>What good looks like</b><ul><li>Bookings auto-create meetings on the right record, routed by sector/geography</li><li>Every call and email logs automatically — one activity timeline per contact</li><li>New tools must pass an integration checklist before adoption</li></ul></div>
+    </div>
+  </div>
+
+  <div class="problem">
+    <h3><span class="pnum">5</span> Every workflow has three unofficial versions</h3>
+    <p class="rfp-map sans">RFP: "Cross-Platform Workflow Standardization"</p>
+    <div class="pgrid">
+      <div class="pcell sym"><b>What it feels like</b>Leads sit unrouted for days, or go to the wrong owner. Marketing-to-BD handoffs depend on who happens to notice. The same list upload is done differently by each person.</div>
+      <div class="pcell why"><b>Why it happens</b>Automations were built one request at a time, across two platforms, by people who have since left. Nobody holds the full picture of what fires when.</div>
+      <div class="pcell fix"><b>What good looks like</b><ul><li>One documented routing model: who gets what lead, and how fast</li><li>Automations inventoried, consolidated, and diagrammed</li><li>Handoffs with SLAs and visible ownership at every stage</li></ul></div>
+    </div>
+  </div>
+
+  <div class="problem">
+    <h3><span class="pnum">6</span> There's no one to keep the machine running</h3>
+    <p class="rfp-map sans">RFP: "CRM Operational Maintenance &amp; Support" + "Technical Troubleshooting" · Deliverable: Ongoing Operational Support, monthly logs</p>
+    <div class="pgrid">
+      <div class="pcell sym"><b>What it feels like</b>Dashboard requests wait weeks. A sync silently fails and is discovered a month later at reporting time. User permissions are guesswork. Bulk updates are scary.</div>
+      <div class="pcell why"><b>Why it happens</b>No dedicated ops capacity — they're hiring one CRM admin, and this RFP is the surge + specialist layer around that hire. Integrations fail quietly by default; someone has to be watching.</div>
+      <div class="pcell fix"><b>What good looks like</b><ul><li>A named support channel with response-time commitments by severity</li><li>Integration monitoring with alerts — failures found in hours, not months</li><li>Monthly support log: what was done, what broke, what's next (an RFP deliverable — easy points)</li></ul></div>
+    </div>
+  </div>
+
+  <div class="problem">
+    <h3><span class="pnum">7</span> Knowledge lives in people's heads</h3>
+    <p class="rfp-map sans">RFP: "User Training, Onboarding &amp; Change Enablement" · Deliverables: SOPs, user manuals, training sessions</p>
+    <div class="pgrid">
+      <div class="pcell sym"><b>What it feels like</b>New hires learn the CRM by shadowing. List uploads and record hygiene vary by person. When a workflow changes, half the team finds out by tripping over it.</div>
+      <div class="pcell why"><b>Why it happens</b>Documentation was never a deliverable before — and generic vendor docs don't match InvestPR's actual fields and workflows.</div>
+      <div class="pcell fix"><b>What good looks like</b><ul><li>Step-by-step manuals for the four named tasks: list uploads, lead management, activity tracking, record documentation</li><li>A standard onboarding path for new team members</li><li>Short recorded sessions + updated docs shipped with every change</li></ul></div>
+    </div>
+  </div>
+
+  <h3 style="margin-top:36px">See problem #1 for yourself</h3>
+  <div class="prose"><p>This is the same five records before and after normalization — the kind of before/after evidence our Data Health Review should lead with.</p></div>
+  <div class="toggle-row">
+    <button class="btn" id="dataToggle" aria-pressed="false">Run the cleanup</button>
+    <span class="state-chip messy" id="dataState">Current state: messy</span>
+  </div>
+  <div class="tablewrap" id="dataTable">
+    <table class="data">
+      <thead><tr><th>Contact</th><th>Company</th><th>Country</th><th>Industry</th><th>Owner</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>María Rivera</td>
+          <td><span class="v-messy">Acme Biotech</span><span class="v-clean">Acme Biotech, LLC</span></td>
+          <td><span class="v-messy"><span class="bad">PR</span></span><span class="v-clean">Puerto Rico</span></td>
+          <td><span class="v-messy"><span class="bad">biotech</span></span><span class="v-clean">Life Sciences</span></td>
+          <td><span class="v-messy"><span class="bad">— none —</span></span><span class="v-clean">J. Ortiz</span></td>
+        </tr>
+        <tr class="dup">
+          <td>maria rivera <span class="merged-note">→ merged into record above</span></td>
+          <td><span class="v-messy">ACME Biotech, LLC</span><span class="v-clean"></span></td>
+          <td><span class="v-messy"><span class="bad">Puerto rico</span></span><span class="v-clean"></span></td>
+          <td><span class="v-messy">Life Sciences</span><span class="v-clean"></span></td>
+          <td><span class="v-messy">J. Ortiz</span><span class="v-clean"></span></td>
+        </tr>
+        <tr>
+          <td>Sam Chen</td>
+          <td>Northlake Capital</td>
+          <td><span class="v-messy"><span class="bad">USA</span></span><span class="v-clean">United States</span></td>
+          <td><span class="v-messy"><span class="bad">finance/VC</span></span><span class="v-clean">Finance &amp; Investment</span></td>
+          <td>J. Ortiz</td>
+        </tr>
+        <tr>
+          <td>D. Okafor</td>
+          <td>Helios Energy</td>
+          <td><span class="v-messy"><span class="bad">puerto rico, usa</span></span><span class="v-clean">Puerto Rico</span></td>
+          <td><span class="v-messy"><span class="bad">Energy??</span></span><span class="v-clean">Energy &amp; Renewables</span></td>
+          <td><span class="v-messy"><span class="bad">— none —</span></span><span class="v-clean">M. Cruz</span></td>
+        </tr>
+        <tr>
+          <td>L. Fontaine</td>
+          <td><span class="v-messy"><span class="bad">—</span></span><span class="v-clean">Aérospatiale Group</span></td>
+          <td>France</td>
+          <td><span class="v-messy"><span class="bad">aerospace mfg</span></span><span class="v-clean">Aerospace &amp; Manufacturing</span></td>
+          <td>M. Cruz</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <figcaption style="margin-top:10px">Why it matters: a filter for <code>Country = Puerto Rico</code> on the messy data returns one of three Puerto Rico records. Every report built on that filter under-counts — silently.</figcaption>
+</section>
+
+<section id="loop">
+  <p class="eyebrow">The centerpiece integration</p>
+  <h2>The closed attribution loop, step by step</h2>
+  <div class="prose">
+    <p>Problem #3 deserves its own walkthrough, because it's the most valuable single fix in this RFP and the easiest to explain badly. Use the buttons to walk the journey of one lead.</p>
+  </div>
+  <figure>
+    <div class="diagram-frame">
+      <svg viewBox="0 0 960 300" role="img" aria-label="Five-step loop: ad click, form capture, sync to CRM, qualification in CRM, conversion sent back to ad platform, with a dashed return arrow from step five to step one." id="loopSvg">
+        <defs>
+          <marker id="arrowM2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><polygon points="0,0 10,5 0,10" style="fill: var(--muted)"></polygon></marker>
+          <marker id="arrowA2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><polygon points="0,0 10,5 0,10" style="fill: var(--accent)"></polygon></marker>
+        </defs>
+
+        <line class="step-edge" x1="188" y1="120" x2="212" y2="120" marker-end="url(#arrowM2)"></line>
+        <line class="step-edge" x1="388" y1="120" x2="412" y2="120" marker-end="url(#arrowM2)"></line>
+        <line class="step-edge" x1="588" y1="120" x2="612" y2="120" marker-end="url(#arrowM2)"></line>
+        <line class="step-edge" x1="788" y1="120" x2="812" y2="120" marker-end="url(#arrowM2)"></line>
+        <path class="step-edge return" id="returnEdge" d="M 880 172 C 880 260, 100 260, 100 176" marker-end="url(#arrowA2)"></path>
+        <text class="eco-label loop" x="480" y="268" text-anchor="middle">"this click became a real project" — bidding gets smarter</text>
+
+        <g class="step-node" id="step-1">
+          <rect x="20" y="68" width="168" height="104" rx="10"></rect>
+          <circle cx="44" cy="92" r="12"></circle><text class="stepnum" x="44" y="96" text-anchor="middle">1</text>
+          <text x="104" y="118" text-anchor="middle">Ad click</text>
+          <text class="stepsub" x="104" y="136" text-anchor="middle">platform appends a</text>
+          <text class="stepsub" x="104" y="150" text-anchor="middle">click ID to the URL</text>
+        </g>
+        <g class="step-node" id="step-2">
+          <rect x="220" y="68" width="168" height="104" rx="10"></rect>
+          <circle cx="244" cy="92" r="12"></circle><text class="stepnum" x="244" y="96" text-anchor="middle">2</text>
+          <text x="304" y="118" text-anchor="middle">Form capture</text>
+          <text class="stepsub" x="304" y="136" text-anchor="middle">hidden fields save</text>
+          <text class="stepsub" x="304" y="150" text-anchor="middle">UTMs + click ID</text>
+        </g>
+        <g class="step-node" id="step-3">
+          <rect x="420" y="68" width="168" height="104" rx="10"></rect>
+          <circle cx="444" cy="92" r="12"></circle><text class="stepnum" x="444" y="96" text-anchor="middle">3</text>
+          <text x="504" y="118" text-anchor="middle">Sync to CRM</text>
+          <text class="stepsub" x="504" y="136" text-anchor="middle">source fields ride</text>
+          <text class="stepsub" x="504" y="150" text-anchor="middle">along, intact</text>
+        </g>
+        <g class="step-node" id="step-4">
+          <rect x="620" y="68" width="168" height="104" rx="10"></rect>
+          <circle cx="644" cy="92" r="12"></circle><text class="stepnum" x="644" y="96" text-anchor="middle">4</text>
+          <text x="704" y="118" text-anchor="middle">BD qualifies</text>
+          <text class="stepsub" x="704" y="136" text-anchor="middle">weeks later: stage set</text>
+          <text class="stepsub" x="704" y="150" text-anchor="middle">to "active project"</text>
+        </g>
+        <g class="step-node" id="step-5">
+          <rect x="820" y="68" width="120" height="104" rx="10"></rect>
+          <circle cx="844" cy="92" r="12"></circle><text class="stepnum" x="844" y="96" text-anchor="middle">5</text>
+          <text x="880" y="118" text-anchor="middle">Send back</text>
+          <text class="stepsub" x="880" y="136" text-anchor="middle">EC4L · Meta CAPI</text>
+          <text class="stepsub" x="880" y="150" text-anchor="middle">LinkedIn CAPI</text>
+        </g>
+      </svg>
+    </div>
+    <figcaption>The loop the RFP calls "offline conversion tracking, campaign attribution, and automated source mapping." Steps 1–3 preserve the thread; steps 4–5 close it.</figcaption>
+  </figure>
+  <div class="toggle-row">
+    <button class="btn secondary" id="prevStep">← Back</button>
+    <button class="btn" id="nextStep">Next step →</button>
+  </div>
+  <div class="step-caption" id="stepCaption" aria-live="polite"></div>
+  <div class="prose" style="margin-top:20px">
+    <p><strong>A timely detail that signals expertise:</strong> Google is deprecating the legacy click-ID upload method (<code>UploadClickConversions</code>) on June 15, 2026 — mid-engagement — in favor of Enhanced Conversions for Leads and the Data Manager API, and Meta has folded its old Offline Events tool into the Conversions API. A proposal that mentions handling these migrations reads as current, not boilerplate. Industry benchmarks for closing this loop are commonly cited at 30–50% more qualified leads for the same spend, because bidding stops optimizing for form-fillers.</p>
+  </div>
+</section>
+
+<section id="good">
+  <p class="eyebrow">Target state</p>
+  <h2>What "good" looks like when the engagement ends</h2>
+  <div class="prose">
+    <p>Every promise in our technical approach should ladder up to one of these seven conditions. They double as acceptance criteria InvestPR can hold us to — putting them in the proposal signals confidence.</p>
+  </div>
+  <ul class="check">
+    <li><strong>One source of truth.</strong> Salesforce holds the canonical record; every other tool reads from or writes to it through a documented path. No field exists twice.</li>
+    <li><strong>A living data dictionary.</strong> Every property has a name, an owner system, allowed values, and a purpose — and cleanup rules run on a schedule so hygiene doesn't decay.</li>
+    <li><strong>Boring, monitored syncs.</strong> The error queue sits at zero; when anything fails, an alert fires the same day. "Silently broken for a month" becomes impossible.</li>
+    <li><strong>A closed attribution loop.</strong> Ad platforms learn which clicks became real projects; marketing defends its budget with CRM-verified numbers.</li>
+    <li><strong>Routing nobody thinks about.</strong> Every lead reaches the right BD director within minutes, meetings and outreach log themselves, and one timeline shows every touch.</li>
+    <li><strong>Dashboards leadership trusts.</strong> One agreed definition per metric, live rather than hand-assembled, matching what the board sees.</li>
+    <li><strong>A team that doesn't need us.</strong> SOPs, manuals, recorded training, and an onboarding path — plus their new CRM admin fully enabled. (Counterintuitively, this wins ongoing renewals: trust, not lock-in.)</li>
+  </ul>
+</section>
+
+<section id="landscape">
+  <p class="eyebrow">Research</p>
+  <h2>The tool &amp; vendor landscape</h2>
+  <div class="prose">
+    <p>What competent vendors bring to each layer of this problem — useful both for writing our "tools and frameworks" section (RFP §5.C) and for anticipating what competitors will pitch.</p>
+  </div>
+  <div class="land">
+    <table class="landscape">
+      <thead><tr><th>Layer</th><th>Representative tools</th><th>What to know</th></tr></thead>
+      <tbody>
+        <tr><td>CRM core</td><td>Salesforce (theirs, per job posting); HubSpot CRM as the common alternative</td><td>Expect Sales Cloud with nonprofit pricing. Feature Salesforce Admin/Consultant certifications prominently.</td></tr>
+        <tr><td>Marketing automation</td><td>HubSpot Marketing Hub (scripts on their site); Salesforce Account Engagement (Pardot) as alternative</td><td>The HubSpot↔Salesforce native connector is the likely battleground — field mappings, inclusion lists, sync-error queue.</td></tr>
+        <tr><td>Data quality</td><td>Insycle, Validity DemandTools, Cloudingo, native Salesforce duplicate rules</td><td>The differentiator is <em>scheduled, automated</em> cleanup vs. one-time manual fixes. Name the tool we'd run.</td></tr>
+        <tr><td>Conversion feedback</td><td>Google Enhanced Conversions for Leads + Data Manager API, Meta Conversions API, LinkedIn Conversions API; connectors like Zapier/LeadsBridge or HubSpot's native ad syncs</td><td>Native platform APIs beat third-party trackers for a nonprofit budget. Mention the 2026 Google migration (see loop section).</td></tr>
+        <tr><td>Middleware / glue</td><td>Zapier, Make, Workato; native connectors first</td><td>Philosophy to state in the proposal: native integrations before middleware, middleware before custom code.</td></tr>
+        <tr><td>Scheduling &amp; routing</td><td>Calendly, HubSpot Meetings, Chili Piper (routing by territory/sector)</td><td>Their tool is unknown — a good pre-Aug-14 question. Routing by sector/geography is the EDO-specific need.</td></tr>
+        <tr><td>BD outreach</td><td>Apollo.io, Salesloft/Outreach, LinkedIn Sales Navigator</td><td>EDO business development teams targeting site selectors lean heavily on LinkedIn; activity capture into the CRM is the ask.</td></tr>
+        <tr><td>Docs &amp; training</td><td>Scribe/Tango (step guides), Loom (recorded sessions), Notion/Confluence (SOP home)</td><td>Named tooling makes the training deliverable concrete instead of hand-wavy — worth 20% of the score via work-product samples.</td></tr>
+        <tr><td>Likely competitors</td><td>Convergence ("HubSpot for Economic Developers," 100+ EDO clients), Cloud Creations &amp; Conrin/edoforce (Salesforce for EDOs), Summit Tech360, plus regional agencies</td><td>EDO-specialist firms exist and will bid. Our counter: this RFP is a <em>systems-integration and ops</em> engagement, not a CRM re-implementation — depth on the integration seams beats vertical branding.</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section id="questions">
+  <p class="eyebrow">Deadline: Fri, Aug 14</p>
+  <h2>Technical questions worth asking InvestPR now</h2>
+  <div class="prose">
+    <p>Questions must be emailed to <a href="mailto:talmodovar@investpr.org">talmodovar@investpr.org</a> by <strong>Friday, August 14</strong>, and answers go to all bidders — so ask things whose answers help us more than competitors (we can already guess the stack; sizing questions sharpen our price).</p>
+  </div>
+  <ol class="qs">
+    <li>Roughly how many CRM users need access and training, and how many contact/company records does the database hold? <span class="why-q">Sizes the training plan and the cleanup effort — the two hardest lines to price blind.</span></li>
+    <li>Is there a current backlog of known integration or sync errors, and roughly how large? <span class="why-q">Distinguishes "tune-up" from "excavation." Directly de-risks our fixed fee.</span></li>
+    <li>What volume of routine support requests should the ongoing retainer assume per month, and what response times do you expect? <span class="why-q">Lets us commit to SLAs without padding the retainer.</span></li>
+    <li>Is a sandbox/test environment available for the CRM, and who owns tag management on the website? <span class="why-q">Determines whether we can work safely without touching production, and whether GTM access is in scope.</span></li>
+    <li>Will the incoming CRM Administrator hire be our day-to-day counterpart, and should knowledge transfer to that role be an explicit deliverable? <span class="why-q">Signals we've done our homework and positions us as the capability-builder, not the dependency.</span></li>
+    <li>For attribution reporting, which outcomes matter most to leadership — qualified leads, meetings held, or landed projects? <span class="why-q">Defines which CRM stage changes we send back to the ad platforms.</span></li>
+  </ol>
+</section>
+
+<section id="glossary">
+  <p class="eyebrow">Reference</p>
+  <h2>Glossary for non-technical readers</h2>
+  <details><summary>CRM (Customer Relationship Management)</summary><p>The database of record for every person, company, meeting, and deal. For InvestPR: Salesforce. If it isn't in the CRM, it didn't happen.</p></details>
+  <details><summary>Marketing automation</summary><p>The tool that sends campaigns, hosts forms and landing pages, and scores leads — HubSpot here. It's where a lead usually lives first, before syncing to the CRM.</p></details>
+  <details><summary>Sync / integration</summary><p>An automatic connection that keeps a record identical in two systems. Syncs fail quietly — the failed record just stops updating, which is why monitoring matters more than the initial setup.</p></details>
+  <details><summary>Field / property</summary><p>One labeled slot on a record — "Country," "Industry," "Lead Source." Data normalization is mostly the discipline of having exactly one field per fact, with a controlled list of allowed values.</p></details>
+  <details><summary>Picklist</summary><p>A dropdown of allowed values, versus a free-text box. Free text produces "PR," "Puerto Rico," and "puerto rico, usa"; a picklist produces one filterable answer.</p></details>
+  <details><summary>Dedupe</summary><p>Finding and merging duplicate records of the same person or company. Best done with tooling and matching rules, then kept clean by scheduled jobs — not a one-time heroic effort.</p></details>
+  <details><summary>Lead scoring</summary><p>Points assigned for who a lead is and what they've done, so BD works the hottest prospects first. Only useful if BD trusts and actually sorts by it.</p></details>
+  <details><summary>Lifecycle stage</summary><p>Where a contact sits in the journey (subscriber → lead → qualified → opportunity → customer/landed). Trouble starts when marketing and the CRM define these stages differently.</p></details>
+  <details><summary>UTM parameters</summary><p>Tags on a link (<code>utm_source</code>, <code>utm_campaign</code>…) that record where a visitor came from. Free attribution — if forms actually save them.</p></details>
+  <details><summary>Click ID (gclid / fbclid / li_fat_id)</summary><p>A unique code each ad platform appends to the URL when someone clicks an ad. Capture it at the form and you can later tell the platform "this exact click became a real project."</p></details>
+  <details><summary>Offline conversion</summary><p>A valuable event that happens away from the website — a lead qualified in the CRM weeks after the click. "Offline conversion tracking" means reporting that event back to the ad platform.</p></details>
+  <details><summary>CAPI (Conversions API)</summary><p>Meta's and LinkedIn's server-to-server channels for receiving conversion events directly from your systems instead of from browser pixels. Google's equivalents: Enhanced Conversions for Leads and the Data Manager API.</p></details>
+  <details><summary>iPaaS / middleware</summary><p>Glue services (Zapier, Make, Workato) that connect tools lacking a native integration. Powerful, but every zap is another thing to monitor — native connectors first.</p></details>
+  <details><summary>SOP (Standard Operating Procedure)</summary><p>A written, step-by-step way to do a recurring task, so the result doesn't depend on who did it. A named RFP deliverable.</p></details>
+</section>
+
+<footer class="sources">
+  <p><strong>Sources &amp; evidence.</strong> Platform inference: <a href="https://www.investpr.org/about-investpr/careers/">InvestPR careers page</a> (CRM Administrator opening; the posting text names Salesforce — also mirrored on <a href="https://www.indeed.com/viewjob?jk=5049b3d3d0b1dd30">Indeed</a>) and our own scan of investpr.org homepage scripts (HubSpot <code>hs-scripts</code>, Google Tag Manager, Meta Pixel, LinkedIn Insight Tag, Microsoft Clarity), Aug 12, 2026. EDO CRM landscape: <a href="https://www.linkedin.com/products/hubspot-for-economic-developers-from-convergence-hubspot-marketing-crm-optimized-for-economic-development-organizations/">Convergence — HubSpot for Economic Developers</a>, <a href="https://www.cloudcreations.com/resource/economic-development-field-guide/">Cloud Creations Economic Development Field Guide</a>, <a href="https://www.salesforce.com/government/guided-tours/economic-development/">Salesforce for Economic Development</a>, <a href="https://summittech360.com/solutions/economic-development-accelerator/">Summit Economic Development Accelerator</a>. Conversion-tracking landscape: <a href="https://www.farsiight.com/resources/offline-conversions-google-ads/">Google Ads offline conversions in 2026 (Farsiight)</a>, <a href="https://leadjourney.io/blog/track-offline-conversions-lead-generation">LeadJourney 2026 offline-conversion guide</a>, <a href="https://www.growthspreeofficial.com/blogs/hubspot-offline-conversions-all-platforms-2026">HubSpot offline conversions to all platforms (GrowthSpree)</a>, <a href="https://hyros.com/updates/offline-conversion-tracking/">HYROS offline conversion tracking</a>.</p>
+  <p>Internal working document for the proposal team. Platform identifications are evidence-based inference; the RFP discloses the official stack to finalists under NDA. Verify before relying on them in the submitted proposal.</p>
+</footer>
+
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  /* ---- ecosystem node panel ---- */
+  var ECO = {
+    salesforce: {
+      title: 'CRM — Salesforce (the hub)',
+      role: 'The system of record. Every company, contact, meeting, and investment project lives here; BD directors work their pipeline here; leadership numbers come from here.',
+      evidence: 'InvestPR’s own CRM Administrator job posting names Salesforce as "the CRM platform."',
+      breaks: 'Years of ad-hoc fields and imports leave duplicate fields, inconsistent picklists, unowned records — so reports disagree and nobody fully trusts the filters.',
+      good: 'One documented field dictionary, enforced picklists, deduped records kept clean by scheduled jobs, and dashboards leadership actually trusts.'
+    },
+    hubspot: {
+      title: 'Marketing automation — HubSpot',
+      role: 'Campaign emails, forms, landing pages, lead scoring, lifecycle stages. Usually the first system a new lead touches.',
+      evidence: 'HubSpot tracking scripts (hs-scripts) load on investpr.org.',
+      breaks: 'The HubSpot↔Salesforce connector drifts: ad-hoc field mappings, mismatched picklists, lifecycle logic defined differently on each side, and a sync-error queue nobody watches.',
+      good: 'Curated mappings where every synced field has one owner system, stages that mean the same thing on both sides, and a zero-error queue with alerts.'
+    },
+    website: {
+      title: 'Website + tag manager',
+      role: 'The storefront: content, forms, and the tags that record where each visitor came from.',
+      evidence: 'Google Tag Manager, Meta Pixel, LinkedIn Insight Tag, and Microsoft Clarity all detected on the homepage.',
+      breaks: 'Forms that don’t capture UTMs and click IDs into hidden fields cut the attribution thread at the front door — nothing downstream can restore it.',
+      good: 'Every form writes source data (UTMs + gclid/fbclid/li_fat_id) onto the new contact automatically.'
+    },
+    ads: {
+      title: 'Paid media — Google, Meta, LinkedIn',
+      role: 'Campaigns targeting site selectors, executives, and investors — expensive audiences with long decision cycles.',
+      evidence: 'Pixels for all three ecosystems are live on investpr.org.',
+      breaks: 'Platforms only see form fills, never which leads became real projects — so bidding optimizes for volume, and reported conversions don’t match CRM reality.',
+      good: 'A closed loop: qualified-stage changes flow back via Enhanced Conversions for Leads and the Meta/LinkedIn Conversions APIs, so spend shifts toward audiences that become actual projects.'
+    },
+    scheduling: {
+      title: 'Scheduling',
+      role: 'Lets a prospect book a meeting directly with the right BD director — no email ping-pong.',
+      evidence: 'Tool unknown (not visible on the homepage) — flagged as a pre-Aug-14 question in GATHER.md.',
+      breaks: 'Meetings get booked but never logged on the CRM record, and routing to the right director by sector/geography is manual.',
+      good: 'Bookings auto-create the meeting on the right record, assigned to the right owner, with routing rules doing the thinking.'
+    },
+    outreach: {
+      title: 'BD outreach tools',
+      role: 'Outbound sequences and social selling — typically Apollo/Salesloft-class tools plus LinkedIn Sales Navigator for reaching site selectors.',
+      evidence: 'Tools unknown — to confirm during discovery.',
+      breaks: 'Activity lives inside the outreach tool instead of the CRM: nobody can see the last touch, and two people contact the same prospect.',
+      good: 'Every call and email logs automatically to one activity timeline per contact; new tools must pass an integration checklist before adoption.'
+    },
+    dataops: {
+      title: 'Data quality & middleware',
+      role: 'The invisible layer: dedupe and standardization jobs, sync monitoring, and any Zapier/Make glue between tools.',
+      evidence: 'Usually missing entirely in organizations at this stage — this RFP effectively hires someone to build and operate it.',
+      breaks: 'Without it, cleanup is a one-time heroic effort that silently decays, and integration failures are discovered at reporting time.',
+      good: 'Scheduled cleanup jobs, alerting on every integration, and a monthly data-health report — hygiene as a system, not a project.'
+    },
+    reporting: {
+      title: 'Reporting & dashboards',
+      role: 'Where the work becomes visible: pipeline health for leadership, jobs-and-capital KPIs for the board and government stakeholders, ROI for marketing.',
+      evidence: 'The RFP names custom reporting and dashboard builds as ongoing deliverables.',
+      breaks: 'Numbers assembled by hand into slides; two dashboards disagree because the fields under them mean different things.',
+      good: 'Live dashboards built on clean fields, with one agreed definition per metric — the same number everywhere it appears.'
+    }
+  };
+
+  var panel = document.getElementById('ecoPanel');
+  var nodes = document.querySelectorAll('.eco-node');
+
+  function selectNode(el) {
+    var key = el.getAttribute('data-node');
+    var d = ECO[key];
+    if (!d) return;
+    nodes.forEach(function (n) { n.classList.remove('selected'); });
+    el.classList.add('selected');
+    panel.innerHTML =
+      '<h3>' + d.title + '</h3>' +
+      '<div class="field role"><b>What it does</b>' + d.role + '</div>' +
+      '<div class="field evidence"><b>Evidence</b>' + d.evidence + '</div>' +
+      '<div class="field breaks"><b>What typically breaks</b>' + d.breaks + '</div>' +
+      '<div class="field good"><b>What good looks like</b>' + d.good + '</div>';
+  }
+
+  nodes.forEach(function (n) {
+    n.addEventListener('click', function () { selectNode(n); });
+    n.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); selectNode(n); }
+    });
+  });
+
+  /* ---- before/after data toggle ---- */
+  var toggle = document.getElementById('dataToggle');
+  var tableBox = document.getElementById('dataTable');
+  var stateChip = document.getElementById('dataState');
+  toggle.addEventListener('click', function () {
+    var clean = tableBox.classList.toggle('is-clean');
+    toggle.setAttribute('aria-pressed', String(clean));
+    toggle.textContent = clean ? 'Undo — show the mess again' : 'Run the cleanup';
+    stateChip.textContent = clean ? 'Current state: normalized' : 'Current state: messy';
+    stateChip.className = 'state-chip ' + (clean ? 'clean' : 'messy');
+  });
+
+  /* ---- attribution loop stepper ---- */
+  var STEPS = [
+    '<b>Step 1 — The click.</b> A site selector in Boston clicks InvestPR’s LinkedIn ad. The platform silently appends a click ID (here, <code>li_fat_id</code>; Google uses <code>gclid</code>, Meta <code>fbclid</code>) to the landing-page URL. This code is the thread that ties everything later back to this exact ad.',
+    '<b>Step 2 — The capture.</b> They download "Doing Business in Puerto Rico" through a form. Hidden fields save the UTM parameters and the click ID onto the brand-new contact record. If this step is missing — and it usually is — the thread is already cut.',
+    '<b>Step 3 — The sync.</b> The contact syncs from the marketing tool into Salesforce with its source fields intact. This is where sloppy field mappings silently drop the attribution data; the sync must carry it through.',
+    '<b>Step 4 — The qualification.</b> Three weeks later, after a discovery call, a BD director changes the record’s stage to "Qualified — active project." This is the moment of real value — and it happens entirely offline, invisible to every ad platform.',
+    '<b>Step 5 — The send-back.</b> An automation reports that stage change to the platforms — Google Enhanced Conversions for Leads, Meta CAPI, LinkedIn CAPI — matched by click ID or hashed email. Now the dashed arrow: each platform learns which clicks become real projects, and its bidding shifts spend toward audiences like this one. Commonly cited results: 30–50% more qualified leads at the same spend.'
+  ];
+  var stepIdx = 0;
+  var prevBtn = document.getElementById('prevStep');
+  var nextBtn = document.getElementById('nextStep');
+  var caption = document.getElementById('stepCaption');
+  var returnEdge = document.getElementById('returnEdge');
+
+  function renderStep() {
+    for (var i = 1; i <= 5; i++) {
+      var g = document.getElementById('step-' + i);
+      if (g) g.classList.toggle('active', i === stepIdx + 1);
+    }
+    returnEdge.classList.toggle('active', stepIdx === 4);
+    caption.innerHTML = STEPS[stepIdx];
+    prevBtn.disabled = stepIdx === 0;
+    nextBtn.disabled = stepIdx === STEPS.length - 1;
+  }
+  prevBtn.addEventListener('click', function () { if (stepIdx > 0) { stepIdx--; renderStep(); } });
+  nextBtn.addEventListener('click', function () { if (stepIdx < STEPS.length - 1) { stepIdx++; renderStep(); } });
+  renderStep();
+})();
+</script>
+</body>
+</html>
