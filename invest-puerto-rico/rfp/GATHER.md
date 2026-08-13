@@ -42,64 +42,62 @@ Implications for how you gather:
 ## Session 0 — Urgent Triage (do this first)
 
 - [x] **Q0.1:** ~~Questions to InvestPR before Aug 14?~~ **DECIDED Aug 12, 2026: No questions round.** Operator's call — no time for a back-and-forth before submission. Consequence: we self-answer the open scope variables (support volume, user count, current-state documentation, record/platform counts) by writing them as **explicit stated assumptions** in the proposal, especially in §F Budget. Every place we would have asked a question becomes a visible assumption line the evaluator can price against. Note: InvestPR shares all vendor Q&A responses on Aug 19 — check for that email and fold anything material into the draft before submitting.
-- [ ] **Q0.2:** "Who is the internal owner of this proposal, and who signs it?" → feeds [G-04].
+- [x] **Q0.2:** ~~Who signs?~~ **DRAFTED Aug 13 (D11):** Robby Abaya, Co-Founder & Principal, signs — drafted into the cover letter with rabaya@gmail.com. **Confirm signatory choice and whether to use a tryres.ai address instead; phone still needed (G-04a).**
 - [ ] **Q0.3:** InvestPR's stack has been inferred from public evidence (see `rfp/TECH-BRIEF.html`, "First, the headline"): **Salesforce CRM** (named in their own CRM Administrator job posting) + **HubSpot marketing** (hs-scripts on investpr.org) + Google/Meta/LinkedIn ad tags + GTM + Microsoft Clarity. Scheduling and outreach tools are unknown. Use this to pick the strongest certifications and case studies to foreground — but do NOT state platform assumptions in the proposal itself; the RFP discloses the official stack to finalists under NDA.
 
 ## Session 1 — Firm Identity (G-01, G-02, G-06 → G-09)
 
-- [ ] **G-01:** Exact legal name of the firm.
-- [ ] **G-06:** Corporate structure, jurisdiction of organization, year founded.
-- [ ] **G-07:** Office location(s). *Probe: any Puerto Rico presence, PR-based staff, Spanish-language capability, or prior PR/LatAm client work? Any of these is a differentiator for a PR-based nonprofit — feature it.*
-- [ ] **G-08:** Company background: founding story, headcount, growth, markets served. Ask for an existing boilerplate/capabilities deck to mine rather than making the human dictate.
-- [ ] **G-09:** Core technical competencies. Cross-check against the RFP scope: data architecture, marketing automation, paid media/attribution, sales enablement tools, workflow automation, training. Flag any scope area the firm is thin on — that needs a partner/contractor story, not silence.
-- [ ] **G-02:** Planned submission date (aim ≥2 business days before Aug 28).
+- [x] **G-01 / G-06:** Written as "Res AI, LLC, State of Washington" — **G-06a verification against WA SoS still open (Hai)**.
+- [x] **G-07:** New York, NY; remote-first with two San Juan trips budgeted (kickoff + training). **Drafted Aug 13 (D11)** — no PR presence or Spanish capability claimed; confirm if either exists, it would be a differentiator.
+- [x] **G-08 / G-09:** §A drafted in full (Session 1 + D11).
+- [x] **G-02:** Aug 26, 2026 — written into the header, token removed.
 
 ## Session 2 — Experience & Case Studies (G-10 → G-14) — worth 20% directly, supports the 50%
 
-- [ ] **G-10:** Experience summary: years doing CRM restructures/integrations, # of projects, platforms, industries. *Probe for nonprofit, government, or economic-development clients.*
-- [x] **G-11 (partial):** Case Study 1 = Masterworks closed-loop marketing stack — drafted in PROPOSAL.md and as a full visual document, `rfp/CASE-STUDY-MASTERWORKS.html` (Aug 12). **Still open:** G-11c measurable results — the HTML doc marks every unverified figure with ◆ for Hai to confirm or replace; nothing ◆-marked may be copied into the proposal.
-- [ ] **G-12 / G-13:** 1–2 more case studies. For each, insist on:
+- [x] **G-10:** Experience narrative drafted Aug 13 (D11) from both resumes — Masterworks/Zocdoc/Pinwheel platform + industry coverage. *No nonprofit/government client claimed; if one exists, add it.*
+- [x] **G-11:** Case Study 1 = Masterworks. **G-11c resolved Aug 13 (D11):** results bullet now uses only figures corroborated by `gather-assets/hai-li.md` (Hai's own LinkedIn: $2K→$1M+ daily capital raised; $4M/mo spend; 0→25+ team). The *other* ◆-marked figures in CASE-STUDY-MASTERWORKS.html (cost per funded investor, server-side recovery share, speed-to-lead) remain **excluded** pending Hai. Hai still reviews the whole case study for accuracy.
+- [x] **G-12 / G-13:** Drafted Aug 13 (D11): Case 2 = Zocdoc (Robby, growth-team marketing systems, enterprise Salesforce); Case 3 = Pinwheel (Robby, SDK/API integration platform for Cash App & Discover). Both grounded in Robby's resume. **Still open: one hard number each (G-12c, G-13c) — owner Robby.** Original coaching guidance:
   - The client (or anonymized descriptor if under NDA),
   - The challenge in one or two sentences,
   - What the firm actually did (tools + tactics),
   - **A measurable result** — dedupe %, sync error reduction, attribution recovery, reporting time saved, lead-response time. If the human offers only qualitative outcomes, ask: "If we looked at the before/after dashboards, what number changed?"
   - Best-fit topics per the RFP: data normalization, system efficiency, campaign attribution.
-- [ ] **G-14:** Work product samples for the appendix. Ask specifically for: one integration/architecture diagram, one SOP, one user manual or training deck, sanitized for confidentiality. *These are scored at 20% — treat "we don't have samples handy" as an open item with a deadline, not a no.*
+- [x] **G-14:** **Path decided Aug 13 (D12):** Appendix B = (1) sanitized Masterworks architecture map from CASE-STUDY-MASTERWORKS.html, (2) an authored data-governance SOP excerpt, (3) an authored training-material excerpt. Written into §B. **Producing the three artifacts is still open — G-14/G-40 Open Items row.**
 
 ## Session 3 — Technical Approach (G-15 → G-17)
 
-- [ ] **G-15:** Review the placeholder five-phase methodology in PROPOSAL.md §C with the human. Ask: "Does this match how you'd actually run it? What would you change, rename, or re-sequence?" Capture their methodology name/branding if they have one.
-- [ ] **G-16:** Tools & software actually used: data-quality/dedupe tools, iPaaS/integration platforms (e.g., middleware), documentation tools, PM stack, monitoring/alerting for sync failures.
-- [ ] **G-17:** Support model: intake channel (email/ticketing/Slack), response-time SLAs by severity, who staffs it, escalation path, what the monthly support log looks like. *The RFP scores "technical support availability" — get concrete commitments.*
+- [x] **G-15:** Drafted Aug 13 (D11): methodology named **Audit → Normalize → Connect → Codify → Enable**, five phases mapped to RFP deliverables. Principals: confirm or rename.
+- [x] **G-16:** Drafted Aug 13 (D11): native platform tooling first + Insycle for bulk data quality; native connectors → Zapier/Make/Workato → custom serverless middleware (with runbooks); health checks + alerting; docs in client's workspace + Loom; shared PM board. Principals: strike anything you wouldn't actually use.
+- [x] **G-17:** Drafted Aug 13 (D11): email+Slack intake, 4-business-hour acknowledgment, Sev1 same-day / Sev2 next-day / Sev3 within 5 days, AST-aligned hours, monthly support log with invoice, POCs Robby (technical) / Hai (engagement). **These are now commitments in the proposal — confirm you'll staff them.**
 
 ## Session 4 — Team (G-18 → G-25) — the core of the 50% criterion
 
-- [ ] **G-18:** Org structure for this account (who reports to whom).
-- [ ] **G-19 → G-23:** For each role (Engagement Lead, Technical/CRM Architect, Integration Specialist, Training Lead, others): name, area of responsibility, certifications (enterprise CRM platforms, martech, analytics).
-- [ ] **G-24:** 100–150 word bio per person. Ask for existing bios/LinkedIn profiles to adapt.
-- [ ] **G-39:** **Resumes for every named person — REQUIRED attachment.** Get the actual files or a firm commitment with a date.
-- [ ] **G-25:** Capacity confirmation: "Can these exact people start Sept 14, 2026, and stay allocated through June 2027?" The RFP requires stating that qualified staff are *immediately available* — don't let this be aspirational.
+- [x] **G-18:** Drafted Aug 13 (D11): two-principal core — Hai (engagement/enablement), Robby (architecture/integration/ops), specialist bench under Robby's direction.
+- [x] **G-19 → G-23:** Table drafted Aug 13 (D11): four RFP roles consolidated onto the two principals (Hai = Engagement + Training lead; Robby = Architect + Integration lead). **Certifications cells assert "HubSpot Academy certifications scheduled for completion before kickoff" — this makes the cert decision (G-19b–23b) a commitment: take them, or edit the cells.**
+- [x] **G-24:** Bios drafted Aug 13 (D11) from `gather-assets/` — every claim traceable to the resumes/LinkedIn export.
+- [ ] **G-39:** **Resumes for every named person — REQUIRED attachment.** Robby's is edited but has DRAFT markers + overlap question; Hai's needs to be produced from the LinkedIn export. See Open Items.
+- [x] **G-25:** Capacity statement drafted Aug 13 (D11): both principals immediately available Sept 14 → June 30, 2027. **This is now an explicit availability commitment in the proposal.**
 
 ## Session 5 — Timeline (G-26)
 
-- [ ] **G-26:** Walk the placeholder schedule in PROPOSAL.md §E. Adjust phase durations to the firm's honest estimates. Confirm no holiday/staffing conflicts Sept–Dec 2026. Keep every RFP deliverable visibly mapped to a milestone date.
+- [x] **G-26:** Schedule adopted as proposed Aug 13 (D11), with a re-baseline clause added (week-3 checkpoint if discovery breaks the stated assumptions). **Principals: confirm no holiday/staffing conflicts Sept–Dec 2026.**
 
 ## Session 6 — Budget (G-27 → G-31) — worth 20%
 
-- [ ] **G-27:** Pricing structure decision: fixed fee vs. hourly vs. retainer, and hybrid shape. *Recommend: fixed fee for implementation + flat monthly retainer for support — matches exactly what the RFP asks vendors to separate.*
-- [ ] **G-28a–f:** One-time implementation pricing per line item (discovery, remediation, integrations, SOPs, training).
-- [ ] **G-29a–e:** Monthly retainer amount and what it includes (hours? unlimited within scope?).
-- [ ] **G-30:** Compute total: implementation + (retainer × months from start through June 30, 2027 — roughly 9.5 months). Verify the math yourself.
-- [ ] **G-31:** Assumptions & exclusions: included hours, overage rates, change-order triggers, payment terms, whether travel/onsite work is included.
-- [ ] Sanity check: "If InvestPR compares this line-by-line against two competitors, is anything unexplained or padded-looking?" Clarity is scored.
+- [x] **G-27:** Drafted Aug 13 (D11): fixed fee for implementation + flat monthly retainer, per the recommended shape.
+- [x] **G-28a–f:** Drafted Aug 13 (D11): $9,500 / $14,500 / $17,500 / $11,500 / $8,500 = **$61,500**.
+- [x] **G-29a–e:** Drafted Aug 13 (D11): $2,500 + $1,500 + $1,500 + $1,000 = **$6,500/mo**, includes up to 30 hrs/mo.
+- [x] **G-30:** Drafted Aug 13 (D11): **$107,000** = $61,500 + $6,500 × 7 (retainer starts Dec 1, 2026, after implementation — *not* the ~9.5-month shape this guide originally suggested; the implementation fee covers Sept–Nov). Math verified.
+- [x] **G-31:** Drafted Aug 13 (D11): 7 numbered assumptions — environment size (25 users / 500K records / 10 platforms), access timing, 30 hrs/mo retainer + $200/hr pre-approved overage, change-order triggers, 2 San Juan trips included, third-party licensing passed through at cost, net-30.
+- [ ] **Sanity check (STILL OPEN — principals):** all Section F numbers are agent-drafted market-rate estimates. Review as a package: is $107K the bid you want to make? Is anything unexplained or padded-looking? Clarity is scored at 20%.
 
 ## Session 7 — References & Compliance (G-32 → G-38)
 
 - [ ] **G-32 / G-33:** ≥2 client references for *similar CRM integration and data governance* work: org, contact name/title, email, phone, services provided. **Ask: "Have these contacts agreed to be listed and been warned they may be called?"**
 - [ ] **G-34 / G-35 / G-36:** ≥3 professional references: name, relationship, contact info. (These are distinct from the client references.)
-- [ ] **G-37:** Conflict of interest: ask explicitly about any board, staff, family, or financial ties to InvestPR or Puerto Rico government entities. If none → use the explicit "no conflicts" statement (required by the RFP even when none exist).
-- [ ] **G-38:** Data-security practices statement; confirm willingness to sign an NDA (required for platform disclosure if shortlisted).
-- [ ] **G-40 / G-41:** Collect appendix artifacts: work samples (from Session 2) and certification/partner credentials.
+- [x] **G-37:** Full no-conflicts statement drafted Aug 13 (D11), including the "no ties to PR government entities" clause. **Principals: confirm it is factually true for both of you before signing.**
+- [x] **G-38:** Data-security + NDA-willingness statement drafted Aug 13 (D11): named MFA/SSO accounts, least privilege, data stays in client systems, credential return, incident notification.
+- [ ] **G-40 / G-41:** Collect appendix artifacts: work samples (path decided — see G-14) and certification records (pending the cert decision).
 
 ---
 
@@ -125,14 +123,17 @@ Implications for how you gather:
 | G-## | Item | Owner | Due |
 | :--- | :--- | :--- | :--- |
 | G-06a | **→ HAI:** Verify exact registered entity name, LLC status, and WA formation date against the Secretary of State filing. Currently written as "Res AI, LLC, State of Washington" on Robby's recollection — needs confirmation before it goes on a signed proposal. | **Hai** | Aug 21 |
-| G-11–13 | **→ HAI:** Case studies with quantified results. **Case Study 1 (Masterworks marketing stack) is now drafted** — narrative in PROPOSAL.md §B plus a full visual document at `rfp/CASE-STUDY-MASTERWORKS.html`. Hai's jobs: (a) review the draft for factual accuracy (architecture, roles, framing); (b) **confirm or replace every ◆-marked figure** — $2K/day → $1M/day capital raised, cost-per-funded-investor change, share of conversions recovered server-side (G-11c blocks on this); (c) supply 1–2 more case studies for G-12/G-13 — candidates: HubSpot lifecycle work at Masterworks, a current Res engagement (anonymized is fine). Each needs at least one hard number. | **Hai** | Aug 21 |
+| G-11 | **→ HAI: Review Case Study 1 as now written.** The results bullet in PROPOSAL.md §B uses the figures from your own LinkedIn export ($2K→$1M+ daily capital raised; $4M/mo; 0→25+ team) — confirm the framing is accurate. The remaining ◆-marked figures in CASE-STUDY-MASTERWORKS.html (cost per funded investor, server-side recovery share, speed-to-lead) are still excluded; supply any you want added. | **Hai** | Aug 21 |
+| G-12c / G-13c | **→ ROBBY: One hard number each for the Zocdoc and Pinwheel case studies** (drafted Aug 13 from your resume). Candidates: attribution coverage or acquisition-efficiency change at Zocdoc; SDK adoption, integration count, or support-load reduction at Pinwheel. Qualitative fallback weakens a 20% criterion — find a number. | **Robby** | Aug 21 |
+| G-04a | **→ ROBBY:** Phone number for the signature block; confirm you're the signatory and whether to use a tryres.ai address instead of rabaya@gmail.com. | **Robby** | Aug 21 |
+| §F review | **→ BOTH: Approve or adjust the drafted pricing** — $61,500 implementation + $6,500/mo × 7 = **$107,000 total**, 30 hrs/mo retainer, $200/hr overage, 2 San Juan trips included, net-30. All agent-drafted (D11); this is the single highest-stakes review item. | **Both** | Aug 21 |
+| D11 review | **→ BOTH: Read PROPOSAL.md end-to-end.** Nearly every section now carries drafted commitments in your names — SLAs (Sev1 same-day), capacity through June 2027, travel, the conflict statement, methodology name. Strike anything you won't stand behind. | **Both** | Aug 21 |
 | G-39 | **Robby's resume — edited Aug 12 (D7, D8):** Worthy corrected to Jan 2025–Apr 2026; Res AI entry added (marked DRAFT) with start date Nov 2025 (matches Hai's LinkedIn); Carat corrected to 2004–Nov 2008; summary 15+ → 20+ years; Zocdoc refocused to growth team / marketing stack / Salesforce (corroborates §A). **Still needed:** Robby to (a) expand the Res AI bullet with current engagements, (b) confirm the Worthy (–Apr 2026) / Res AI (Nov 2025–) ~6-month overlap is the intended presentation, since both entries will be read side by side. | Robby | Aug 21 |
 | G-39b | **→ HAI: Hai's resume must corroborate the Carat overlap.** §A now claims the partnership began at Carat in 2004. Hai's LinkedIn export shows "Carat Interactive, Sep 2003 – Nov 2004, San Francisco Bay Area." Confirm the dates and location are accurate as written, since Robby's corrected entry places him at Carat from 2004. If the geography differs (SF vs. NY), we should soften §A to "met through Carat" rather than implying a shared office. Both resumes are required attachments and will be read side by side. | **Hai** | Aug 21 |
-| G-19b–23b | Decide on certifications. HubSpot Marketing/Sales/RevOps certs are free, ~3–4 hrs each, verifiable by URL. Directly scored in §5.D. Robby has direct Salesforce experience (Zocdoc) and both have HubSpot experience (Masterworks) — formal credentials would convert that into scoreable evidence. | Both | Aug 19 |
+| G-19b–23b | **Certifications — now a commitment, not just a decision.** The §D table (drafted Aug 13, D11) asserts "HubSpot Academy certifications scheduled for completion before kickoff." Either actually schedule/take them (free, ~3–4 hrs each, verifiable by URL) or edit the cells before submission. Per D6, an unfulfilled cert claim next to resumes with no certs is a scoring risk. | Both | Aug 19 |
 | ~~G-09a~~ | ~~Training/enablement evidence.~~ **RESOLVED Aug 12:** both principals have built programs from scratch and trained internal and external teams across many platforms. Written into §A. | — | Done |
-| G-14/G-40 | Work product samples (20% of score): integration map, SOP, training material. Sanitize existing or author originals — decide which path. | Both | Aug 21 |
-| G-32–36 | 2 client references + 3 professional references, **with permission confirmed**. | Both | Aug 24 |
-| G-27–31 | Pricing: implementation fixed fee + monthly retainer through Jun 30, 2027. | Both | Aug 24 |
+| G-14/G-40 | Work product samples (20% of score). **Path decided Aug 13 (D12):** (1) sanitize the Masterworks architecture map, (2) author a data-governance SOP excerpt, (3) author a training-material excerpt — §B now promises exactly these three in Appendix B. **Remaining work: produce the three artifacts.** Agent can draft 2 and 3; the map needs sanitization sign-off from Hai. | Both | Aug 21 |
+| G-32–36 | 2 client references + 3 professional references, **with permission confirmed**. The only section still fully open — 17 of the 21 remaining tokens. Names cannot be drafted by agent. | Both | Aug 24 |
 | — | Watch for InvestPR's Aug 19 Q&A email to all vendors; fold material answers into the draft. | Robby | Aug 19 |
 | — | **Font licensing for `rfp/PROPOSAL-DECK.html` (see D10).** The deck embeds six commercial woff2 faces (American Grotesk, Martina Plantijn, Atlas Typewriter) pulled from tryres.ai and inlined as base64. Embedding them in our own submitted proposal is ordinary brand use; **serving them from a publicly shared artifact URL is redistribution.** Confirm the licenses cover both, or swap to fallback faces before the deck is shared outside Res. Does not block the PDF submission to InvestPR. | Robby | Aug 21 |
 | — | Rename `gather-assets/hai-li.md` → `hai-tran.md` to match the correct legal name. | Robby | Low priority |
