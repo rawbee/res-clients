@@ -134,4 +134,5 @@ Implications for how you gather:
 | G-32–36 | 2 client references + 3 professional references, **with permission confirmed**. | Both | Aug 24 |
 | G-27–31 | Pricing: implementation fixed fee + monthly retainer through Jun 30, 2027. | Both | Aug 24 |
 | — | Watch for InvestPR's Aug 19 Q&A email to all vendors; fold material answers into the draft. | Robby | Aug 19 |
+| — | **Font licensing for `rfp/PROPOSAL-DECK.html` (see D10).** The deck embeds six commercial woff2 faces (American Grotesk, Martina Plantijn, Atlas Typewriter) pulled from tryres.ai and inlined as base64. Embedding them in our own submitted proposal is ordinary brand use; **serving them from a publicly shared artifact URL is redistribution.** Confirm the licenses cover both, or swap to fallback faces before the deck is shared outside Res. Does not block the PDF submission to InvestPR. | Robby | Aug 21 |
 | — | Rename `gather-assets/hai-li.md` → `hai-tran.md` to match the correct legal name. | Robby | Low priority |
