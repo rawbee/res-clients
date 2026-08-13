@@ -1,0 +1,621 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Masterworks Loop</title>
+<style>
+  :root {
+    --bg: #F5F8F7;
+    --surface: #FFFFFF;
+    --surface-2: #EBF1F0;
+    --ink: #182A2D;
+    --muted: #56696B;
+    --line: #D6E0DE;
+    --accent: #0E7C86;
+    --accent-soft: #DDEEEF;
+    --deep: #29507C;
+    --warn: #A85B22;
+    --warn-soft: #F6E8DC;
+    --good: #2F7D53;
+    --good-soft: #E1EFE7;
+    --code-bg: #EDF2F1;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0F191B;
+      --surface: #162225;
+      --surface-2: #1C2B2E;
+      --ink: #E2ECEA;
+      --muted: #97ABA9;
+      --line: #2B3C3E;
+      --accent: #4CBCC5;
+      --accent-soft: #143A3E;
+      --deep: #8FB4D9;
+      --warn: #D9945C;
+      --warn-soft: #3A2A1B;
+      --good: #6CBE93;
+      --good-soft: #1B3428;
+      --code-bg: #1E2E31;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0F191B;
+    --surface: #162225;
+    --surface-2: #1C2B2E;
+    --ink: #E2ECEA;
+    --muted: #97ABA9;
+    --line: #2B3C3E;
+    --accent: #4CBCC5;
+    --accent-soft: #143A3E;
+    --deep: #8FB4D9;
+    --warn: #D9945C;
+    --warn-soft: #3A2A1B;
+    --good: #6CBE93;
+    --good-soft: #1B3428;
+    --code-bg: #1E2E31;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: "Charter", "Iowan Old Style", "Palatino", Georgia, serif;
+    font-size: 1.04rem;
+    line-height: 1.68;
+  }
+  .wrap { max-width: 1000px; margin: 0 auto; padding: 0 24px 96px; }
+  .prose { max-width: 66ch; }
+
+  h1, h2, h3, .sans {
+    font-family: "Avenir Next", "Avenir", "Segoe UI", "Trebuchet MS", system-ui, sans-serif;
+  }
+  h1 { font-size: clamp(2.1rem, 5vw, 3rem); line-height: 1.08; letter-spacing: -0.015em; margin: 0.4em 0 0.3em; text-wrap: balance; }
+  h2 { font-size: 1.45rem; letter-spacing: -0.01em; margin: 0 0 0.5em; text-wrap: balance; }
+  h3 { font-size: 1.08rem; margin: 1.4em 0 0.4em; }
+  p { margin: 0 0 1em; }
+  a { color: var(--accent); }
+  code { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; font-size: 0.86em; background: var(--code-bg); padding: 0.1em 0.35em; border-radius: 4px; }
+
+  .eyebrow {
+    font-family: "Avenir Next", "Avenir", "Segoe UI", system-ui, sans-serif;
+    font-size: 0.72rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.12em;
+    color: var(--accent); margin: 0 0 0.6em;
+  }
+  header.masthead { padding-top: 56px; border-bottom: 1px solid var(--line); padding-bottom: 28px; margin-bottom: 8px; }
+  .subtitle { color: var(--muted); font-size: 1.12rem; max-width: 62ch; }
+  .meta-line { font-family: "Avenir Next", "Segoe UI", system-ui, sans-serif; font-size: 0.8rem; color: var(--muted); margin-top: 18px; display: flex; flex-wrap: wrap; gap: 6px 18px; }
+
+  section { margin-top: 64px; scroll-margin-top: 24px; }
+
+  .note {
+    border: 1px solid var(--line); border-left: 4px solid var(--accent);
+    background: var(--surface); border-radius: 8px; padding: 16px 20px; margin: 20px 0;
+  }
+  .note.warn { border-left-color: var(--warn); }
+  .note p:last-child { margin-bottom: 0; }
+
+  /* to-be-confirmed marker */
+  .tbc { color: var(--warn); font-weight: 700; cursor: help; text-decoration: none; }
+
+  /* stat band */
+  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin: 24px 0 8px; }
+  .stat {
+    background: var(--surface); border: 1px solid var(--line); border-radius: 10px;
+    padding: 18px 20px 14px;
+  }
+  .stat .num {
+    font-family: "Avenir Next", "Avenir", "Segoe UI", system-ui, sans-serif;
+    font-size: clamp(1.6rem, 3.4vw, 2.1rem); font-weight: 700; letter-spacing: -0.02em;
+    line-height: 1.1; font-variant-numeric: tabular-nums;
+  }
+  .stat .lbl { font-family: "Avenir Next", "Segoe UI", system-ui, sans-serif; font-size: 0.8rem; color: var(--muted); margin-top: 6px; line-height: 1.45; }
+
+  figure { margin: 28px 0; }
+  figure svg { max-width: 100%; height: auto; display: block; }
+  figcaption { font-size: 0.86rem; color: var(--muted); margin-top: 10px; max-width: 70ch; }
+  .diagram-frame { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 18px; overflow-x: auto; }
+
+  /* ecosystem SVG */
+  .eco-node { cursor: pointer; }
+  .eco-node rect { fill: var(--surface-2); stroke: var(--line); stroke-width: 1.5; rx: 10; transition: stroke 0.15s; }
+  .eco-node text { fill: var(--ink); font-family: "Avenir Next", "Segoe UI", system-ui, sans-serif; font-size: 13px; font-weight: 600; }
+  .eco-node .nodesub { fill: var(--muted); font-size: 10.5px; font-weight: 400; }
+  .eco-node:hover rect, .eco-node:focus-visible rect { stroke: var(--accent); stroke-width: 2; }
+  .eco-node:focus-visible { outline: none; }
+  .eco-node.selected rect { stroke: var(--accent); stroke-width: 2.5; fill: var(--accent-soft); }
+  .eco-edge { stroke: var(--muted); stroke-width: 1.4; fill: none; }
+  .eco-edge.loop { stroke: var(--accent); stroke-dasharray: 5 4; stroke-width: 1.8; }
+  .eco-label { fill: var(--muted); font-family: "Avenir Next", "Segoe UI", system-ui, sans-serif; font-size: 10.5px; }
+  .eco-label.loop { fill: var(--accent); font-weight: 600; }
+  #arrowMuted polygon { fill: var(--muted); }
+  #arrowAccent polygon { fill: var(--accent); }
+  .hub-badge { fill: var(--accent); font-family: "Avenir Next", "Segoe UI", system-ui, sans-serif; font-size: 9.5px; font-weight: 700; letter-spacing: 0.08em; }
+
+  .eco-panel {
+    border: 1px solid var(--line); border-radius: 12px; background: var(--surface);
+    padding: 20px 24px; margin-top: 14px; min-height: 150px;
+  }
+  .eco-panel h3 { margin-top: 0; }
+  .eco-panel .field { margin: 10px 0; }
+  .eco-panel .field b {
+    font-family: "Avenir Next", "Segoe UI", system-ui, sans-serif; font-size: 0.72rem; text-transform: uppercase;
+    letter-spacing: 0.1em; display: block; margin-bottom: 2px;
+  }
+  .eco-panel .field.role b { color: var(--deep); }
+  .eco-panel .field.wiring b { color: var(--accent); }
+  .eco-panel .field.payoff b { color: var(--good); }
+  .eco-panel .field.parallel b { color: var(--warn); }
+  .eco-panel .placeholder { color: var(--muted); font-style: italic; }
+
+  /* stepper */
+  .toggle-row { display: flex; align-items: center; gap: 14px; margin: 14px 0 10px; flex-wrap: wrap; }
+  button.btn {
+    font-family: "Avenir Next", "Segoe UI", system-ui, sans-serif; font-size: 0.86rem; font-weight: 600;
+    background: var(--accent); color: var(--bg); border: none; border-radius: 8px; padding: 9px 16px; cursor: pointer;
+  }
+  button.btn.secondary { background: var(--surface); color: var(--ink); border: 1px solid var(--line); }
+  button.btn:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+  button.btn[disabled] { opacity: 0.4; cursor: default; }
+
+  .step-node rect { fill: var(--surface-2); stroke: var(--line); stroke-width: 1.5; }
+  .step-node text { fill: var(--ink); font-family: "Avenir Next", "Segoe UI", system-ui, sans-serif; font-size: 12px; font-weight: 600; }
+  .step-node .stepsub { fill: var(--muted); font-size: 10px; font-weight: 400; }
+  .step-node circle { fill: var(--surface); stroke: var(--line); stroke-width: 1.5; }
+  .step-node .stepnum { fill: var(--muted); font-size: 11px; font-weight: 700; }
+  .step-node.active rect { fill: var(--accent-soft); stroke: var(--accent); stroke-width: 2.5; }
+  .step-node.active circle { fill: var(--accent); stroke: var(--accent); }
+  .step-node.active .stepnum { fill: var(--bg); }
+  .step-edge { stroke: var(--muted); stroke-width: 1.4; fill: none; }
+  .step-edge.return { stroke: var(--accent); stroke-dasharray: 5 4; stroke-width: 1.8; opacity: 0.35; }
+  .step-edge.return.active { opacity: 1; }
+  .step-caption { border: 1px solid var(--line); border-radius: 10px; background: var(--surface); padding: 14px 18px; margin-top: 12px; min-height: 88px; font-size: 0.95rem; }
+  .step-caption b { font-family: "Avenir Next", "Segoe UI", system-ui, sans-serif; color: var(--accent); }
+
+  /* landscape tables */
+  .land { border: 1px solid var(--line); border-radius: 10px; background: var(--surface); overflow-x: auto; margin: 18px 0; }
+  table.landscape { border-collapse: collapse; width: 100%; min-width: 680px; font-size: 0.92rem; }
+  table.landscape th { font-family: "Avenir Next", "Segoe UI", system-ui, sans-serif; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; text-align: left; color: var(--muted); padding: 10px 16px; border-bottom: 1px solid var(--line); }
+  table.landscape td { padding: 11px 16px; border-bottom: 1px solid var(--line); vertical-align: top; line-height: 1.5; }
+  table.landscape tr:last-child td { border-bottom: none; }
+  table.landscape td:first-child { font-family: "Avenir Next", "Segoe UI", system-ui, sans-serif; font-weight: 600; font-size: 0.86rem; }
+
+  /* checklist */
+  ul.check { list-style: none; padding: 0; max-width: 70ch; }
+  ul.check li { padding: 8px 0 8px 30px; position: relative; border-bottom: 1px solid var(--line); }
+  ul.check li:last-child { border-bottom: none; }
+  ul.check li::before { content: "✓"; position: absolute; left: 4px; color: var(--good); font-weight: 700; font-family: "Avenir Next", system-ui, sans-serif; }
+
+  footer.sources { margin-top: 72px; border-top: 1px solid var(--line); padding-top: 24px; font-size: 0.88rem; color: var(--muted); }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; }
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+<header class="masthead">
+  <p class="eyebrow">Res AI · Case study · Principals' work at Masterworks</p>
+  <h1>How Masterworks Closed the Loop</h1>
+  <p class="subtitle">A billion-dollar alternative-asset platform, a marketing organization built from zero, and the architecture that made every ad dollar accountable to funded investors — not form fills.</p>
+  <div class="meta-line sans">
+    <span>Hai Tran — co-founder, CMO → CPO</span>
+    <span>Robby Abaya — principal software engineer</span>
+    <span>Companion to <code>PROPOSAL.md</code> §B</span>
+  </div>
+</header>
+
+<!-- DRAFT BANNER — remove before any external use -->
+<div class="note warn" id="draft-banner">
+  <p><strong>Internal draft.</strong> Figures marked <span class="tbc">◆</span> are illustrative placeholders awaiting Hai's confirmation (tracked as G-11c in GATHER.md) — do not copy them into the proposal or share externally until verified. Everything unmarked is backed by the resumes in <code>gather-assets/</code>. This banner and every ◆ must be resolved before this document ships.</p>
+</div>
+
+<section id="context">
+  <p class="eyebrow">The situation</p>
+  <h2>Selling a new asset class, one phone call at a time</h2>
+  <div class="prose">
+    <p>Masterworks lets individual investors buy shares in blue-chip paintings — a product nobody wakes up searching for. Growth meant paid media at serious scale, a long consideration cycle, and a regulated funnel that ended not on a website but in a phone call with a human advisor and, weeks later, a funded investment.</p>
+    <p>That shape — expensive audiences, a decision that happens offline, a team of humans in the middle, and a board that wants spend tied to real outcomes — is the same shape as an economic-development pipeline. The logos differ; the physics don't.</p>
+    <p>Our principals built and ran this machine together: Hai as co-founder and CMO grew the marketing organization from zero to twenty-five people; Robby, as principal software engineer, built the integration and automation layer underneath it.</p>
+  </div>
+  <div class="stats">
+    <div class="stat"><div class="num">$4M/mo</div><div class="lbl">peak managed paid media across Meta, Google, and partners</div></div>
+    <div class="stat"><div class="num">0 → 25</div><div class="lbl">marketing organization built from scratch</div></div>
+    <div class="stat"><div class="num">$2K → $1M<span class="tbc" title="To confirm with Hai">◆</span></div><div class="lbl">growth in daily capital raised over the build-out</div></div>
+    <div class="stat"><div class="num">1</div><div class="lbl">canonical record per investor — one timeline, one source, one answer</div></div>
+  </div>
+</section>
+
+<section id="architecture">
+  <p class="eyebrow">The build</p>
+  <h2>One pipe in, one record at the center, one loop back out</h2>
+  <div class="prose">
+    <p>The stack was deliberately hub-and-spoke: every event flowed through <strong>Segment</strong> on the way in, every fact about a person lived in <strong>HubSpot</strong> at the center, and every valuable outcome flowed <em>back out</em> to the ad platforms. <strong>Click (or tab to) any box</strong> to see what it did, how it was wired, what that bought us — and the direct parallel to the concerns in InvestPR's RFP.</p>
+  </div>
+  <figure>
+    <div class="diagram-frame">
+      <svg viewBox="0 0 960 640" role="img" aria-label="Masterworks stack: ad platforms drive traffic to the website; the website sends every event to Segment, which fans out to Braze, Google Analytics, and back to the ad platforms; identified users flow into HubSpot at the center; the advisory team works and logs calls in HubSpot; a custom automation service triggers SMS and syncs ad audiences; a dashed loop sends funded-investor conversions from HubSpot back to the ad platforms; reporting reads from the hub." id="ecoMap">
+        <defs>
+          <marker id="arrowMuted" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><polygon points="0,0 10,5 0,10"></polygon></marker>
+          <marker id="arrowAccent" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><polygon points="0,0 10,5 0,10"></polygon></marker>
+        </defs>
+
+        <!-- edges -->
+        <line class="eco-edge" x1="250" y1="80" x2="426" y2="75" marker-end="url(#arrowMuted)"></line>
+        <text class="eco-label" x="338" y="60" text-anchor="middle">clicks + click IDs</text>
+
+        <line class="eco-edge" x1="535" y1="110" x2="535" y2="176" marker-end="url(#arrowMuted)"></line>
+        <text class="eco-label" x="548" y="148">every event, one schema</text>
+
+        <line class="eco-edge" x1="640" y1="205" x2="760" y2="113" marker-end="url(#arrowMuted)"></line>
+        <text class="eco-label" x="726" y="170" text-anchor="middle">fan-out</text>
+
+        <line class="eco-edge" x1="640" y1="235" x2="726" y2="235" marker-end="url(#arrowMuted)"></line>
+        <text class="eco-label" x="683" y="223" text-anchor="middle">events + traits</text>
+
+        <line class="eco-edge" x1="430" y1="210" x2="253" y2="130" marker-end="url(#arrowMuted)"></line>
+        <text class="eco-label" x="320" y="185" text-anchor="middle">server-side events</text>
+
+        <line class="eco-edge" x1="535" y1="260" x2="535" y2="336" marker-end="url(#arrowMuted)"></line>
+        <text class="eco-label" x="548" y="304">identified users → contacts</text>
+
+        <line class="eco-edge" x1="815" y1="260" x2="675" y2="348" marker-end="url(#arrowMuted)"></line>
+        <line class="eco-edge" x1="665" y1="340" x2="805" y2="252"></line>
+        <text class="eco-label" x="785" y="310" text-anchor="middle">lifecycle stages, both ways</text>
+
+        <line class="eco-edge" x1="670" y1="380" x2="736" y2="380" marker-end="url(#arrowMuted)"></line>
+        <line class="eco-edge" x1="736" y1="404" x2="670" y2="404" marker-end="url(#arrowMuted)"></line>
+        <text class="eco-label" x="703" y="368" text-anchor="middle">queues out ·</text>
+        <text class="eco-label" x="703" y="424" text-anchor="middle">calls logged back</text>
+
+        <line class="eco-edge" x1="400" y1="392" x2="294" y2="388" marker-end="url(#arrowMuted)"></line>
+        <text class="eco-label" x="347" y="374" text-anchor="middle">stage changes</text>
+        <text class="eco-label" x="347" y="410" text-anchor="middle">(webhooks)</text>
+
+        <line class="eco-edge" x1="175" y1="428" x2="175" y2="496" marker-end="url(#arrowMuted)"></line>
+        <text class="eco-label" x="187" y="466">seconds-later texts</text>
+
+        <line class="eco-edge" x1="100" y1="336" x2="100" y2="137" marker-end="url(#arrowMuted)"></line>
+        <text class="eco-label" x="110" y="248">custom audiences ·</text>
+        <text class="eco-label" x="110" y="262">suppression lists</text>
+
+        <line class="eco-edge" x1="620" y1="444" x2="662" y2="506" marker-end="url(#arrowMuted)"></line>
+        <text class="eco-label" x="700" y="478" text-anchor="middle">spend ↔ outcomes</text>
+
+        <path class="eco-edge loop" d="M 430 438 C 40 470, 10 200, 134 134" marker-end="url(#arrowAccent)"></path>
+        <text class="eco-label loop" x="330" y="470" text-anchor="middle">funded-investor conversions sent back</text>
+        <text class="eco-label loop" x="330" y="484" text-anchor="middle">Meta CAPI · Google offline imports</text>
+
+        <!-- nodes -->
+        <g class="eco-node" data-node="ads" tabindex="0" role="button" aria-label="Paid media: Meta and Google">
+          <rect x="40" y="40" width="210" height="90"></rect>
+          <text x="145" y="68" text-anchor="middle">Paid media</text>
+          <text class="nodesub" x="145" y="86" text-anchor="middle">Meta · Google Ads</text>
+          <text class="nodesub" x="145" y="102" text-anchor="middle">bidding on funded investors</text>
+        </g>
+
+        <g class="eco-node" data-node="website" tabindex="0" role="button" aria-label="Website and signup funnel">
+          <rect x="430" y="40" width="210" height="70"></rect>
+          <text x="535" y="68" text-anchor="middle">Website &amp; funnel</text>
+          <text class="nodesub" x="535" y="88" text-anchor="middle">masterworks.com · signup flow</text>
+        </g>
+
+        <g class="eco-node" data-node="analytics" tabindex="0" role="button" aria-label="Google Analytics">
+          <rect x="730" y="40" width="190" height="70"></rect>
+          <text x="825" y="68" text-anchor="middle">Google Analytics</text>
+          <text class="nodesub" x="825" y="88" text-anchor="middle">sessions · funnels</text>
+        </g>
+
+        <g class="eco-node" data-node="segment" tabindex="0" role="button" aria-label="Segment, the customer data platform">
+          <rect x="430" y="180" width="210" height="80"></rect>
+          <text x="535" y="208" text-anchor="middle">Segment (CDP)</text>
+          <text class="nodesub" x="535" y="226" text-anchor="middle">one tracking plan,</text>
+          <text class="nodesub" x="535" y="241" text-anchor="middle">one pipe out to everything</text>
+        </g>
+
+        <g class="eco-node" data-node="braze" tabindex="0" role="button" aria-label="Braze lifecycle messaging">
+          <rect x="730" y="180" width="190" height="80"></rect>
+          <text x="825" y="208" text-anchor="middle">Braze</text>
+          <text class="nodesub" x="825" y="226" text-anchor="middle">lifecycle automations</text>
+          <text class="nodesub" x="825" y="241" text-anchor="middle">email · push · in-app</text>
+        </g>
+
+        <g class="eco-node" data-node="hubspot" tabindex="0" role="button" aria-label="HubSpot CRM, the hub">
+          <rect x="400" y="340" width="270" height="104"></rect>
+          <text class="hub-badge" x="535" y="364" text-anchor="middle">THE HUB</text>
+          <text x="535" y="387" text-anchor="middle">CRM — HubSpot</text>
+          <text class="nodesub" x="535" y="406" text-anchor="middle">the canonical person record:</text>
+          <text class="nodesub" x="535" y="421" text-anchor="middle">source, stage, every touch</text>
+        </g>
+
+        <g class="eco-node" data-node="advisors" tabindex="0" role="button" aria-label="Advisory team">
+          <rect x="740" y="348" width="180" height="84"></rect>
+          <text x="830" y="378" text-anchor="middle">Advisory team</text>
+          <text class="nodesub" x="830" y="396" text-anchor="middle">calls booked, held,</text>
+          <text class="nodesub" x="830" y="411" text-anchor="middle">and logged automatically</text>
+        </g>
+
+        <g class="eco-node" data-node="server" tabindex="0" role="button" aria-label="Custom automation service">
+          <rect x="60" y="336" width="230" height="92"></rect>
+          <text x="175" y="366" text-anchor="middle">Custom automation service</text>
+          <text class="nodesub" x="175" y="384" text-anchor="middle">money-moment triggers</text>
+          <text class="nodesub" x="175" y="399" text-anchor="middle">in-house · monitored · alerting</text>
+        </g>
+
+        <g class="eco-node" data-node="sms" tabindex="0" role="button" aria-label="SMS via Twilio">
+          <rect x="60" y="500" width="180" height="64"></rect>
+          <text x="150" y="527" text-anchor="middle">SMS — Twilio</text>
+          <text class="nodesub" x="150" y="545" text-anchor="middle">highest-intent channel</text>
+        </g>
+
+        <g class="eco-node" data-node="reporting" tabindex="0" role="button" aria-label="Reporting and LTV models">
+          <rect x="560" y="510" width="250" height="72"></rect>
+          <text x="685" y="537" text-anchor="middle">Reporting &amp; LTV</text>
+          <text class="nodesub" x="685" y="555" text-anchor="middle">spend accountable to</text>
+          <text class="nodesub" x="685" y="569" text-anchor="middle">funded capital, not clicks</text>
+        </g>
+      </svg>
+    </div>
+    <figcaption>The Masterworks stack. Solid arrows carried data automatically every day; the dashed teal loop — funded-investor conversions flowing <em>back</em> to the ad platforms — is the piece most organizations never build, and the piece InvestPR's RFP asks for by name ("offline conversion tracking, campaign attribution, and automated source mapping").</figcaption>
+  </figure>
+  <div class="eco-panel" id="ecoPanel" aria-live="polite">
+    <p class="placeholder">Select a box in the diagram to see what it did, how it was wired, what it bought us, and the InvestPR parallel.</p>
+  </div>
+</section>
+
+<section id="journey">
+  <p class="eyebrow">One investor, end to end</p>
+  <h2>The thread never breaks</h2>
+  <div class="prose">
+    <p>The architecture only matters because of what it does to a single person's journey. Walk one investor through the system with the buttons below — and notice that the most valuable event happens weeks after the click, entirely offline, where browser pixels are blind.</p>
+  </div>
+  <figure>
+    <div class="diagram-frame">
+      <svg viewBox="0 0 960 300" role="img" aria-label="Five-step loop: ad click, signup with identity stitching, nurture by Braze and an advisor call, offline funding event, conversion sent back to the ad platform, with a dashed return arrow from step five to step one." id="loopSvg">
+        <defs>
+          <marker id="arrowM2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><polygon points="0,0 10,5 0,10" style="fill: var(--muted)"></polygon></marker>
+          <marker id="arrowA2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><polygon points="0,0 10,5 0,10" style="fill: var(--accent)"></polygon></marker>
+        </defs>
+
+        <line class="step-edge" x1="188" y1="120" x2="212" y2="120" marker-end="url(#arrowM2)"></line>
+        <line class="step-edge" x1="388" y1="120" x2="412" y2="120" marker-end="url(#arrowM2)"></line>
+        <line class="step-edge" x1="588" y1="120" x2="612" y2="120" marker-end="url(#arrowM2)"></line>
+        <line class="step-edge" x1="788" y1="120" x2="812" y2="120" marker-end="url(#arrowM2)"></line>
+        <path class="step-edge return" id="returnEdge" d="M 880 172 C 880 260, 100 260, 100 176" marker-end="url(#arrowA2)"></path>
+        <text class="eco-label loop" x="480" y="268" text-anchor="middle">"this click became a funded investor" — bidding gets smarter every day</text>
+
+        <g class="step-node" id="step-1">
+          <rect x="20" y="68" width="168" height="104" rx="10"></rect>
+          <circle cx="44" cy="92" r="12"></circle><text class="stepnum" x="44" y="96" text-anchor="middle">1</text>
+          <text x="104" y="118" text-anchor="middle">Ad click</text>
+          <text class="stepsub" x="104" y="136" text-anchor="middle">platform appends a</text>
+          <text class="stepsub" x="104" y="150" text-anchor="middle">click ID to the URL</text>
+        </g>
+        <g class="step-node" id="step-2">
+          <rect x="220" y="68" width="168" height="104" rx="10"></rect>
+          <circle cx="244" cy="92" r="12"></circle><text class="stepnum" x="244" y="96" text-anchor="middle">2</text>
+          <text x="304" y="118" text-anchor="middle">Signup</text>
+          <text class="stepsub" x="304" y="136" text-anchor="middle">identity stitched;</text>
+          <text class="stepsub" x="304" y="150" text-anchor="middle">UTMs + click ID saved</text>
+        </g>
+        <g class="step-node" id="step-3">
+          <rect x="420" y="68" width="168" height="104" rx="10"></rect>
+          <circle cx="444" cy="92" r="12"></circle><text class="stepnum" x="444" y="96" text-anchor="middle">3</text>
+          <text x="504" y="118" text-anchor="middle">Nurture</text>
+          <text class="stepsub" x="504" y="136" text-anchor="middle">Braze journeys +</text>
+          <text class="stepsub" x="504" y="150" text-anchor="middle">advisor call booked</text>
+        </g>
+        <g class="step-node" id="step-4">
+          <rect x="620" y="68" width="168" height="104" rx="10"></rect>
+          <circle cx="644" cy="92" r="12"></circle><text class="stepnum" x="644" y="96" text-anchor="middle">4</text>
+          <text x="704" y="118" text-anchor="middle">The money moment</text>
+          <text class="stepsub" x="704" y="136" text-anchor="middle">weeks later, offline:</text>
+          <text class="stepsub" x="704" y="150" text-anchor="middle">investment funded</text>
+        </g>
+        <g class="step-node" id="step-5">
+          <rect x="820" y="68" width="120" height="104" rx="10"></rect>
+          <circle cx="844" cy="92" r="12"></circle><text class="stepnum" x="844" y="96" text-anchor="middle">5</text>
+          <text x="880" y="118" text-anchor="middle">Send back</text>
+          <text class="stepsub" x="880" y="136" text-anchor="middle">CAPI · offline</text>
+          <text class="stepsub" x="880" y="150" text-anchor="middle">imports · audiences</text>
+        </g>
+      </svg>
+    </div>
+    <figcaption>The same closed loop InvestPR's RFP describes — running in production at consumer scale. Steps 1–3 preserve the thread; steps 4–5 close it.</figcaption>
+  </figure>
+  <div class="toggle-row">
+    <button class="btn secondary" id="prevStep">← Back</button>
+    <button class="btn" id="nextStep">Next step →</button>
+  </div>
+  <div class="step-caption" id="stepCaption" aria-live="polite"></div>
+</section>
+
+<section id="concerns">
+  <p class="eyebrow">Why this matters here</p>
+  <h2>Same problems, different logos</h2>
+  <div class="prose">
+    <p>Every failure mode named in InvestPR's RFP is one we designed against at Masterworks — some because we hit it first and fixed it, some because the architecture made it impossible from day one. The mapping is one-to-one:</p>
+  </div>
+  <div class="land">
+    <table class="landscape">
+      <thead><tr><th>The concern in InvestPR's RFP</th><th>How the Masterworks build answered it</th></tr></thead>
+      <tbody>
+        <tr><td>Data foundation that decays after cleanup</td><td>A versioned tracking plan governed every event and property — names, allowed values, and one owning system per field. Schema violations were blocked at the pipe, not cleaned up after the fact. Hygiene was enforced by machinery, not memory.</td></tr>
+        <tr><td>Marketing and the CRM disagree about who a lead is</td><td>Segment's identity resolution stitched anonymous browsing to the known person at signup, and HubSpot held the one canonical record. Braze, analytics, and the ad platforms were all downstream consumers of the same identity — there was no second version of a person to disagree about.</td></tr>
+        <tr><td>Ad spend can't see which leads became real outcomes</td><td>The dashed loop: funded-investor events flowed back to Meta and Google matched by click ID and hashed email. Bidding optimized toward people who actually invested — not people who fill out forms — and converted spend became suppression lists so we stopped paying to re-reach them.</td></tr>
+        <tr><td>Meetings and outreach happen off the record</td><td>Advisor calls were booked, routed, and logged on the contact automatically. "When did we last talk to them?" was a lookup, not an investigation — at 25 people and thousands of conversations a month.</td></tr>
+        <tr><td>Every workflow has three unofficial versions</td><td>Messaging logic lived in exactly one place (Braze journeys); money-moment logic lived in exactly one place (the automation service). Every automation was inventoried and diagrammed, so "what fires when" had one answer.</td></tr>
+        <tr><td>Integrations fail silently; nobody keeps the machine running</td><td>The custom service was built like production software because it was production software: monitored, alerting, with runbooks. A broken sync paged an engineer the same hour — it was never discovered a month later at reporting time.</td></tr>
+        <tr><td>Knowledge lives in people's heads</td><td>The tracking plan, the automation inventory, and the runbooks <em>were</em> the documentation — new marketers and engineers onboarded from artifacts, not shadowing. A 0→25 team can't run any other way.</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section id="results">
+  <p class="eyebrow">Outcomes</p>
+  <h2>What the loop paid for</h2>
+  <div class="prose">
+    <p>The architecture's return showed up in three places: cheaper acquisition (bidding on real outcomes), faster response (automation at the moments that matter), and a marketing budget that could be defended to a board with CRM-verified numbers. Figures marked <span class="tbc">◆</span> are illustrative pending confirmation:</p>
+  </div>
+  <ul class="check">
+    <li><strong>Daily capital raised grew from roughly $2K to $1M<span class="tbc" title="To confirm with Hai">◆</span></strong> over the build-out of this system, with paid media scaling to $4M/month along the way.</li>
+    <li><strong>Cost per funded investor dropped ~35%<span class="tbc" title="Illustrative — replace with real figure">◆</span></strong> after bid optimization moved from signup events to funded-investor events sent back through the loop.</li>
+    <li><strong>~30% of funded conversions<span class="tbc" title="Illustrative — replace with real figure">◆</span></strong> were attributable only through server-side events — conversions browser pixels missed entirely (ad blockers, iOS privacy changes, the weeks-long offline gap).</li>
+    <li><strong>Speed-to-lead measured in seconds, not days:</strong> high-intent moments (an abandoned funding flow, a booked call) triggered SMS and advisor follow-up automatically.</li>
+    <li><strong>One vocabulary from ad click to board deck:</strong> because every system consumed the same events and the same identity, the marketing dashboard, the product funnel, and the finance model never disagreed about what a "funded investor" was.</li>
+  </ul>
+</section>
+
+<section id="transfer">
+  <p class="eyebrow">The transferable pattern</p>
+  <h2>What this means for an organization like InvestPR</h2>
+  <div class="prose">
+    <p>Nothing about this architecture is specific to selling art. The pattern — <strong>one instrumented pipe in, one canonical record at the center, documented glue with an owner, and valuable outcomes looped back to the platforms that sourced them</strong> — transfers to any organization whose real conversions happen offline, weeks after the click, through a team of humans. That is precisely an economic-development pipeline: the "funded investment" becomes a qualified project; the advisory call becomes a BD director's meeting with a site selector; the board deck becomes jobs-and-capital KPIs.</p>
+    <p>The hub here happened to be HubSpot. The pattern is indifferent to which CRM sits at the center — what matters is that exactly one system is canonical, that everything else reads and writes through documented paths, and that someone owns the glue. That is the system InvestPR's RFP describes wanting, and it is a system our principals have already built, operated, and been accountable for at consumer scale.</p>
+  </div>
+</section>
+
+<footer class="sources">
+  <p><strong>Attribution &amp; provenance.</strong> This case study describes work performed by Res AI's principals in their roles at Masterworks — Hai Tran (co-founder; Chief Marketing Officer, later Chief Product Officer) and Robby Abaya (principal software engineer) — not a Res AI, LLC engagement. Scale figures ($4M/month paid media; 0→25 team) are stated in the principals' attached resumes. Figures marked ◆ are drafts pending verification and must be confirmed or removed before external use.</p>
+</footer>
+
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  /* ---- ecosystem node panel ---- */
+  var ECO = {
+    website: {
+      title: 'Website & signup funnel',
+      role: 'Top of funnel: content, the investment thesis, and a signup flow that ended in booking a call with an advisor.',
+      wiring: 'A single Segment snippet carried all instrumentation — no tag sprawl across the site. Landing pages preserved UTM parameters and click IDs (fbclid, gclid) into the signup, so source data landed on the person, not just the session.',
+      payoff: 'The attribution thread was never cut at the front door. Every downstream system — CRM, messaging, ads, analytics — inherited the same source truth automatically.',
+      parallel: 'The tech brief calls this the most common failure: "forms that don’t capture UTMs and click IDs cut the attribution thread at the front door — nothing downstream can restore it."'
+    },
+    segment: {
+      title: 'Segment — the event backbone',
+      role: 'The customer data platform: every meaningful action (page view, signup, call booked, document viewed, investment funded) entered here once and fanned out to Braze, Google Analytics, and the ad platforms.',
+      wiring: 'A versioned tracking plan defined every event and property — its name, its allowed values, its owner. Identity resolution stitched anonymous pre-signup behavior onto the known user. New destinations were toggles, not engineering projects.',
+      payoff: 'One definition per event, everywhere. Swapping or adding a tool never meant re-instrumenting the site, and no two systems could quietly define "signup" differently.',
+      parallel: 'This is the RFP’s "data dictionary" and "automated source mapping" concern solved structurally — schema enforced at the pipe instead of cleaned up afterward.'
+    },
+    hubspot: {
+      title: 'CRM — HubSpot (the hub)',
+      role: 'The canonical record for every person: source attribution, lifecycle stage, advisor ownership, every email, call, and SMS on one timeline. The advisory team ran its day out of HubSpot views and queues.',
+      wiring: 'Every synced field had one declared owner system. Lifecycle stages were defined once and consumed identically by Braze and reporting. Sync errors alerted the same day instead of accumulating in an unwatched queue.',
+      payoff: '"Where did this investor come from and what have we said to them?" had exactly one answer, for every one of hundreds of thousands of contacts.',
+      parallel: 'The RFP’s core ask — a CRM that marketing, BD, and leadership all trust — is a property-ownership and stage-definition discipline, not a software purchase. We’ve run that discipline at scale.'
+    },
+    braze: {
+      title: 'Braze — lifecycle automations',
+      role: 'All scheduled and triggered messaging: onboarding journeys, nurture tracks, re-engagement, transactional email and push.',
+      wiring: 'Journeys triggered off Segment events and HubSpot lifecycle stages — the same definitions as everywhere else. All messaging logic lived here and only here.',
+      payoff: 'No duplicate or contradictory sends, and a change to a journey was made once, in one place, visible to the whole team.',
+      parallel: 'The RFP’s "every workflow has three unofficial versions" problem, prevented by construction: one home for messaging logic.'
+    },
+    ads: {
+      title: 'Paid media — Meta & Google',
+      role: 'Prospecting and retargeting at up to $4M/month — the engine that filled the top of the funnel.',
+      wiring: 'The platforms received server-side events from Segment, custom and suppression audiences from the automation service, and — the crucial part — funded-investor conversions looped back from the CRM, matched by click ID and hashed email.',
+      payoff: 'Bidding algorithms optimized toward people who become funded investors, not people who fill out forms. Suppression meant never paying to re-acquire an existing customer.',
+      parallel: 'This is the RFP’s "Paid Media & Conversion Tracking Integration" scope item, verbatim — the closed loop the tech brief calls the most valuable single fix.'
+    },
+    analytics: {
+      title: 'Google Analytics',
+      role: 'Session, funnel, and content measurement for the marketing team’s day-to-day optimization.',
+      wiring: 'Fed by the same Segment events with the same names as every other tool — never a parallel, separately-tagged measurement universe.',
+      payoff: 'The analytics funnel and the CRM pipeline could be laid side by side and reconciled, because they were built from the same raw events.',
+      parallel: 'The tech brief’s reporting concern — "two dashboards disagree because the fields under them mean different things" — cannot happen when every dashboard consumes one event stream.'
+    },
+    advisors: {
+      title: 'Advisory team — the human layer',
+      role: 'Licensed advisors who took the calls where investments actually got sold. The offline conversion engine.',
+      wiring: 'Call bookings routed to the right advisor and created the meeting on the contact record automatically. Calls, outcomes, and notes logged back without relying on anyone’s discipline.',
+      payoff: 'A complete activity timeline per person across thousands of monthly conversations — no double-contacted prospects, no invisible meetings.',
+      parallel: 'InvestPR’s BD directors and site-selector meetings are this exact layer. The RFP’s "Sales Enablement & External Tool Alignment" item is this wiring.'
+    },
+    server: {
+      title: 'Custom automation service',
+      role: 'The in-house glue for logic no SaaS tool could express: money-moment SMS triggers, ad-audience sync, and the conversion send-back to the platforms.',
+      wiring: 'A small production service consuming webhooks and Segment events — monitored, alerting, with runbooks. Built by the same engineer proposing this engagement.',
+      payoff: 'The "last mile" automations that differentiate a good stack from a great one — owned, observable, and documented instead of a pile of unowned zaps.',
+      parallel: 'The tech brief’s philosophy — native integrations first, middleware second, custom code where it earns its keep, and everything monitored — is how this layer was actually run.'
+    },
+    sms: {
+      title: 'SMS — Twilio',
+      role: 'The highest-intent channel, reserved for the moments that deserve it: an abandoned funding flow, a call reminder, a funding confirmation.',
+      wiring: 'Triggered by the automation service within seconds of the qualifying event, and logged back to the contact timeline like every other touch.',
+      payoff: 'Speed-to-lead in seconds at the moments money was actually in motion — and a channel that stayed effective because it was never spammed.',
+      parallel: 'The RFP’s routing concern — leads reaching the right person "within minutes" — is a solved problem when triggers run on events instead of on someone noticing.'
+    },
+    reporting: {
+      title: 'Reporting & LTV',
+      role: 'Where spend met outcomes: cohort LTV models, channel performance against funded capital, and the numbers leadership and the board ran on.',
+      wiring: 'Built on the clean event stream and CRM stages — one agreed definition per metric, live rather than hand-assembled.',
+      payoff: 'Marketing defended a $4M/month budget with CRM-verified numbers, not platform-reported conversions that never match reality.',
+      parallel: 'InvestPR’s equivalent is jobs-and-capital KPIs for the board and government stakeholders — the same requirement that every number trace back to a trusted record.'
+    }
+  };
+
+  var panel = document.getElementById('ecoPanel');
+  var nodes = document.querySelectorAll('.eco-node');
+
+  function selectNode(el) {
+    var key = el.getAttribute('data-node');
+    var d = ECO[key];
+    if (!d) return;
+    nodes.forEach(function (n) { n.classList.remove('selected'); });
+    el.classList.add('selected');
+    panel.innerHTML =
+      '<h3>' + d.title + '</h3>' +
+      '<div class="field role"><b>What it did</b>' + d.role + '</div>' +
+      '<div class="field wiring"><b>How it was wired</b>' + d.wiring + '</div>' +
+      '<div class="field payoff"><b>What it bought us</b>' + d.payoff + '</div>' +
+      '<div class="field parallel"><b>The InvestPR parallel</b>' + d.parallel + '</div>';
+  }
+
+  nodes.forEach(function (n) {
+    n.addEventListener('click', function () { selectNode(n); });
+    n.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); selectNode(n); }
+    });
+  });
+
+  /* ---- journey stepper ---- */
+  var STEPS = [
+    '<b>Step 1 — The click.</b> A prospective investor clicks a Masterworks ad on Instagram. Meta appends <code>fbclid</code> to the landing-page URL (Google appends <code>gclid</code>). That code is the thread that will tie a funded investment, weeks from now, back to this exact ad and audience.',
+    '<b>Step 2 — The signup.</b> They create an account. Segment’s identify call stitches their anonymous browsing history onto the new user, and UTMs plus the click ID are written to the HubSpot contact as first-class properties. The thread is preserved — this is the step most stacks miss.',
+    '<b>Step 3 — The nurture.</b> Braze runs the onboarding journey; the prospect books a call, which routes to the right advisor and logs itself on the contact record. Every email, page view, and call lands on one timeline. Nobody double-contacts them; nobody loses the history.',
+    '<b>Step 4 — The money moment.</b> Three weeks later, after two advisor calls, they fund their first investment. This is the event that actually matters — and it happens entirely offline, invisible to every browser pixel. In most stacks, the ad platforms never learn it happened.',
+    '<b>Step 5 — The send-back.</b> The automation service reports the funded conversion to Meta’s Conversions API and Google’s offline imports, matched by click ID and hashed email — then moves the investor from prospecting audiences into suppression and seeds lookalikes from funded investors. The dashed arrow: bidding now optimizes toward people like this one. Repeat at $4M/month.'
+  ];
+  var stepIdx = 0;
+  var prevBtn = document.getElementById('prevStep');
+  var nextBtn = document.getElementById('nextStep');
+  var caption = document.getElementById('stepCaption');
+  var returnEdge = document.getElementById('returnEdge');
+
+  function renderStep() {
+    for (var i = 1; i <= 5; i++) {
+      var g = document.getElementById('step-' + i);
+      if (g) g.classList.toggle('active', i === stepIdx + 1);
+    }
+    returnEdge.classList.toggle('active', stepIdx === 4);
+    caption.innerHTML = STEPS[stepIdx];
+    prevBtn.disabled = stepIdx === 0;
+    nextBtn.disabled = stepIdx === STEPS.length - 1;
+  }
+  prevBtn.addEventListener('click', function () { if (stepIdx > 0) { stepIdx--; renderStep(); } });
+  nextBtn.addEventListener('click', function () { if (stepIdx < STEPS.length - 1) { stepIdx++; renderStep(); } });
+  renderStep();
+})();
+</script>
+</body>
+</html>

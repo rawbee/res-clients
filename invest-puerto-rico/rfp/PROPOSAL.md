@@ -71,10 +71,13 @@ Across their careers our principals have held senior roles at R/GA, Digitas, Car
 
 *(RFP asks for measurable results in data normalization, system efficiency, or campaign attribution. Include 2–3. Each should follow the structure below.)*
 
-#### Case Study 1: [G-11: Client name (or anonymized descriptor) + one-line project title]
-- **Challenge:** [G-11a]
-- **What we did:** [G-11b]
-- **Measurable results:** [G-11c: Quantified — e.g., "reduced duplicate records by X%", "cut lead-routing time from X to Y", "recovered X% of previously unattributed conversions"]
+#### Case Study 1: Masterworks — a closed-loop marketing stack at $4M/month scale
+
+*(Principals' work in their roles at Masterworks — Hai Tran, co-founder & CMO; Robby Abaya, principal software engineer. Full visual case study: `rfp/CASE-STUDY-MASTERWORKS.html` — architecture diagram, investor-journey walkthrough, and concern-by-concern mapping to this RFP's scope. Candidate work-product sample for [G-14].)*
+
+- **Challenge:** Masterworks sells a product nobody searches for — shares in blue-chip paintings — through a funnel whose real conversion happens offline, weeks after the ad click, in a phone call with a licensed advisor. Scaling paid media to $4M/month required an architecture in which ad platforms could learn which clicks became *funded investors* (not form fills), every team worked from one canonical record per person, and none of the glue failed silently.
+- **What we did:** Built a hub-and-spoke stack with HubSpot as the canonical CRM at the center and Segment as the single event pipe: a versioned tracking plan governed every event and property; identity resolution stitched anonymous browsing to known contacts; Segment fanned events to Braze (all lifecycle messaging), Google Analytics, and the ad platforms; advisor calls booked, routed, and logged automatically; and a monitored in-house automation service handled the last mile — SMS at high-intent moments, ad-audience sync and suppression, and funded-investor conversions sent back to Meta and Google matched by click ID and hashed email.
+- **Measurable results:** [G-11c: Quantified — Hai to confirm. Candidates (drafted with ◆ markers in CASE-STUDY-MASTERWORKS.html): daily capital raised ~$2K → ~$1M over the build-out; cost per funded investor after moving bid optimization to offline funded events; share of conversions recovered via server-side events that pixels missed; speed-to-lead in seconds for high-intent SMS.]
 
 #### Case Study 2: [G-12: Client + title]
 - **Challenge:** [G-12a]

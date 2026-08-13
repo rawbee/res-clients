@@ -34,6 +34,7 @@ They have worked together across **four companies since 2004**: Carat → Zynga 
 | `rfp/GATHER.md` | Interview playbook keyed to the same G-## tags | **The live tracker.** Its *Open Items* table at the bottom is the current frontier — owners and due dates included |
 | `rfp/gather-assets/` | Source material from the principals | `Robby_Abaya_Resume.md` (edited Aug 12 — see D7), `hai-li.md` (Hai Tran's LinkedIn export; filename is stale, person is **Hai Tran**) |
 | `rfp/TECH-BRIEF.html` | Interactive technical briefing: their ecosystem, seven problems, tool landscape, glossary | `open rfp/TECH-BRIEF.html`. Also at <https://claude.ai/code/artifact/38ca41fe-861c-4832-945c-307fa34e9173> |
+| `rfp/CASE-STUDY-MASTERWORKS.html` | Interactive visual case study of the principals' Masterworks marketing stack (Case Study 1 / feeds G-11, candidate G-14 work sample) | `open rfp/CASE-STUDY-MASTERWORKS.html`. Also at <https://claude.ai/code/artifact/e27363ed-2363-4967-820f-8763bf179ee8>. **◆-marked figures are unverified drafts** — see D9 |
 
 ## Decisions already made — do not silently reverse these
 
@@ -53,6 +54,8 @@ They have worked together across **four companies since 2004**: Carat → Zynga 
 
 **D8 — Robby's resume, second edit Aug 12** (Robby's direct instruction): (1) Zocdoc entry refocused from mobile-team tech lead to **principal engineer on the growth team working on the marketing stack**, with the Salesforce experience now stated in the entry itself — this closes the D6 gap where §A's "Salesforce at Zocdoc" claim had no corroboration in the required attachment. (2) Res AI start date changed **Apr 2026 → Nov 2025** to match Hai's LinkedIn. *Consequence:* the resume now shows Worthy (Jan 2025–Apr 2026) and Res AI (Nov 2025–present) overlapping by ~6 months — Robby to confirm the concurrent-roles presentation is intended, or adjust one entry. Tracked in the G-39 Open Items row.
 
+**D9 — Case Study 1 is the Masterworks marketing stack, drafted with explicitly-marked placeholder numbers.** (Aug 12, Robby's direction: "take liberty to fill in the gaps … and I'll adjust.") `rfp/CASE-STUDY-MASTERWORKS.html` presents the stack Robby described (HubSpot hub; website → Segment → Braze/Meta/GA fan-out; Braze automations plus a custom server service for SMS and ad retargeting) upgraded to its idealized form, and maps it node-by-node onto the TECH-BRIEF concerns. *Convention:* every figure not backed by `gather-assets/` carries a visible **◆ marker** (also flagged in the doc's draft banner and footer) — per D6, no ◆-marked number may be copied into PROPOSAL.md or shipped externally until Hai confirms it. The doc states plainly it was the principals' work at Masterworks, not a Res engagement (D4).
+
 ## Key intelligence
 
 - **Evaluation weights:** 50% ability/capacity · 20% cost clarity/reasonability · 20% examples of work product (integration maps, SOPs, training materials) · 10% references. Spend effort accordingly.
@@ -65,9 +68,10 @@ They have worked together across **four companies since 2004**: Carat → Zynga 
 - [x] Session 0 triage — questions round declined (D1)
 - [x] Session 1 — firm identity. **§A Firm Overview is drafted and substantially complete**, pending entity verification
 - [x] Robby's resume corrected (D7, D8 — Zocdoc refocused to growth/marketing stack; Res AI start aligned to Nov 2025)
-- [ ] **§B, §C, §D, §E, §F, §G all still skeleton — 76 `[G-` tokens remain**
-- [ ] **Work samples (G-14/G-40) — worth 20%, longest lead item, UNDECIDED:** sanitize existing artifacts or author originals? Blocking, asked repeatedly
-- [ ] Case studies with hard numbers (G-11–13) — **assigned to Hai**
+- [x] **Case Study 1 drafted (Aug 12):** Masterworks marketing stack — narrative in §B + visual doc `rfp/CASE-STUDY-MASTERWORKS.html` (D9). **Numbers are ◆-marked drafts; Hai must confirm G-11c**
+- [ ] **§C, §D, §E, §F, §G still skeleton; §B partially drafted — 74 `[G-` tokens remain**
+- [ ] **Work samples (G-14/G-40) — worth 20%, longest lead item, UNDECIDED:** sanitize existing artifacts or author originals? Blocking, asked repeatedly. *The Masterworks case-study architecture map is now a candidate sample*
+- [ ] Case studies 2–3 with hard numbers (G-12/G-13) + G-11c figures — **assigned to Hai**
 - [ ] Entity name verification (G-06a) — **assigned to Hai**
 - [ ] Certifications decision (G-19b–23b) — free HubSpot certs are ~3–4 hrs each and directly scoreable
 - [ ] References with permission (G-32–36); pricing (G-27–31)
