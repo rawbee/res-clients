@@ -1,0 +1,1973 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Salesforce Before the Call</title>
+<style>
+  :root {
+    --bg: #F5F8F7;
+    --surface: #FFFFFF;
+    --surface-2: #EBF1F0;
+    --ink: #182A2D;
+    --muted: #56696B;
+    --line: #D6E0DE;
+    --accent: #0E7C86;
+    --accent-soft: #DDEEEF;
+    --deep: #29507C;
+    --deep-soft: #E1E9F3;
+    --warn: #A85B22;
+    --warn-soft: #F6E8DC;
+    --good: #2F7D53;
+    --good-soft: #E1EFE7;
+    --bad: #A33A3A;
+    --bad-soft: #F6E2E2;
+    --code-bg: #EDF2F1;
+    --shadow: 0 1px 2px rgba(24,42,45,.05), 0 8px 24px -16px rgba(24,42,45,.28);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0F191B;
+      --surface: #162225;
+      --surface-2: #1C2B2E;
+      --ink: #E2ECEA;
+      --muted: #97ABA9;
+      --line: #2B3C3E;
+      --accent: #4CBCC5;
+      --accent-soft: #143A3E;
+      --deep: #8FB4D9;
+      --deep-soft: #1A2837;
+      --warn: #D9945C;
+      --warn-soft: #3A2A1B;
+      --good: #6CBE93;
+      --good-soft: #1B3428;
+      --bad: #E08585;
+      --bad-soft: #38201F;
+      --code-bg: #1E2E31;
+      --shadow: 0 1px 2px rgba(0,0,0,.3), 0 8px 24px -16px rgba(0,0,0,.7);
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0F191B;
+    --surface: #162225;
+    --surface-2: #1C2B2E;
+    --ink: #E2ECEA;
+    --muted: #97ABA9;
+    --line: #2B3C3E;
+    --accent: #4CBCC5;
+    --accent-soft: #143A3E;
+    --deep: #8FB4D9;
+    --deep-soft: #1A2837;
+    --warn: #D9945C;
+    --warn-soft: #3A2A1B;
+    --good: #6CBE93;
+    --good-soft: #1B3428;
+    --bad: #E08585;
+    --bad-soft: #38201F;
+    --code-bg: #1E2E31;
+    --shadow: 0 1px 2px rgba(0,0,0,.3), 0 8px 24px -16px rgba(0,0,0,.7);
+  }
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } * { animation-duration: .01ms !important; transition-duration: .01ms !important; } }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: "Charter", "Iowan Old Style", "Palatino", Georgia, serif;
+    font-size: 1.04rem;
+    line-height: 1.68;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 1060px; margin: 0 auto; padding: 0 24px 120px; }
+  .prose { max-width: 68ch; }
+
+  h1, h2, h3, h4, .sans { font-family: "Avenir Next", "Avenir", "Segoe UI", "Trebuchet MS", system-ui, sans-serif; }
+  h1 { font-size: clamp(2.1rem, 5.2vw, 3.1rem); line-height: 1.06; letter-spacing: -0.02em; margin: .35em 0 .28em; text-wrap: balance; }
+  h2 { font-size: clamp(1.35rem, 2.6vw, 1.62rem); letter-spacing: -0.012em; margin: 0 0 .45em; text-wrap: balance; }
+  h3 { font-size: 1.06rem; margin: 1.6em 0 .4em; letter-spacing: -0.005em; }
+  h4 { font-size: .95rem; margin: 1.2em 0 .3em; }
+  p { margin: 0 0 1em; }
+  ul, ol { margin: 0 0 1em; padding-left: 1.25em; }
+  li { margin: .28em 0; }
+  a { color: var(--accent); text-underline-offset: 2px; }
+  strong { font-weight: 700; }
+  code, .mono { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; font-size: .855em; }
+  code { background: var(--code-bg); padding: .1em .38em; border-radius: 4px; }
+  hr { border: 0; border-top: 1px solid var(--line); margin: 40px 0; }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
+
+  .eyebrow {
+    font-family: "Avenir Next", "Segoe UI", system-ui, sans-serif;
+    font-size: .71rem; font-weight: 700; text-transform: uppercase; letter-spacing: .13em;
+    color: var(--accent); margin: 0 0 .7em;
+  }
+
+  /* ---------- masthead ---------- */
+  header.masthead { padding-top: 52px; border-bottom: 1px solid var(--line); padding-bottom: 30px; }
+  .subtitle { color: var(--muted); font-size: 1.12rem; max-width: 60ch; }
+  .meta-line { font-family: "Avenir Next", "Segoe UI", system-ui, sans-serif; font-size: .78rem; color: var(--muted); margin-top: 20px; display: flex; flex-wrap: wrap; gap: 6px 20px; }
+  .theme-toggle {
+    position: fixed; bottom: 16px; right: 16px; z-index: 60;
+    font-family: "Avenir Next", "Segoe UI", system-ui, sans-serif; font-size: .74rem; font-weight: 600;
+    background: var(--surface); color: var(--muted); border: 1px solid var(--line);
+    border-radius: 999px; padding: 7px 15px; cursor: pointer; box-shadow: var(--shadow);
+  }
+  .theme-toggle:hover { color: var(--accent); border-color: var(--accent); }
+
+  /* ---------- triage paths ---------- */
+  .paths { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; margin: 26px 0 6px; }
+  .path {
+    background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 16px 18px; box-shadow: var(--shadow);
+  }
+  .path b { font-family: "Avenir Next", "Segoe UI", system-ui, sans-serif; display: block; font-size: .74rem; text-transform: uppercase; letter-spacing: .1em; color: var(--accent); margin-bottom: 6px; }
+  .path .big { font-family: "Avenir Next", system-ui, sans-serif; font-size: 1.05rem; font-weight: 600; display: block; margin-bottom: 4px; }
+  .path span.detail { font-size: .88rem; color: var(--muted); line-height: 1.5; }
+  .path a { font-family: "Avenir Next", system-ui, sans-serif; font-size: .82rem; text-decoration: none; font-weight: 600; }
+
+  /* ---------- nav ---------- */
+  nav.toc {
+    position: sticky; top: 0; z-index: 50; background: color-mix(in srgb, var(--bg) 92%, transparent);
+    backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--line); margin: 0 -24px 0; padding: 10px 24px;
+    display: flex; gap: 6px; overflow-x: auto; scrollbar-width: thin;
+  }
+  nav.toc a {
+    font-family: "Avenir Next", "Segoe UI", system-ui, sans-serif; font-size: .76rem; font-weight: 600;
+    text-decoration: none; color: var(--muted); border: 1px solid transparent;
+    padding: 4px 10px; border-radius: 999px; white-space: nowrap;
+  }
+  nav.toc a:hover { color: var(--accent); }
+  nav.toc a.active { color: var(--accent); background: var(--accent-soft); border-color: var(--accent); }
+
+  /* ---------- modules ---------- */
+  section { margin-top: 72px; scroll-margin-top: 62px; }
+  .mod-head { display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap; border-top: 2px solid var(--ink); padding-top: 14px; margin-bottom: 16px; }
+  .mod-num {
+    font-family: "Avenir Next", system-ui, sans-serif; font-variant-numeric: tabular-nums;
+    font-size: 1.6rem; font-weight: 700; letter-spacing: -.03em; color: var(--accent); line-height: 1;
+  }
+  .mod-head h2 { margin: 0; flex: 1 1 320px; }
+  .chip {
+    font-family: "Avenir Next", system-ui, sans-serif; font-size: .68rem; font-weight: 700;
+    text-transform: uppercase; letter-spacing: .09em; padding: 3px 9px; border-radius: 999px; white-space: nowrap;
+    border: 1px solid; display: inline-block;
+  }
+  .chip.p1 { color: var(--bad); background: var(--bad-soft); border-color: var(--bad); }
+  .chip.p2 { color: var(--deep); background: var(--deep-soft); border-color: var(--deep); }
+  .chip.p3 { color: var(--muted); background: var(--surface-2); border-color: var(--line); }
+  .serves {
+    font-family: "Avenir Next", system-ui, sans-serif; font-size: .78rem; color: var(--muted);
+    margin: -6px 0 20px; padding-left: 2px;
+  }
+  .serves b { color: var(--ink); font-weight: 600; }
+
+  /* ---------- callouts ---------- */
+  .note { border: 1px solid var(--line); border-left: 4px solid var(--accent); background: var(--surface); border-radius: 8px; padding: 15px 20px; margin: 22px 0; }
+  .note.warn { border-left-color: var(--warn); background: var(--warn-soft); }
+  .note.bad  { border-left-color: var(--bad); background: var(--bad-soft); }
+  .note.good { border-left-color: var(--good); background: var(--good-soft); }
+  .note.deep { border-left-color: var(--deep); background: var(--deep-soft); }
+  .note p:last-child { margin-bottom: 0; }
+  .note .label { font-family: "Avenir Next", system-ui, sans-serif; font-size: .7rem; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; display: block; margin-bottom: 5px; color: var(--accent); }
+  .note.warn .label { color: var(--warn); } .note.bad .label { color: var(--bad); }
+  .note.good .label { color: var(--good); } .note.deep .label { color: var(--deep); }
+
+  /* ---------- tables ---------- */
+  .table-wrap { overflow-x: auto; margin: 22px 0; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); }
+  table { border-collapse: collapse; width: 100%; font-size: .9rem; }
+  th, td { text-align: left; padding: 9px 14px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { font-family: "Avenir Next", system-ui, sans-serif; font-size: .72rem; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); font-weight: 700; background: var(--surface-2); position: sticky; top: 0; }
+  tr:last-child td { border-bottom: 0; }
+  td.num { font-variant-numeric: tabular-nums; }
+  table code { font-size: .8em; }
+
+  /* ---------- figures ---------- */
+  figure { margin: 30px 0; }
+  figure svg { max-width: 100%; height: auto; display: block; }
+  figcaption { font-size: .85rem; color: var(--muted); margin-top: 10px; max-width: 72ch; }
+  .diagram-frame { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 20px; overflow-x: auto; box-shadow: var(--shadow); }
+  .svg-label { font-family: "Avenir Next", "Segoe UI", system-ui, sans-serif; }
+
+  /* ---------- object explorer ---------- */
+  .eco-node { cursor: pointer; }
+  .eco-node rect { fill: var(--surface-2); stroke: var(--line); stroke-width: 1.5; rx: 9; transition: stroke .15s, fill .15s; }
+  .eco-node text { fill: var(--ink); font-family: "Avenir Next", "Segoe UI", system-ui, sans-serif; font-size: 13.5px; font-weight: 700; }
+  .eco-node .nodesub { fill: var(--muted); font-size: 10px; font-weight: 500; font-family: ui-monospace, Menlo, monospace; }
+  .eco-node:hover rect, .eco-node:focus-visible rect { stroke: var(--accent); stroke-width: 2; }
+  .eco-node:focus-visible { outline: none; }
+  .eco-node.selected rect { stroke: var(--accent); stroke-width: 2.5; fill: var(--accent-soft); }
+  .eco-edge { stroke: var(--muted); stroke-width: 1.3; fill: none; }
+  .eco-edge.hi { stroke: var(--accent); stroke-dasharray: 5 4; stroke-width: 1.8; }
+  .eco-edge.own { stroke: var(--muted); stroke-dasharray: 3 3; }
+  .eco-lbl { fill: var(--muted); font-family: "Avenir Next", system-ui, sans-serif; font-size: 10px; }
+  .eco-lbl.hi { fill: var(--accent); font-weight: 700; }
+  .er-head { fill: var(--muted); }
+  .panel {
+    border: 1px solid var(--line); border-radius: 12px; background: var(--surface);
+    padding: 20px 24px; margin-top: 14px; min-height: 168px; box-shadow: var(--shadow);
+  }
+  .panel h3 { margin-top: 0; }
+  .panel .field { margin: 11px 0; font-size: .93rem; }
+  .panel .field b {
+    font-family: "Avenir Next", system-ui, sans-serif; font-size: .68rem; text-transform: uppercase;
+    letter-spacing: .1em; display: block; margin-bottom: 2px; color: var(--muted);
+  }
+  .panel .field.eng b { color: var(--deep); }
+  .panel .field.break b { color: var(--warn); }
+  .panel .field.good b { color: var(--good); }
+  .panel .empty { color: var(--muted); font-style: italic; }
+
+  /* ---------- generic controls ---------- */
+  .btnrow { display: flex; flex-wrap: wrap; gap: 8px; margin: 18px 0 0; }
+  button.ui {
+    font-family: "Avenir Next", "Segoe UI", system-ui, sans-serif; font-size: .82rem; font-weight: 600;
+    background: var(--surface); color: var(--ink); border: 1px solid var(--line);
+    border-radius: 8px; padding: 7px 14px; cursor: pointer; transition: border-color .15s, color .15s;
+  }
+  button.ui:hover { border-color: var(--accent); color: var(--accent); }
+  button.ui.on { background: var(--accent); border-color: var(--accent); color: #fff; }
+  :root[data-theme="dark"] button.ui.on, :root:not([data-theme="light"]) button.ui.on { color: #0F191B; }
+  @media (prefers-color-scheme: light) { :root:not([data-theme="dark"]) button.ui.on { color: #fff; } }
+  button.ui[disabled] { opacity: .4; cursor: not-allowed; }
+  input.ui {
+    font-family: "Avenir Next", system-ui, sans-serif; font-size: .9rem; width: 100%;
+    background: var(--surface); color: var(--ink); border: 1px solid var(--line);
+    border-radius: 8px; padding: 9px 13px;
+  }
+  input.ui::placeholder { color: var(--muted); }
+
+  /* ---------- stepper ---------- */
+  .stepper { display: flex; gap: 6px; flex-wrap: wrap; margin: 18px 0 0; }
+  .stepper button {
+    flex: 1 1 130px; text-align: left; font-family: "Avenir Next", system-ui, sans-serif;
+    background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px;
+    cursor: pointer; color: var(--muted); transition: all .15s;
+  }
+  .stepper button .n { display: block; font-size: .68rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; }
+  .stepper button .t { display: block; font-size: .88rem; font-weight: 600; color: var(--ink); margin-top: 2px; }
+  .stepper button:hover { border-color: var(--accent); }
+  .stepper button.on { border-color: var(--accent); background: var(--accent-soft); color: var(--accent); }
+
+  /* ---------- flashcards ---------- */
+  .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(215px, 1fr)); gap: 10px; margin: 20px 0; }
+  .card {
+    background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px;
+    cursor: pointer; min-height: 92px; display: flex; flex-direction: column; justify-content: center;
+    font-family: "Avenir Next", system-ui, sans-serif; transition: border-color .15s;
+  }
+  .card:hover { border-color: var(--accent); }
+  .card .term { font-size: .98rem; font-weight: 700; }
+  .card .hint { font-size: .7rem; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; margin-top: 6px; }
+  .card .ans { font-size: .87rem; color: var(--ink); line-height: 1.5; }
+  .card .ans em { color: var(--accent); font-style: normal; font-weight: 600; }
+  .card.flipped { background: var(--accent-soft); border-color: var(--accent); }
+
+  /* ---------- quiz ---------- */
+  .q { border: 1px solid var(--line); border-radius: 12px; background: var(--surface); padding: 18px 22px; margin: 14px 0; }
+  .q .qtext { font-family: "Avenir Next", system-ui, sans-serif; font-weight: 600; margin-bottom: 12px; display: block; }
+  .q .qnum { color: var(--accent); font-variant-numeric: tabular-nums; margin-right: 8px; }
+  .opts { display: flex; flex-direction: column; gap: 7px; }
+  .opts button {
+    text-align: left; font-family: inherit; font-size: .93rem; background: var(--bg); color: var(--ink);
+    border: 1px solid var(--line); border-radius: 8px; padding: 9px 13px; cursor: pointer;
+  }
+  .opts button:hover:not([disabled]) { border-color: var(--accent); }
+  .opts button.right { background: var(--good-soft); border-color: var(--good); color: var(--good); font-weight: 600; }
+  .opts button.wrong { background: var(--bad-soft); border-color: var(--bad); color: var(--bad); }
+  .opts button[disabled] { cursor: default; }
+  .why { margin-top: 12px; font-size: .89rem; color: var(--muted); border-left: 3px solid var(--accent); padding-left: 12px; display: none; }
+  .why.show { display: block; }
+  .score { font-family: "Avenir Next", system-ui, sans-serif; font-weight: 700; font-size: 1.05rem; }
+
+  /* ---------- accordion ---------- */
+  details.qa { border: 1px solid var(--line); border-radius: 10px; background: var(--surface); margin: 8px 0; overflow: hidden; }
+  details.qa > summary {
+    cursor: pointer; padding: 13px 18px; font-family: "Avenir Next", system-ui, sans-serif;
+    font-weight: 600; font-size: .95rem; list-style: none; display: flex; gap: 10px; align-items: flex-start;
+  }
+  details.qa > summary::-webkit-details-marker { display: none; }
+  details.qa > summary::before { content: "▸"; color: var(--accent); flex: none; transition: transform .15s; }
+  details.qa[open] > summary::before { transform: rotate(90deg); }
+  details.qa > summary:hover { color: var(--accent); }
+  details.qa .body { padding: 0 18px 16px 40px; font-size: .95rem; }
+  details.qa .body p:last-child { margin-bottom: 0; }
+  .say { font-size: .9rem; border-radius: 8px; padding: 10px 14px; margin: 10px 0 0; }
+  .say.yes { background: var(--good-soft); border-left: 3px solid var(--good); }
+  .say.no  { background: var(--bad-soft); border-left: 3px solid var(--bad); }
+  .say b { font-family: "Avenir Next", system-ui, sans-serif; font-size: .7rem; text-transform: uppercase; letter-spacing: .09em; display: block; margin-bottom: 3px; }
+  .say.yes b { color: var(--good); } .say.no b { color: var(--bad); }
+
+  /* ---------- grids ---------- */
+  .two { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; margin: 20px 0; }
+  .box { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 16px 18px; }
+  .box h4 { margin-top: 0; }
+  .box p:last-child, .box ul:last-child { margin-bottom: 0; }
+  .kv { font-family: "Avenir Next", system-ui, sans-serif; font-size: .74rem; text-transform: uppercase; letter-spacing: .09em; color: var(--muted); }
+
+  .ladder { counter-reset: rung; margin: 20px 0; display: flex; flex-direction: column; gap: 8px; }
+  .rung { display: flex; gap: 14px; align-items: flex-start; background: var(--surface); border: 1px solid var(--line); border-left: 4px solid var(--accent); border-radius: 8px; padding: 12px 16px; }
+  .rung .r-n { font-family: "Avenir Next", system-ui, sans-serif; font-weight: 700; color: var(--accent); font-variant-numeric: tabular-nums; flex: none; }
+  .rung .r-b { font-size: .93rem; }
+  .rung .r-b b { font-family: "Avenir Next", system-ui, sans-serif; }
+  .rung:nth-child(4) { border-left-color: var(--warn); } .rung:nth-child(4) .r-n { color: var(--warn); }
+  .rung:nth-child(5) { border-left-color: var(--bad); } .rung:nth-child(5) .r-n { color: var(--bad); }
+
+  footer.end { margin-top: 90px; border-top: 1px solid var(--line); padding-top: 24px; font-size: .85rem; color: var(--muted); }
+
+  @media print {
+    nav.toc, .theme-toggle, .btnrow, .stepper { display: none; }
+    section { margin-top: 30px; page-break-inside: avoid; }
+    body { background: #fff; color: #000; font-size: 10pt; }
+  }
+</style>
+</head>
+<body>
+
+<button class="theme-toggle" id="themeBtn" type="button">Dark</button>
+
+<div class="wrap">
+
+<header class="masthead">
+  <p class="eyebrow">InvestPR RFP · Internal prep · Not for submission</p>
+  <h1>Salesforce Before the Call</h1>
+  <p class="subtitle">Everything an experienced engineer needs to hold a fluent Salesforce conversation with Invest Puerto Rico — ordered by what their RFP actually asks for, not by what a certification exam covers.</p>
+  <div class="meta-line">
+    <span>Prepared Aug 13, 2026</span>
+    <span>Companion to <span class="mono">TECH-BRIEF.html</span></span>
+    <span>Audience: engineers new to the platform</span>
+    <span>~90 min cover to cover</span>
+  </div>
+
+  <div class="paths">
+    <div class="path">
+      <b>20 minutes</b>
+      <span class="big">The seams</span>
+      <span class="detail">Modules 02, 03, 06 and the Grill Me section. The data model, what happens at lead conversion, and the HubSpot↔Salesforce sync — that is where every question they ask will land.</span>
+    </div>
+    <div class="path">
+      <b>One hour</b>
+      <span class="big">Everything marked critical</span>
+      <span class="detail">Modules 01–08. You will be able to explain any of the seven problems in the tech brief in Salesforce's own vocabulary.</span>
+    </div>
+    <div class="path">
+      <b>Before you speak</b>
+      <span class="big">The guardrail</span>
+      <span class="detail">Read the box below. It is the one thing in this document that can lose the bid rather than win it.</span>
+    </div>
+  </div>
+</header>
+
+<nav class="toc" id="toc">
+  <a href="#m01">01 Mental model</a>
+  <a href="#m02">02 Data model</a>
+  <a href="#m03">03 Conversion</a>
+  <a href="#m04">04 Fields</a>
+  <a href="#m05">05 Duplicates</a>
+  <a href="#m06">06 The HubSpot seam</a>
+  <a href="#m07">07 Automation</a>
+  <a href="#m08">08 Attribution</a>
+  <a href="#m09">09 Reporting</a>
+  <a href="#m10">10 Security</a>
+  <a href="#m11">11 APIs &amp; limits</a>
+  <a href="#m12">12 Environments</a>
+  <a href="#m13">13 Nonprofit</a>
+  <a href="#decoder">Decoder</a>
+  <a href="#grill">Grill me</a>
+  <a href="#quiz">Quiz</a>
+  <a href="#cheat">Cheat sheet</a>
+</nav>
+
+<div class="note bad" style="margin-top:28px">
+  <span class="label">Read this first — the one way this document can hurt us</span>
+  <p><strong>We do not know their stack. We inferred it.</strong> Salesforce comes from their own CRM Administrator job posting; HubSpot comes from tracking scripts on investpr.org. The RFP discloses the real stack only to shortlisted finalists under NDA (see README decision <strong>D3</strong>).</p>
+  <p>So: never open with “we know you’re on Salesforce.” Ask, then answer. <em>Our own</em> platform history — Salesforce at Zocdoc, HubSpot at Masterworks — is stated plainly and proudly; <em>their</em> platform is something they tell us. Study this so you can be fluent the moment they say the word, not so you can say it first.</p>
+</div>
+
+<!-- ============================================================ 01 -->
+<section id="m01">
+  <div class="mod-head">
+    <span class="mod-num">01</span>
+    <h2>The mental model: what kind of system this is</h2>
+    <span class="chip p1">Critical</span>
+  </div>
+  <p class="serves">Foundation for everything else. <b>Read once, then never be surprised again.</b></p>
+
+  <div class="prose">
+    <p>Salesforce is not a database you build on. It is a multitenant application whose configuration <em>is</em> data, running your code inside hard quotas on shared infrastructure. Almost every counterintuitive thing about the platform follows from that one sentence.</p>
+
+    <p>Your instance is an <strong>org</strong> — a tenant. Everything you “build” is <strong>metadata</strong>: objects, fields, page layouts, validation rules, flows, permission sets, report types. Metadata is versionable XML you can pull, diff, and deploy like source. Records are the actual rows your users create. The two move on completely different rails: metadata deploys from sandbox to production, data does not travel with it.</p>
+  </div>
+
+  <figure>
+    <div class="diagram-frame">
+      <svg viewBox="0 0 820 330" role="img" aria-label="Four layers of a Salesforce org — data, metadata configuration, automation, and interface — all sitting inside a runtime that enforces governor limits and per-tenant API quotas." class="svg-label">
+        <defs>
+          <marker id="ar1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <polygon points="0,0 10,5 0,10" fill="currentColor"/>
+          </marker>
+        </defs>
+        <rect x="10" y="10" width="800" height="310" rx="14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-dasharray="6 5" opacity=".45"/>
+        <text x="30" y="34" font-size="11.5" font-weight="700" fill="currentColor" opacity=".6" letter-spacing="1.2">THE MULTITENANT RUNTIME — GOVERNOR LIMITS APPLY TO EVERY TRANSACTION</text>
+
+        <g>
+          <rect x="34" y="56" width="752" height="56" rx="9" fill="currentColor" opacity=".05"/>
+          <rect x="34" y="56" width="752" height="56" rx="9" fill="none" stroke="currentColor" stroke-width="1.3" opacity=".55"/>
+          <text x="52" y="80" font-size="13" font-weight="700" fill="currentColor">Interface</text>
+          <text x="52" y="98" font-size="11" fill="currentColor" opacity=".65">Lightning pages · page layouts · Lightning Web Components · Experience Cloud sites</text>
+          <text x="700" y="90" font-size="10.5" fill="currentColor" opacity=".5">what users see</text>
+        </g>
+
+        <g>
+          <rect x="34" y="124" width="752" height="56" rx="9" fill="currentColor" opacity=".05"/>
+          <rect x="34" y="124" width="752" height="56" rx="9" fill="none" stroke="currentColor" stroke-width="1.3" opacity=".55"/>
+          <text x="52" y="148" font-size="13" font-weight="700" fill="currentColor">Automation</text>
+          <text x="52" y="166" font-size="11" fill="currentColor" opacity=".65">Flows · assignment rules · validation rules · Apex triggers · scheduled jobs</text>
+          <text x="676" y="158" font-size="10.5" fill="currentColor" opacity=".5">what happens on save</text>
+        </g>
+
+        <g>
+          <rect x="34" y="192" width="752" height="56" rx="9" fill="currentColor" opacity=".09"/>
+          <rect x="34" y="192" width="752" height="56" rx="9" fill="none" stroke="currentColor" stroke-width="1.8"/>
+          <text x="52" y="216" font-size="13" font-weight="700" fill="currentColor">Metadata — the configuration, as deployable XML</text>
+          <text x="52" y="234" font-size="11" fill="currentColor" opacity=".7">objects · fields · picklists · record types · permission sets · report types · flows</text>
+          <text x="646" y="226" font-size="10.5" fill="currentColor" opacity=".6">this is what we deploy</text>
+        </g>
+
+        <g>
+          <rect x="34" y="260" width="752" height="46" rx="9" fill="currentColor" opacity=".05"/>
+          <rect x="34" y="260" width="752" height="46" rx="9" fill="none" stroke="currentColor" stroke-width="1.3" opacity=".55"/>
+          <text x="52" y="282" font-size="13" font-weight="700" fill="currentColor">Data</text>
+          <text x="52" y="298" font-size="11" fill="currentColor" opacity=".65">Leads, Contacts, Accounts, Opportunities, Campaigns, Activities</text>
+          <text x="628" y="288" font-size="10.5" fill="currentColor" opacity=".5">this never rides along with a deploy</text>
+        </g>
+      </svg>
+    </div>
+    <figcaption>The layer that matters to this engagement is the third one. “CRM architecture optimization” is almost entirely a metadata problem — fields, picklists, mappings, flows, permissions — not a coding problem.</figcaption>
+  </figure>
+
+  <h3>The decision ladder every Salesforce professional uses</h3>
+  <p>When someone asks “can you make X happen,” the platform has a settled order of preference. Naming this ladder out loud is one of the fastest credibility signals available to us, and it is already our stated philosophy in the proposal: <em>native integrations before middleware, middleware before custom code.</em></p>
+
+  <div class="ladder">
+    <div class="rung"><span class="r-n">1</span><span class="r-b"><b>Configuration.</b> A field, a picklist, a validation rule, a page layout. No code, no deploy risk, any admin can maintain it. Always ask whether the answer lives here first.</span></div>
+    <div class="rung"><span class="r-n">2</span><span class="r-b"><b>Declarative automation — Flow.</b> Record-triggered and scheduled flows cover the overwhelming majority of routing, field updates, and cross-object logic. Version-controlled, debuggable, and the client’s new CRM admin can read it.</span></div>
+    <div class="rung"><span class="r-n">3</span><span class="r-b"><b>Native connectors.</b> The HubSpot↔Salesforce package, native ad-platform syncs, Calendly/HubSpot Meetings integrations. Supported by the vendor, monitored by the vendor, upgraded by the vendor.</span></div>
+    <div class="rung"><span class="r-n">4</span><span class="r-b"><b>Middleware.</b> Zapier, Make, Workato. Fast to build, but every automation is another thing that fails silently and another line item on somebody’s card. Use where no native path exists.</span></div>
+    <div class="rung"><span class="r-n">5</span><span class="r-b"><b>Apex / custom code.</b> Last resort. Requires 75% test coverage to deploy to production, requires a developer forever, and is the single most common way a small nonprofit ends up locked to a vendor. If we write code, we document it and hand it over.</span></div>
+  </div>
+
+  <div class="note deep">
+    <span class="label">Why this ladder wins us points</span>
+    <p>Decision <strong>D5</strong> in the README: we position as the architecture layer <em>above</em> their incoming CRM Administrator, not as a competing pair of hands. The ladder is that positioning made concrete — every rung we stay above is a thing their admin can own after we leave. Reach for Apex and you have quietly built dependency.</p>
+  </div>
+
+  <h3>Governor limits, in one paragraph</h3>
+  <p>Because thousands of tenants share the same application servers, Salesforce kills any transaction that consumes too much. The numbers you should be able to recite are in the <a href="#cheat">cheat sheet</a>, but the principle is what matters in conversation: <strong>everything must be written in bulk.</strong> Code or flows that work on one record and blow up on two hundred are the classic novice failure, and “their data load fails at scale” is a symptom we should expect to find in an org that grew by accretion.</p>
+</section>
+
+<!-- ============================================================ 02 -->
+<section id="m02">
+  <div class="mod-head">
+    <span class="mod-num">02</span>
+    <h2>The data model, and how an EDO funnel maps onto it</h2>
+    <span class="chip p1">Critical</span>
+  </div>
+  <p class="serves">Serves tech-brief problems <b>#1 data foundation</b>, <b>#2 lead identity</b>, <b>#4 activity capture</b>, <b>#5 workflow standardization</b>.</p>
+
+  <div class="prose">
+    <p>Six standard objects carry nearly all of InvestPR’s business. Learn these and the vocabulary of the entire engagement opens up. Click any box below for what it is, what an engineer would call it, what typically breaks there, and what good looks like.</p>
+  </div>
+
+  <figure>
+    <div class="diagram-frame">
+      <svg viewBox="0 0 880 470" role="img" aria-label="Entity diagram of the core Salesforce objects: Campaign and CampaignMember linking to Lead or Contact, Lead converting into Account plus Contact plus Opportunity, Account parenting Contacts and Opportunities, and Activities logged against Leads and Contacts." id="erdiagram" class="svg-label">
+        <defs>
+          <marker id="erArrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <polygon points="0,0 10,5 0,10" class="er-head"/>
+          </marker>
+        </defs>
+        <!-- edges first so nodes paint above -->
+        <line class="eco-edge" x1="190" y1="68" x2="243" y2="68" marker-end="url(#erArrow)"/>
+        <text class="eco-lbl" x="196" y="60">1:N</text>
+
+        <line class="eco-edge" x1="300" y1="96" x2="152" y2="184" marker-end="url(#erArrow)"/>
+        <text class="eco-lbl" x="196" y="132">Lead…</text>
+        <line class="eco-edge" x1="372" y1="96" x2="528" y2="184" marker-end="url(#erArrow)"/>
+        <text class="eco-lbl" x="440" y="132">…or Contact</text>
+
+        <line class="eco-edge hi" x1="192" y1="218" x2="464" y2="218" marker-end="url(#erArrow)"/>
+        <text class="eco-lbl hi" x="238" y="210">converts to Contact + Account + Opportunity</text>
+
+        <line class="eco-edge" x1="550" y1="98" x2="550" y2="184" marker-end="url(#erArrow)"/>
+        <text class="eco-lbl" x="558" y="146">AccountId</text>
+
+        <line class="eco-edge" x1="632" y1="70" x2="686" y2="122" marker-end="url(#erArrow)"/>
+        <text class="eco-lbl" x="640" y="106">1:N</text>
+        <line class="eco-edge" x1="632" y1="214" x2="686" y2="166" marker-end="url(#erArrow)"/>
+        <text class="eco-lbl" x="646" y="200">contact roles</text>
+
+        <line class="eco-edge" x1="550" y1="248" x2="550" y2="334" marker-end="url(#erArrow)"/>
+        <text class="eco-lbl" x="558" y="296">WhoId</text>
+        <line class="eco-edge" x1="176" y1="248" x2="464" y2="352" marker-end="url(#erArrow)"/>
+        <text class="eco-lbl" x="252" y="292">WhoId</text>
+
+        <line class="eco-edge own" x1="110" y1="336" x2="110" y2="250" marker-end="url(#erArrow)"/>
+        <text class="eco-lbl" x="118" y="298">OwnerId</text>
+
+        <!-- nodes -->
+        <g class="eco-node" data-node="campaign" tabindex="0" role="button" aria-label="Campaign">
+          <rect x="30" y="40" width="160" height="56"/>
+          <text x="48" y="66">Campaign</text><text class="nodesub" x="48" y="82">701 · ad, event, list</text>
+        </g>
+        <g class="eco-node" data-node="campaignmember" tabindex="0" role="button" aria-label="Campaign Member">
+          <rect x="250" y="40" width="172" height="56"/>
+          <text x="268" y="66">CampaignMember</text><text class="nodesub" x="268" y="82">00v · the junction</text>
+        </g>
+        <g class="eco-node" data-node="lead" tabindex="0" role="button" aria-label="Lead">
+          <rect x="30" y="190" width="160" height="58"/>
+          <text x="48" y="216">Lead</text><text class="nodesub" x="48" y="232">00Q · unconverted</text>
+        </g>
+        <g class="eco-node" data-node="account" tabindex="0" role="button" aria-label="Account">
+          <rect x="470" y="40" width="160" height="58"/>
+          <text x="488" y="66">Account</text><text class="nodesub" x="488" y="82">001 · the company</text>
+        </g>
+        <g class="eco-node" data-node="contact" tabindex="0" role="button" aria-label="Contact">
+          <rect x="470" y="190" width="160" height="58"/>
+          <text x="488" y="216">Contact</text><text class="nodesub" x="488" y="232">003 · the person</text>
+        </g>
+        <g class="eco-node" data-node="opportunity" tabindex="0" role="button" aria-label="Opportunity">
+          <rect x="690" y="115" width="160" height="58"/>
+          <text x="708" y="141">Opportunity</text><text class="nodesub" x="708" y="157">006 · the project</text>
+        </g>
+        <g class="eco-node" data-node="activity" tabindex="0" role="button" aria-label="Activity: Task and Event">
+          <rect x="470" y="340" width="160" height="58"/>
+          <text x="488" y="366">Task / Event</text><text class="nodesub" x="488" y="382">00T / 00U · activity</text>
+        </g>
+        <g class="eco-node" data-node="user" tabindex="0" role="button" aria-label="User">
+          <rect x="30" y="340" width="160" height="58"/>
+          <text x="48" y="366">User</text><text class="nodesub" x="48" y="382">005 · BD director</text>
+        </g>
+
+        <text class="eco-lbl" x="30" y="440" opacity=".8">Three-character prefixes are the start of every record ID — a fast way to tell what you are looking at in a URL or an error log.</text>
+      </svg>
+    </div>
+    <figcaption>The core object graph. Solid arrows are real foreign keys; the teal dashed arrow is <em>conversion</em> — a one-way, irreversible transformation, not a relationship. Every one of these objects also carries an <code>OwnerId</code>, which is the hook InvestPR’s sector-and-geography routing hangs on.</figcaption>
+  </figure>
+
+  <div class="panel" id="erPanel" aria-live="polite">
+    <p class="empty">Select an object in the diagram above.</p>
+  </div>
+
+  <h3>The mapping that makes this concrete</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>InvestPR funnel stage</th><th>Salesforce object</th><th>The question it answers</th></tr></thead>
+      <tbody>
+        <tr><td>1 · Attract</td><td>Campaign</td><td>Which program, ad, or event did we spend on?</td></tr>
+        <tr><td>2 · Capture</td><td>Lead (+ CampaignMember)</td><td>Who raised a hand, and off the back of what?</td></tr>
+        <tr><td>3 · Qualify &amp; route</td><td>Lead → conversion; <code>OwnerId</code></td><td>Is this real, and whose desk does it land on?</td></tr>
+        <tr><td>4 · Advance</td><td>Opportunity + Activities</td><td>What stage is the project at, and when did we last talk?</td></tr>
+        <tr><td>5 · Land &amp; report</td><td>Opportunity (closed) + custom fields</td><td>How many jobs, how much capital, from which campaign?</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="note warn">
+    <span class="label">The EDO-specific wrinkle worth raising</span>
+    <p>Salesforce’s Opportunity object is built around a <em>sale</em>: an amount, a close date, a probability. InvestPR lands <em>investment projects</em> measured in <strong>jobs created and capital invested</strong>, over months or years. Those are almost certainly custom fields on Opportunity, and the standard <code>Amount</code>-based forecasting and ROI reports will be meaningless or, worse, quietly wrong. Ask what their equivalent fields are before promising any dashboard.</p>
+  </div>
+</section>
+
+<!-- ============================================================ 03 -->
+<section id="m03">
+  <div class="mod-head">
+    <span class="mod-num">03</span>
+    <h2>Lead conversion: the one-way door</h2>
+    <span class="chip p1">Critical</span>
+  </div>
+  <p class="serves">Serves tech-brief problem <b>#2 marketing and the CRM disagree about who a lead is</b> — and it is the single highest-value thing to understand cold.</p>
+
+  <div class="prose">
+    <p>A Lead is a deliberately anomalous object: a person <em>and</em> a company crammed into one flat record, with no relationships to anything. That is by design — before qualification you do not yet know whether this person belongs to a company you already track. Conversion is the moment you decide.</p>
+    <p>Converting a Lead does three things at once, and it cannot be undone through the UI.</p>
+  </div>
+
+  <figure>
+    <div class="diagram-frame">
+      <svg viewBox="0 0 840 380" role="img" aria-label="Lead conversion diagram: a Lead record splits into an Account, a Contact and an optional Opportunity, while any custom Lead field without an explicit conversion mapping is discarded." class="svg-label">
+        <defs>
+          <marker id="cvA" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <polygon points="0,0 10,5 0,10" fill="currentColor"/>
+          </marker>
+        </defs>
+
+        <rect x="20" y="78" width="210" height="150" rx="10" fill="currentColor" opacity=".06"/>
+        <rect x="20" y="78" width="210" height="150" rx="10" fill="none" stroke="currentColor" stroke-width="1.6"/>
+        <text x="38" y="104" font-size="13.5" font-weight="700" fill="currentColor">Lead</text>
+        <text x="38" y="132" font-size="11.5" fill="currentColor" opacity=".8" font-family="ui-monospace, Menlo, monospace">FirstName / LastName</text>
+        <text x="38" y="152" font-size="11.5" fill="currentColor" opacity=".8" font-family="ui-monospace, Menlo, monospace">Email</text>
+        <text x="38" y="172" font-size="11.5" fill="currentColor" opacity=".8" font-family="ui-monospace, Menlo, monospace">Company</text>
+        <text x="38" y="192" font-size="11.5" fill="currentColor" opacity=".8" font-family="ui-monospace, Menlo, monospace">LeadSource</text>
+        <text x="38" y="212" font-size="11.5" font-family="ui-monospace, Menlo, monospace" fill="#A85B22" font-weight="700">gclid__c</text>
+
+        <text x="252" y="140" font-size="11.5" font-weight="700" fill="currentColor" letter-spacing="1">CONVERT</text>
+        <line x1="236" y1="152" x2="368" y2="152" stroke="currentColor" stroke-width="1.6" marker-end="url(#cvA)"/>
+
+        <rect x="400" y="16" width="200" height="62" rx="9" fill="currentColor" opacity=".06"/>
+        <rect x="400" y="16" width="200" height="62" rx="9" fill="none" stroke="currentColor" stroke-width="1.4"/>
+        <text x="418" y="42" font-size="13" font-weight="700" fill="currentColor">Account</text>
+        <text x="418" y="60" font-size="10.5" fill="currentColor" opacity=".7">matched to existing, or new</text>
+
+        <rect x="400" y="96" width="200" height="62" rx="9" fill="currentColor" opacity=".06"/>
+        <rect x="400" y="96" width="200" height="62" rx="9" fill="none" stroke="currentColor" stroke-width="1.4"/>
+        <text x="418" y="122" font-size="13" font-weight="700" fill="currentColor">Contact</text>
+        <text x="418" y="140" font-size="10.5" fill="currentColor" opacity=".7">child of that Account</text>
+
+        <rect x="400" y="176" width="200" height="62" rx="9" fill="none" stroke="currentColor" stroke-width="1.4" stroke-dasharray="5 4"/>
+        <text x="418" y="202" font-size="13" font-weight="700" fill="currentColor">Opportunity</text>
+        <text x="418" y="220" font-size="10.5" fill="currentColor" opacity=".7">optional — checkbox at convert time</text>
+
+        <rect x="400" y="258" width="200" height="54" rx="9" fill="none" stroke="currentColor" stroke-width="1.3" stroke-dasharray="3 3" opacity=".6"/>
+        <text x="418" y="280" font-size="12" font-weight="700" fill="currentColor" opacity=".75">Original Lead</text>
+        <text x="418" y="298" font-size="9.5" fill="currentColor" opacity=".6" font-family="ui-monospace, Menlo, monospace">IsConverted = true · read-only</text>
+
+        <path d="M 110 222 L 110 348 L 676 348" fill="none" stroke="#A85B22" stroke-width="1.5" stroke-dasharray="4 4"/>
+        <line x1="688" y1="336" x2="712" y2="360" stroke="#A85B22" stroke-width="2.4"/>
+        <line x1="712" y1="336" x2="688" y2="360" stroke="#A85B22" stroke-width="2.4"/>
+        <text x="418" y="336" font-size="11" font-weight="700" fill="#A85B22">unmapped custom field is silently discarded</text>
+      </svg>
+    </div>
+    <figcaption>Standard fields map themselves. <strong>Custom Lead fields do not</strong> — each one needs an explicit conversion mapping to a Contact, Account, or Opportunity field, configured in Setup. Miss one and the value is gone at the exact moment the record becomes valuable.</figcaption>
+  </figure>
+
+  <div class="note bad">
+    <span class="label">This is the attribution killer</span>
+    <p>The click ID captured on the form (module 08) lives on the Lead. If <code>gclid__c</code> has no conversion mapping to a Contact field <em>and</em> an Opportunity field, the thread from ad click to landed project is cut at exactly step 4 of the loop. Organizations discover this months later, when someone asks why no closed project has a campaign attached. When we audit an org, <strong>Setup → Object Manager → Lead → Fields → Map Lead Fields</strong> is one of the first screens to open.</p>
+  </div>
+
+  <h3>What else conversion does</h3>
+  <ul>
+    <li><strong>Account matching is not automatic.</strong> Out of the box, the converting user picks an existing Account or creates a new one from the Lead’s <code>Company</code> text. “Acme Biotech” and “Acme Biotech, LLC” become two Accounts unless someone intervenes — this is precisely the mess in the tech brief’s before/after demo.</li>
+    <li><strong>Campaign membership carries over.</strong> The Lead’s CampaignMember rows re-point to the new Contact, which is what keeps campaign attribution alive across the conversion.</li>
+    <li><strong>Activities carry over</strong> to the Contact, so the history is preserved.</li>
+    <li><strong>The Lead becomes read-only</strong> with <code>IsConverted = true</code>. It still exists, still counts against storage, and — importantly — is <em>excluded from most Lead reports by default</em>, which is a common cause of two dashboards disagreeing.</li>
+    <li><strong>Conversion can fire automation.</strong> Record-triggered flows on Contact/Account/Opportunity creation all fire, as do validation rules — a required field on Opportunity that the Lead has no value for will make conversion fail outright.</li>
+  </ul>
+
+  <div class="note">
+    <span class="label">The strategic question underneath</span>
+    <p>Many organizations debate whether to use Leads at all versus creating Contacts directly. For an EDO, Leads earn their place: a site selector who fills out a report download is not yet attached to a real project. But the <em>rules</em> for when a Lead converts must be written down and agreed with BD — otherwise “qualified” means something different in every conversation, which is tech-brief problem #2 in one sentence.</p>
+  </div>
+</section>
+<!-- ============================================================ 04 -->
+<section id="m04">
+  <div class="mod-head">
+    <span class="mod-num">04</span>
+    <h2>Fields, picklists, record types, validation rules</h2>
+    <span class="chip p1">Critical</span>
+  </div>
+  <p class="serves">Serves tech-brief problem <b>#1 the data foundation is almost — but not — done</b>. This module <em>is</em> the Data Health Review.</p>
+
+  <div class="prose">
+    <p>“Three fields hold the same thing. Puerto Rico is spelled four ways.” Every word of that complaint is a fact about field metadata. Here is the vocabulary for fixing it.</p>
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th style="width:22%">Concept</th><th style="width:32%">What it is</th><th>What it means for the cleanup</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><strong>Label vs. API name</strong></td>
+          <td>Every field has a human label and an immutable API name. Custom fields end in <code>__c</code>.</td>
+          <td>Two fields can carry the same label and different API names — that is how “three fields hold the same thing” survives a visual audit. Audit by API name, always.</td>
+        </tr>
+        <tr>
+          <td><strong>Picklist</strong></td>
+          <td>A constrained value set. Can be restricted (nothing outside the list) or unrestricted (the API can write anything).</td>
+          <td>An <em>unrestricted</em> picklist is free text wearing a costume — an integration can inject “puerto rico, usa” right past it. Restricting picklists is usually step one.</td>
+        </tr>
+        <tr>
+          <td><strong>Global value set</strong></td>
+          <td>One value list shared by picklists across many objects.</td>
+          <td>The mechanism that makes Country mean the same thing on Lead, Contact, and Account. Without it you maintain four lists and they drift.</td>
+        </tr>
+        <tr>
+          <td><strong>Multi-select picklist</strong></td>
+          <td>Semicolon-delimited multiple values in one field.</td>
+          <td>Notoriously painful to report and filter on. If we find sector stored this way, flag it — it is usually why a report “quietly misses records.”</td>
+        </tr>
+        <tr>
+          <td><strong>Record type</strong></td>
+          <td>A variant of an object: different page layout, different subset of picklist values, different business process.</td>
+          <td>A record type can make a picklist value <em>invisible on one record type and valid on another</em>. This is a top-three cause of integration sync failures that “work fine when I do it by hand.”</td>
+        </tr>
+        <tr>
+          <td><strong>Validation rule</strong></td>
+          <td>A formula evaluated on save. If it returns TRUE, the save is blocked with an error.</td>
+          <td>Validation rules apply to <em>API writes too</em>. A well-meaning “Country is required” rule will reject every HubSpot sync that has no country. See module 06.</td>
+        </tr>
+        <tr>
+          <td><strong>Formula field</strong></td>
+          <td>Calculated at read time, never stored, cannot be written to.</td>
+          <td>Cheap normalization: derive a clean “Region” from a messy Country without touching source data. But you cannot sync <em>into</em> one, and integrations that try will error.</td>
+        </tr>
+        <tr>
+          <td><strong>Roll-up summary</strong></td>
+          <td>COUNT / SUM / MIN / MAX of child records onto a parent. Master-detail relationships only.</td>
+          <td>How “total capital in pipeline per Account” gets computed without code. Lookup relationships cannot do this natively — that gap is why orgs end up with Apex.</td>
+        </tr>
+        <tr>
+          <td><strong>External ID</strong></td>
+          <td>A custom field flagged as an external unique key, indexed by the platform.</td>
+          <td>The single most important field type for integration work. It enables <code>upsert</code>: “create if absent, update if present, match on this key.” Without external IDs, every re-run of a sync creates duplicates.</td>
+        </tr>
+        <tr>
+          <td><strong>Field history tracking</strong></td>
+          <td>Up to 20 fields per object logged with old/new value and timestamp.</td>
+          <td>Turn it on for the fields that drive routing and reporting <em>before</em> we start changing things. It is how you answer “who changed this and when” six weeks later.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>What a data dictionary actually contains</h3>
+  <p>The RFP’s deliverable is a <em>Data Health Review &amp; Remediation Summary</em>. The artifact underneath it is a field dictionary. One row per field:</p>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Column</th><th>Example</th><th>Why it is there</th></tr></thead>
+      <tbody>
+        <tr><td>API name</td><td><code>Investment_Sector__c</code></td><td>The unambiguous identity</td></tr>
+        <tr><td>Label</td><td>Investment Sector</td><td>What users call it</td></tr>
+        <tr><td>Type / value set</td><td>Picklist, restricted, global set “Sectors”</td><td>Whether drift is possible</td></tr>
+        <tr><td><strong>Owner system</strong></td><td>Salesforce (HubSpot reads only)</td><td>The rule that ends the sync war — one field, one authority</td></tr>
+        <tr><td>Populated by</td><td>Web form → HubSpot → sync</td><td>Where to go when values look wrong</td></tr>
+        <tr><td>Used by</td><td>Lead routing flow; Board KPI dashboard</td><td>Tells you what breaks if you retire it</td></tr>
+        <tr><td>Status</td><td>Active / Deprecated / To merge</td><td>Turns the dictionary into a work plan</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="note good">
+    <span class="label">How you retire a field without breaking anything</span>
+    <p>You do not delete it. You (1) find every dependency — Setup has a <em>Where is this used?</em> view on each field, plus reports, flows, and page layouts; (2) migrate the values into the surviving field; (3) remove it from all layouts and revoke field-level security so nobody can see it; (4) rename the label to <code>ZZ_DEPRECATED_…</code>; (5) delete only after a full reporting cycle has passed. Deleted fields sit in a recycle bin for 15 days and then the data is unrecoverable.</p>
+  </div>
+</section>
+
+<!-- ============================================================ 05 -->
+<section id="m05">
+  <div class="mod-head">
+    <span class="mod-num">05</span>
+    <h2>Duplicates, merging, and getting data in safely</h2>
+    <span class="chip p1">Critical</span>
+  </div>
+  <p class="serves">Serves tech-brief problem <b>#1</b>. The differentiator we claim is <b>scheduled automated cleanup, not one-time manual fixes</b> — this module is the evidence.</p>
+
+  <h3>The native mechanism, in two parts</h3>
+  <div class="two">
+    <div class="box">
+      <h4>Matching rules — “what counts as the same?”</h4>
+      <p>A matching rule defines the comparison: exact match on Email, fuzzy match on First Name, exact on Company. Salesforce ships standard rules for Lead, Contact, and Account; you can write custom ones.</p>
+      <p class="kv">Key limit</p>
+      <p>Matching runs across Leads↔Contacts too, which matters enormously here — the same site selector often exists as an old Lead and a current Contact.</p>
+    </div>
+    <div class="box">
+      <h4>Duplicate rules — “what do we do about it?”</h4>
+      <p>A duplicate rule binds a matching rule to an action: <strong>Allow</strong> (log it), <strong>Alert</strong> (warn the user, let them proceed), or <strong>Block</strong>. It can be configured to bypass the rule for specific profiles — and, crucially, you choose whether it applies to API-created records.</p>
+      <p class="kv">Key limit</p>
+      <p>Native rules prevent <em>new</em> duplicates. They do not clean up the existing pile, and they cannot merge on a schedule.</p>
+    </div>
+  </div>
+
+  <div class="note warn">
+    <span class="label">The trap that hits integrations</span>
+    <p>Set a duplicate rule to <strong>Block</strong> and the HubSpot connector’s record creation starts failing — the errors land in a sync queue nobody is watching, and marketing concludes “the sync is broken.” The right answer is usually Block for manual entry, Allow-with-report for the integration user, plus a scheduled dedupe pass. Being able to say that sentence is worth more than any tool name.</p>
+  </div>
+
+  <h3>What actually happens on merge</h3>
+  <ul>
+    <li>You pick a <strong>master</strong>; the master’s field values win by default, though you can choose field-by-field in the UI.</li>
+    <li>Child records — activities, campaign memberships, opportunities, attachments — <strong>re-parent to the master</strong>. Nothing is lost there.</li>
+    <li>Field values on the losing records that you did <em>not</em> select are <strong>discarded permanently</strong>. If the loser held the only <code>gclid__c</code>, attribution dies in the merge.</li>
+    <li>The losing record IDs are deleted. Anything integrating on those IDs — a HubSpot record mapping, a Zap, a spreadsheet — now points at nothing.</li>
+    <li>The UI merges three records at a time. Real cleanup at volume needs tooling.</li>
+  </ul>
+
+  <h3>Tooling — and the honest reason to name one</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Tool</th><th>What it is for</th><th>Reality check</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Data Import Wizard</strong></td><td>In-app, up to 50,000 records, respects duplicate rules</td><td>Fine for a small list upload by a trained user. This is what the SOP for “list uploads” should describe.</td></tr>
+        <tr><td><strong>Data Loader</strong></td><td>Desktop/CLI, millions of records via Bulk API, supports upsert on External ID</td><td>The engineer’s tool. Always export first, always dry-run in a sandbox.</td></tr>
+        <tr><td><strong>Insycle / DemandTools / Cloudingo</strong></td><td>Scheduled, rules-based mass dedupe and normalization across Salesforce <em>and</em> HubSpot</td><td>The category that makes “cleanup that stays clean” true. Insycle in particular works on both sides of the seam, which is our exact problem shape.</td></tr>
+        <tr><td><strong>Salesforce Inspector / Workbench</strong></td><td>Browser tools for ad-hoc SOQL, metadata inspection, quick edits</td><td>How you actually investigate an org fast. Free.</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p>Naming a specific tool in the proposal is deliberate: it converts “we will improve data quality” into a costed, verifiable commitment. It also invites the question “why that one,” so have the answer — for a two-sided HubSpot/Salesforce problem on a nonprofit budget, a tool that operates on both systems beats a Salesforce-only one.</p>
+
+  <div class="note deep">
+    <span class="label">The before/after report is the deliverable</span>
+    <p>The tech brief’s interactive demo — five messy records, five clean ones — is the shape of the evidence we hand over: record counts by field completeness, duplicate clusters found and merged, picklist values collapsed, and the filter that used to return 1 of 3 Puerto Rico records now returning 3 of 3. Run those counts <em>before</em> touching anything. You cannot reconstruct a baseline after you have fixed it.</p>
+  </div>
+</section>
+
+<!-- ============================================================ 06 -->
+<section id="m06">
+  <div class="mod-head">
+    <span class="mod-num">06</span>
+    <h2>The HubSpot ↔ Salesforce seam</h2>
+    <span class="chip p1">Critical</span>
+  </div>
+  <p class="serves">Serves tech-brief problem <b>#2</b>. Per the tech brief, the RFP’s whole problem list “reads like a textbook description of a drifted HubSpot↔Salesforce integration.” <b>This is the battleground.</b></p>
+
+  <div class="prose">
+    <p>The connector is a managed package installed in Salesforce plus a settings surface in HubSpot. It authenticates as one Salesforce user and moves records both ways on a near-continuous cycle. Everything that goes wrong with it goes wrong in one of four places.</p>
+  </div>
+
+  <figure>
+    <div class="diagram-frame">
+      <svg viewBox="0 0 840 340" role="img" aria-label="The HubSpot to Salesforce sync seam: an inclusion list gates which records sync, per-field mappings declare direction and conflict winner, the integration user's permissions gate what can be written, and Salesforce-side validation rules can reject the write into an error queue." class="svg-label">
+        <defs>
+          <marker id="syA" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <polygon points="0,0 10,5 0,10" fill="currentColor"/>
+          </marker>
+        </defs>
+
+        <rect x="16" y="60" width="150" height="120" rx="10" fill="currentColor" opacity=".06"/>
+        <rect x="16" y="60" width="150" height="120" rx="10" fill="none" stroke="currentColor" stroke-width="1.5"/>
+        <text x="34" y="90" font-size="13.5" font-weight="700" fill="currentColor">HubSpot</text>
+        <text x="34" y="112" font-size="10.5" fill="currentColor" opacity=".7">contacts · companies</text>
+        <text x="34" y="128" font-size="10.5" fill="currentColor" opacity=".7">deals · lifecycle stage</text>
+        <text x="34" y="152" font-size="10.5" fill="currentColor" opacity=".7">forms · scoring</text>
+
+        <rect x="674" y="60" width="150" height="120" rx="10" fill="currentColor" opacity=".06"/>
+        <rect x="674" y="60" width="150" height="120" rx="10" fill="none" stroke="currentColor" stroke-width="1.5"/>
+        <text x="692" y="90" font-size="13.5" font-weight="700" fill="currentColor">Salesforce</text>
+        <text x="692" y="112" font-size="10.5" fill="currentColor" opacity=".7">Lead · Contact</text>
+        <text x="692" y="128" font-size="10.5" fill="currentColor" opacity=".7">Account · Opportunity</text>
+        <text x="692" y="152" font-size="10.5" fill="currentColor" opacity=".7">Campaign · members</text>
+
+        <!-- gates -->
+        <rect x="196" y="86" width="130" height="68" rx="8" fill="none" stroke="currentColor" stroke-width="1.4" stroke-dasharray="4 4"/>
+        <text x="212" y="112" font-size="11.5" font-weight="700" fill="currentColor">1 · Inclusion</text>
+        <text x="212" y="128" font-size="11.5" font-weight="700" fill="currentColor">list</text>
+        <text x="212" y="146" font-size="10" fill="currentColor" opacity=".65">who is allowed to sync</text>
+
+        <rect x="356" y="86" width="130" height="68" rx="8" fill="none" stroke="currentColor" stroke-width="1.4" stroke-dasharray="4 4"/>
+        <text x="372" y="112" font-size="11.5" font-weight="700" fill="currentColor">2 · Field</text>
+        <text x="372" y="128" font-size="11.5" font-weight="700" fill="currentColor">mappings</text>
+        <text x="372" y="146" font-size="10" fill="currentColor" opacity=".65">direction + who wins</text>
+
+        <rect x="516" y="86" width="130" height="68" rx="8" fill="none" stroke="currentColor" stroke-width="1.4" stroke-dasharray="4 4"/>
+        <text x="532" y="112" font-size="11.5" font-weight="700" fill="currentColor">3 · Integration</text>
+        <text x="532" y="128" font-size="11.5" font-weight="700" fill="currentColor">user</text>
+        <text x="532" y="146" font-size="10" fill="currentColor" opacity=".65">what it may see + write</text>
+
+        <line x1="168" y1="120" x2="192" y2="120" stroke="currentColor" stroke-width="1.4" marker-end="url(#syA)"/>
+        <line x1="328" y1="120" x2="352" y2="120" stroke="currentColor" stroke-width="1.4" marker-end="url(#syA)"/>
+        <line x1="488" y1="120" x2="512" y2="120" stroke="currentColor" stroke-width="1.4" marker-end="url(#syA)"/>
+        <line x1="648" y1="120" x2="670" y2="120" stroke="currentColor" stroke-width="1.4" marker-end="url(#syA)"/>
+
+        <!-- rejection path -->
+        <path d="M 700 184 L 700 226 L 210 226 L 210 246" fill="none" stroke="#A85B22" stroke-width="1.6" stroke-dasharray="5 4" marker-end="url(#syA)" color="#A85B22"/>
+        <rect x="120" y="252" width="180" height="40" rx="8" fill="none" stroke="#A85B22" stroke-width="1.5"/>
+        <text x="140" y="277" font-size="12" font-weight="700" fill="#A85B22">Sync error queue</text>
+        <text x="336" y="266" font-size="11" font-weight="700" fill="#A85B22">4 · rejected by a validation rule, a duplicate rule,</text>
+        <text x="336" y="282" font-size="11" font-weight="700" fill="#A85B22">a missing picklist value, or field-level security</text>
+        <text x="120" y="322" font-size="11" fill="currentColor" opacity=".7">The queue nobody watches. Alerting on it is a deliverable, not a nicety.</text>
+      </svg>
+    </div>
+    <figcaption>Four gates, in order. A record that never syncs failed at gate 1 or 3; a record whose <em>values</em> are wrong failed at gate 2; a record that produces an error failed at gate 4. Diagnosing in that order turns a vague “the sync is broken” into a ten-minute answer.</figcaption>
+  </figure>
+
+  <h3>Gate 1 — the inclusion list</h3>
+  <p>HubSpot can gate which contacts are permitted to sync to Salesforce using an active list. Without one, every conference badge scan, every purchased list, and every newsletter subscriber lands in the CRM. With one, the CRM contains only records the business has a reason to hold. Asking “do you have an inclusion list, and what is its definition?” is a question no generalist vendor asks, and the answer tells you immediately how disciplined the org is.</p>
+
+  <h3>Gate 2 — field mappings and the ownership rule</h3>
+  <p>Each mapped field carries a sync behavior: two-way, two-way with Salesforce preferred on conflict, or one-way from Salesforce into HubSpot. (Verify the current option labels in the connector settings before quoting them — they have changed over the years.) The engineering rule underneath is invariant and worth stating in the meeting:</p>
+  <div class="note good">
+    <span class="label">The rule</span>
+    <p><strong>One field, one owner system, written down.</strong> A field that both systems can write is a field that will eventually disagree with itself, and no amount of monitoring will tell you which value was right. Two-way sync is a legitimate choice for a handful of fields; it is a catastrophe as a default.</p>
+  </div>
+  <p>The specific mappings that cause trouble at an EDO:</p>
+  <ul>
+    <li><strong>Lifecycle Stage (HubSpot) vs. Lead Status (Salesforce) vs. Opportunity Stage.</strong> Three different vocabularies for “how far along is this,” maintained by two different teams. They must be mapped explicitly, value by value, with a written definition of each — and HubSpot lifecycle stages do not move backwards by default, which surprises people.</li>
+    <li><strong>Lead Source.</strong> Almost always overwritten by the wrong side. First-touch attribution dies here.</li>
+    <li><strong>Owner.</strong> HubSpot owner and Salesforce <code>OwnerId</code> are different user records; mapping them requires the same person to exist in both systems, correctly linked.</li>
+    <li><strong>Picklist values.</strong> If HubSpot sends “Life Sciences” and Salesforce’s restricted picklist only has “Biotech,” the write fails. Every time.</li>
+  </ul>
+
+  <h3>Gate 3 — the integration user</h3>
+  <p>The connector acts as one Salesforce user. That user’s profile, permission sets, field-level security, role, and sharing access define the ceiling on what the sync can do. Three things follow:</p>
+  <ul>
+    <li>It should be a <strong>dedicated user</strong>, not a person’s account. Otherwise the audit trail says an employee edited 40,000 records, and when they leave and their user is deactivated the sync dies.</li>
+    <li>If a field is hidden from that user by field-level security, <strong>the sync silently cannot write it</strong> — no error, just a permanently empty field.</li>
+    <li>If org-wide defaults are Private and the integration user has no role high enough to see a record, the connector cannot update it.</li>
+  </ul>
+
+  <h3>Gate 4 — triage the error queue</h3>
+  <p>Click an error to see what it means and what to do. These are the messages you will actually see.</p>
+
+  <div class="btnrow" id="errChips">
+    <button class="ui" type="button" data-err="required">REQUIRED_FIELD_MISSING</button>
+    <button class="ui" type="button" data-err="picklist">INVALID_OR_NULL_FOR_RESTRICTED_PICKLIST</button>
+    <button class="ui" type="button" data-err="validation">FIELD_CUSTOM_VALIDATION_EXCEPTION</button>
+    <button class="ui" type="button" data-err="dupe">DUPLICATES_DETECTED</button>
+    <button class="ui" type="button" data-err="fls">INSUFFICIENT_ACCESS_ON_CROSS_REFERENCE_ENTITY</button>
+    <button class="ui" type="button" data-err="limit">REQUEST_LIMIT_EXCEEDED</button>
+    <button class="ui" type="button" data-err="lock">UNABLE_TO_LOCK_ROW</button>
+    <button class="ui" type="button" data-err="converted">CANNOT_UPDATE_CONVERTED_LEAD</button>
+  </div>
+  <div class="panel" id="errPanel" aria-live="polite">
+    <p class="empty">Select an error above.</p>
+  </div>
+
+  <div class="note deep">
+    <span class="label">Two facts that make us sound like we have done this</span>
+    <p><strong>The connector consumes Salesforce API calls</strong> against the org’s daily allocation — a large initial sync or a badly-scoped inclusion list can exhaust it and take down <em>every</em> other integration in the org for the rest of the day. And <strong>the connector cannot fix what it cannot see</strong>: records created directly in Salesforce before the connector was installed may never have been enrolled, which is why the marketing tool and the CRM can hold wildly different totals with no errors at all.</p>
+  </div>
+</section>
+
+<!-- ============================================================ 07 -->
+<section id="m07">
+  <div class="mod-head">
+    <span class="mod-num">07</span>
+    <h2>Automation: Flow, triggers, and the order of execution</h2>
+    <span class="chip p2">Important</span>
+  </div>
+  <p class="serves">Serves tech-brief problems <b>#5 every workflow has three unofficial versions</b> and <b>#4 meetings happen off the record</b>.</p>
+
+  <div class="prose">
+    <p>“Automations were built one request at a time, by people who have since left. Nobody holds the full picture of what fires when.” The remedy is an inventory, and to build an inventory you need to know where automation can hide.</p>
+  </div>
+
+  <h3>Where automation lives</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Mechanism</th><th>Status</th><th>What to know</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Flow</strong> — record-triggered, scheduled, screen, autolaunched, platform-event-triggered</td><td>Current</td><td>The one tool Salesforce is investing in. Record-triggered flows run either <em>before save</em> (fast, same-record field updates only) or <em>after save</em> (can touch related records, send emails, call out).</td></tr>
+        <tr><td><strong>Workflow Rules</strong> and <strong>Process Builder</strong></td><td>Legacy — end of support announced; migrate to Flow</td><td>You will still find them running in an org that has been around a while. Inventorying and migrating them is normal early-engagement work, and the <em>Migrate to Flow</em> tool in Setup does part of it.</td></tr>
+        <tr><td><strong>Assignment rules</strong></td><td>Current, Lead/Case only</td><td>An ordered rule list that sets the owner on create (and optionally on update, if the API call asks for it). This is where sector-and-geography routing usually lives.</td></tr>
+        <tr><td><strong>Auto-response rules · escalation rules</strong></td><td>Current</td><td>Email acknowledgements and Case escalation. Easy to forget they exist and then wonder where an email came from.</td></tr>
+        <tr><td><strong>Apex triggers</strong></td><td>Current, code</td><td>Fire before or after insert/update/delete/undelete. Always bulk — <code>Trigger.new</code> is a list. One trigger per object is the accepted pattern; multiple triggers on one object have no guaranteed order, which is a genuine landmine.</td></tr>
+        <tr><td><strong>Scheduled jobs</strong> (scheduled Flow, scheduled Apex)</td><td>Current</td><td>Where nightly hygiene runs. Check <em>Setup → Scheduled Jobs</em> on day one — orphaned jobs from a departed consultant are extremely common.</td></tr>
+        <tr><td><strong>Managed-package automation</strong></td><td>Varies</td><td>The HubSpot connector, NPSP, and anything else from AppExchange bring their own triggers you cannot edit. When something inexplicable happens on save, this is often why.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Order of execution — the diagram that explains most “impossible” bugs</h3>
+  <figure>
+    <div class="diagram-frame">
+      <svg viewBox="0 0 700 560" role="img" aria-label="Simplified Salesforce order of execution on save, from system validation through before-save flow, before triggers, validation and duplicate rules, the save, after triggers, assignment rules, after-save flows, roll-up summaries, commit, and post-commit asynchronous work. Validation rules, duplicate rules and assignment rules are highlighted as the steps that reject or redirect integration writes." class="svg-label">
+        <defs>
+          <marker id="oeA" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <polygon points="0,0 10,5 0,10" fill="currentColor"/>
+          </marker>
+        </defs>
+        <line x1="40" y1="34" x2="40" y2="530" stroke="currentColor" stroke-width="1.2" opacity=".35"/>
+
+        <g font-size="12" fill="currentColor">
+          <circle cx="40" cy="34" r="5" fill="currentColor"/>
+          <rect x="66" y="16" width="330" height="34" rx="7" fill="currentColor" opacity=".05"/>
+          <text x="82" y="38" font-weight="700">Record arrives — UI, API, or sync</text>
+
+          <circle cx="40" cy="82" r="4" fill="currentColor" opacity=".6"/>
+          <text x="66" y="86">System validation — required fields, data types, field length</text>
+
+          <circle cx="40" cy="122" r="4" fill="currentColor" opacity=".6"/>
+          <text x="66" y="126">Before-save record-triggered flows</text>
+
+          <circle cx="40" cy="162" r="4" fill="currentColor" opacity=".6"/>
+          <text x="66" y="166">Before triggers (Apex)</text>
+
+          <rect x="60" y="188" width="500" height="36" rx="7" fill="#A85B22" opacity=".12"/>
+          <circle cx="40" cy="206" r="5" fill="#A85B22"/>
+          <text x="76" y="211" font-weight="700" fill="#A85B22">Custom validation rules — the write can be rejected here</text>
+
+          <rect x="60" y="234" width="500" height="36" rx="7" fill="#A85B22" opacity=".12"/>
+          <circle cx="40" cy="252" r="5" fill="#A85B22"/>
+          <text x="76" y="257" font-weight="700" fill="#A85B22">Duplicate rules — the write can be blocked here</text>
+
+          <circle cx="40" cy="298" r="6" fill="currentColor"/>
+          <rect x="60" y="280" width="330" height="36" rx="7" fill="currentColor" opacity=".09"/>
+          <text x="76" y="303" font-weight="700">Record saved — not yet committed</text>
+
+          <circle cx="40" cy="344" r="4" fill="currentColor" opacity=".6"/>
+          <text x="66" y="348">After triggers (Apex)</text>
+
+          <rect x="60" y="368" width="500" height="36" rx="7" fill="#29507C" opacity=".13"/>
+          <circle cx="40" cy="386" r="5" fill="#29507C"/>
+          <text x="76" y="391" font-weight="700" fill="#29507C">Assignment rules — ownership is set here, after your trigger ran</text>
+
+          <circle cx="40" cy="428" r="4" fill="currentColor" opacity=".6"/>
+          <text x="66" y="432">After-save flows · legacy workflow rules · escalation</text>
+
+          <circle cx="40" cy="464" r="4" fill="currentColor" opacity=".6"/>
+          <text x="66" y="468">Roll-up summaries recalculated on parents · sharing rules evaluated</text>
+
+          <circle cx="40" cy="500" r="6" fill="currentColor"/>
+          <text x="66" y="504" font-weight="700">COMMIT</text>
+
+          <circle cx="40" cy="534" r="4" fill="currentColor" opacity=".6"/>
+          <text x="66" y="538">Then, asynchronously: emails send, future/queueable/batch Apex runs, outbound messages fire</text>
+        </g>
+      </svg>
+    </div>
+    <figcaption>Simplified but faithful to the parts that matter. Two consequences worth memorizing: <strong>validation and duplicate rules sit between the integration and the save</strong>, which is why they are the top cause of sync errors; and <strong>assignment rules run after triggers</strong>, which is why an Apex trigger that reads <code>OwnerId</code> on insert sees the wrong value.</figcaption>
+  </figure>
+
+  <div class="note warn">
+    <span class="label">Recursion, briefly</span>
+    <p>Automation that updates a record re-enters this sequence. Two flows that each update the other’s object will loop until the platform kills the transaction. When an org “randomly” throws <code>Too many SOQL queries</code> or <code>Maximum trigger depth exceeded</code> on ordinary saves, an automation inventory is not optional housekeeping — it is the fix.</p>
+  </div>
+</section>
+
+<!-- ============================================================ 08 -->
+<section id="m08">
+  <div class="mod-head">
+    <span class="mod-num">08</span>
+    <h2>The attribution loop, in Salesforce terms</h2>
+    <span class="chip p1">Critical</span>
+  </div>
+  <p class="serves">Serves tech-brief problem <b>#3 ad spend can’t see which leads became real projects</b> — described in the brief as “the most valuable single fix in this RFP.”</p>
+
+  <div class="prose">
+    <p>The tech brief walks the loop conceptually. This is the same journey with the object, field, and setting named at every step — which is what a technical stakeholder will actually press us on.</p>
+  </div>
+
+  <div class="stepper" id="attSteps">
+    <button class="ui-step on" type="button" data-step="0"><span class="n">Step 1</span><span class="t">Ad click</span></button>
+    <button class="ui-step" type="button" data-step="1"><span class="n">Step 2</span><span class="t">Form capture</span></button>
+    <button class="ui-step" type="button" data-step="2"><span class="n">Step 3</span><span class="t">Sync to CRM</span></button>
+    <button class="ui-step" type="button" data-step="3"><span class="n">Step 4</span><span class="t">Conversion</span></button>
+    <button class="ui-step" type="button" data-step="4"><span class="n">Step 5</span><span class="t">Qualification</span></button>
+    <button class="ui-step" type="button" data-step="5"><span class="n">Step 6</span><span class="t">Send back</span></button>
+  </div>
+  <div class="panel" id="attPanel" aria-live="polite"></div>
+
+  <h3>Salesforce’s own campaign machinery</h3>
+  <div class="two">
+    <div class="box">
+      <h4>Primary Campaign Source</h4>
+      <p>A single lookup field on Opportunity. It drives the standard campaign ROI report and is what most orgs mean when they say “attribution.” It is single-touch — the last campaign to touch the record before conversion, or whatever a human last set.</p>
+    </div>
+    <div class="box">
+      <h4>Campaign Influence</h4>
+      <p>An optional feature that credits <em>multiple</em> campaigns per Opportunity under a configurable model. Better matches an EDO reality where a project touched an ad, a webinar, and a trade mission over eighteen months. Must be explicitly enabled, and adds real complexity — recommend it deliberately, not reflexively.</p>
+    </div>
+    <div class="box">
+      <h4>Campaign hierarchy</h4>
+      <p>Campaigns nest up to five levels, with roll-up fields for the whole branch. The natural structure for an EDO: <em>Fiscal year → channel → market/sector → individual push.</em> Getting this hierarchy right at the start is cheaper than restructuring it later.</p>
+    </div>
+    <div class="box">
+      <h4>CampaignMember status</h4>
+      <p>Per-campaign statuses — Sent, Responded, Registered, Attended — with one flagged as “Responded.” Customizing these per campaign type is how event attendance becomes measurable rather than anecdotal.</p>
+    </div>
+  </div>
+
+  <div class="note deep">
+    <span class="label">The timely detail that signals we are current</span>
+    <p>Per our tech brief research: Google is retiring the legacy click-ID upload path (<code>UploadClickConversions</code>) on <strong>June 15, 2026</strong> — <em>mid-engagement</em> — in favour of Enhanced Conversions for Leads and the Data Manager API, and Meta has folded its old Offline Events tool into the Conversions API. Mentioning that we plan for these migrations is the difference between reading as current and reading as boilerplate. Note also that Enhanced Conversions for Leads matches on <strong>hashed customer data</strong> (email, phone) rather than requiring the click ID — so capturing email cleanly is itself an attribution requirement.</p>
+  </div>
+
+  <div class="note warn">
+    <span class="label">Where this breaks in practice, in order of likelihood</span>
+    <ol style="margin-bottom:0">
+      <li>Hidden click-ID fields were never added to the form, so there is nothing to capture.</li>
+      <li>The fields exist on Lead but have no <strong>lead conversion mapping</strong> (module 03), so the value dies at qualification.</li>
+      <li>The field mapping in the connector is one-way in the wrong direction, so the CRM never receives it.</li>
+      <li>Nobody defined which CRM stage <em>counts</em> as the conversion event worth sending back — so the feedback either never starts or sends noise.</li>
+      <li>Consent and privacy handling for sending hashed PII to ad platforms was never agreed. Raise it before they do.</li>
+    </ol>
+  </div>
+</section>
+<!-- ============================================================ 09 -->
+<section id="m09">
+  <div class="mod-head">
+    <span class="mod-num">09</span>
+    <h2>Reports and dashboards: why two of them disagree</h2>
+    <span class="chip p2">Important</span>
+  </div>
+  <p class="serves">Serves the outcome the tech brief calls <b>“dashboards leadership trusts”</b> — and the scenario it names: a leadership meeting where two dashboards disagree about the pipeline.</p>
+
+  <h3>The four building blocks</h3>
+  <ul>
+    <li><strong>Report type</strong> — the most misunderstood object in Salesforce. It defines <em>which objects a report may draw from and which fields are even available</em>. Standard report types cover common shapes; custom report types unlock the rest. Crucially, a report type declares whether children are required: “Accounts <em>with</em> Contacts” silently excludes every Account that has none. Half of all “the numbers are wrong” investigations end here.</li>
+    <li><strong>Report</strong> — filters, groupings, and a format: tabular (a list), summary (grouped), matrix (grouped both ways), or joined (multiple blocks). Bucket fields group values on the fly; row-level formulas compute per row.</li>
+    <li><strong>Dashboard</strong> — up to a set number of components, each fed by one report.</li>
+    <li><strong>Running user</strong> — a dashboard renders through <em>somebody’s</em> record access. By default that is a fixed user, so everyone sees the same numbers regardless of what they can actually see in the CRM. Dynamic dashboards render as the viewer instead.</li>
+  </ul>
+
+  <div class="note bad">
+    <span class="label">The checklist for “these two dashboards disagree”</span>
+    <ol style="margin-bottom:0">
+      <li><strong>Different running user</strong> — one dashboard runs as an executive who sees everything, the other as a BD director who sees their own records.</li>
+      <li><strong>Different report type</strong> — one uses “with Contacts,” the other “with or without.”</li>
+      <li><strong>Converted leads</strong> — Lead reports exclude converted leads by default, so “total leads” and “leads that became projects” come from disjoint populations.</li>
+      <li><strong>Different date field</strong> — Created Date vs. Close Date vs. a custom “Project Landed” date, plus fiscal-year settings that may not match the calendar.</li>
+      <li><strong>Time zone</strong> — reports render in the running user’s time zone; a record created at 11 PM AST lands in a different day for a user set to UTC.</li>
+      <li><strong>Formula vs. stored field</strong> — one component reads a stored value updated by a flow, the other a formula computed live. They diverge the moment the flow fails.</li>
+      <li><strong>Filter drift</strong> — someone added <code>Type = 'New Business'</code> in 2023 and nobody remembers.</li>
+    </ol>
+  </div>
+
+  <p>The fix that we should be selling is not a better dashboard. It is <strong>one written definition per metric</strong> — what counts as a qualified lead, what counts as a landed project, which date stamps it — agreed with leadership and then implemented once. That is a governance deliverable with a reporting artifact attached, and it is exactly what a board-reporting nonprofit needs.</p>
+
+  <div class="note">
+    <span class="label">Worth knowing exists</span>
+    <p><strong>CRM Analytics</strong> (formerly Einstein/Tableau CRM) and <strong>Tableau</strong> are separate, licensed products for anything beyond native reporting. Do not assume they have either. Native reports and dashboards will carry a nonprofit of this size perfectly well, and saying so is a cost-credibility signal.</p>
+  </div>
+</section>
+
+<!-- ============================================================ 10 -->
+<section id="m10">
+  <div class="mod-head">
+    <span class="mod-num">10</span>
+    <h2>Security, sharing, and who can see what</h2>
+    <span class="chip p2">Important</span>
+  </div>
+  <p class="serves">Serves tech-brief problem <b>#6 “user permissions are guesswork”</b> and underpins the proposal’s data-security statement.</p>
+
+  <p>Salesforce access is decided in two independent dimensions. Engineers new to the platform routinely conflate them and then cannot explain why a user who “has the permission” still sees nothing.</p>
+
+  <figure>
+    <div class="diagram-frame">
+      <svg viewBox="0 0 800 300" role="img" aria-label="Salesforce access is the intersection of two independent dimensions: object and field permissions granted by profiles and permission sets, and record visibility granted by org-wide defaults, role hierarchy, sharing rules and manual shares. A user sees a record only where both dimensions allow it." class="svg-label">
+        <rect x="30" y="40" width="330" height="200" rx="12" fill="currentColor" opacity=".05"/>
+        <rect x="30" y="40" width="330" height="200" rx="12" fill="none" stroke="currentColor" stroke-width="1.5"/>
+        <text x="52" y="70" font-size="13" font-weight="700" fill="currentColor">1 · What kind of thing may you touch?</text>
+        <text x="52" y="98" font-size="11.5" fill="currentColor" opacity=".78">Profile — one per user, the baseline</text>
+        <text x="52" y="120" font-size="11.5" fill="currentColor" opacity=".78">Permission set — additive grant, stackable</text>
+        <text x="52" y="142" font-size="11.5" fill="currentColor" opacity=".78">Permission set group — bundles of the above</text>
+        <text x="52" y="164" font-size="11.5" fill="currentColor" opacity=".78">Object CRUD — create, read, edit, delete</text>
+        <text x="52" y="186" font-size="11.5" fill="currentColor" opacity=".78">Field-level security — per field, per profile</text>
+        <text x="52" y="214" font-size="10.5" fill="currentColor" opacity=".55">Modern practice: a minimal profile, everything else in permission sets.</text>
+
+        <rect x="440" y="40" width="330" height="200" rx="12" fill="currentColor" opacity=".05"/>
+        <rect x="440" y="40" width="330" height="200" rx="12" fill="none" stroke="currentColor" stroke-width="1.5"/>
+        <text x="462" y="70" font-size="13" font-weight="700" fill="currentColor">2 · Which rows may you see?</text>
+        <text x="462" y="98" font-size="11.5" fill="currentColor" opacity=".78">Org-wide default — Private / Read / Read-Write</text>
+        <text x="462" y="120" font-size="11.5" fill="currentColor" opacity=".78">Role hierarchy — managers inherit upward</text>
+        <text x="462" y="142" font-size="11.5" fill="currentColor" opacity=".78">Sharing rules — by owner or by criteria</text>
+        <text x="462" y="164" font-size="11.5" fill="currentColor" opacity=".78">Manual share · account &amp; opportunity teams</text>
+        <text x="462" y="186" font-size="11.5" fill="currentColor" opacity=".78">Ownership — every record has an OwnerId</text>
+        <text x="462" y="214" font-size="10.5" fill="currentColor" opacity=".55">Start Private and open deliberately, not the reverse.</text>
+
+        <text x="382" y="146" font-size="26" font-weight="700" fill="currentColor" opacity=".5">∩</text>
+        <text x="330" y="278" font-size="12.5" font-weight="700" fill="currentColor">A user acts on a record only where both dimensions allow it.</text>
+      </svg>
+    </div>
+    <figcaption>“I gave them the permission and they still can’t see it” is always dimension 2. “They can see it but the field is blank” is always field-level security in dimension 1 — and that same rule silently blanks fields for the integration user (module 06).</figcaption>
+  </figure>
+
+  <h3>What this means for an economic development org</h3>
+  <ul>
+    <li><strong>Routing and visibility are the same design problem.</strong> If BD directors own leads by sector and geography, the role hierarchy and sharing model must match that split — or directors will either see everything (no focus) or nothing (no coverage during leave).</li>
+    <li><strong>Queues</strong> let a group own records collectively — the right destination for “unrouted leads awaiting triage” rather than dumping them on one person.</li>
+    <li><strong>License types differ.</strong> A full Salesforce license, a Platform license, and a community license grant very different access. Never promise a user count without knowing which licenses exist.</li>
+    <li><strong>Deactivate, never delete, users.</strong> Deleting is not possible anyway; deactivating preserves history. Reassigning their records is a separate, deliberate step.</li>
+    <li><strong>Setup Audit Trail</strong> records configuration changes with user and timestamp, retained for six months. Turn to it first when something changed and nobody knows who.</li>
+  </ul>
+
+  <div class="note good">
+    <span class="label">A concrete offer that costs us nothing and reads as senior</span>
+    <p>Salesforce ships a <strong>Health Check</strong> in Setup that scores an org’s security settings against a baseline, and an <strong>Optimizer</strong> report that flags unused fields, stale automation, and limit pressure. Running both in week one produces a credible, quantified starting picture for the Data Health Review — with no tooling spend and no guessing.</p>
+  </div>
+</section>
+
+<!-- ============================================================ 11 -->
+<section id="m11">
+  <div class="mod-head">
+    <span class="mod-num">11</span>
+    <h2>APIs, authentication, and the limits that bite</h2>
+    <span class="chip p2">Important</span>
+  </div>
+  <p class="serves">Serves the integration and troubleshooting scope. This is the module where our engineering background is an advantage rather than a translation problem.</p>
+
+  <h3>The integration surface</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>API</th><th>Shape</th><th>Use it when</th></tr></thead>
+      <tbody>
+        <tr><td><strong>REST</strong></td><td><code>/services/data/vXX.0/sobjects/…</code>, JSON</td><td>Default for anything you build. Includes <code>composite</code> and <code>batch</code> endpoints to bundle calls and save your allocation.</td></tr>
+        <tr><td><strong>SOAP</strong></td><td>WSDL, XML</td><td>You are not choosing it — but many older managed packages and connectors still use it, which matters when you are counting API calls.</td></tr>
+        <tr><td><strong>Bulk API 2.0</strong></td><td>Async CSV jobs</td><td>Loads and extracts above roughly 10,000 records. Counts against the API allocation per <em>batch</em>, not per record — the difference between a load that fits and one that takes the org down.</td></tr>
+        <tr><td><strong>Platform Events</strong></td><td>Pub/sub, publish-subscribe messaging</td><td>Decoupled, near-real-time integration where you do not want the caller waiting. The modern answer to “tell the other system something happened.”</td></tr>
+        <tr><td><strong>Change Data Capture</strong></td><td>Streamed record change events</td><td>Replicating Salesforce changes into a warehouse or a downstream system without polling.</td></tr>
+        <tr><td><strong>Metadata &amp; Tooling API</strong></td><td>Config as XML</td><td>How deployments, source control, and automated org audits work. This is how you diff an org.</td></tr>
+        <tr><td><strong>Outbound Message / Named Credential callouts</strong></td><td>Salesforce calling out</td><td>Named Credentials hold the endpoint and secret outside the code — the right way to call an external service, and a genuine security talking point.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Authentication, briefly</h3>
+  <p>Every integration goes through a <strong>Connected App</strong> using OAuth 2.0. For a server-to-server sync with no human present, the <strong>JWT bearer flow</strong> is the correct choice — a signed assertion against a certificate, no stored password, no interactive login, and it survives password rotation. The old username-password flow is deprecated and blocked by default in modern orgs; if we find something depending on it, that is a finding, not a footnote. Connected Apps can also be restricted by IP range and by permitted profiles.</p>
+
+  <h3>The two limit systems people confuse</h3>
+  <div class="two">
+    <div class="box">
+      <h4>Governor limits — per transaction</h4>
+      <p>Enforced on every save, flow run, and Apex execution. They are the reason bulk-safe design is not optional.</p>
+      <ul style="margin-bottom:0">
+        <li>100 SOQL queries (synchronous)</li>
+        <li>50,000 records retrieved by SOQL</li>
+        <li>150 DML statements; 10,000 records DML’d</li>
+        <li>6 MB heap sync / 12 MB async</li>
+        <li>10 s CPU time sync / 60 s async</li>
+        <li>100 callouts, 120 s total callout time</li>
+      </ul>
+    </div>
+    <div class="box">
+      <h4>API allocation — per org, per 24 hours</h4>
+      <p>A rolling daily budget shared by <em>every</em> integration in the org — the HubSpot connector, any middleware, any script we run.</p>
+      <p>Sized by edition and license count (Enterprise is on the order of 1,000 calls per full license per day on top of a base allocation). Blow through it and everything integration-shaped stops until the window rolls.</p>
+      <p style="margin-bottom:0"><strong>Monitor it</strong> in Setup → Company Information, or via the <code>limits</code> REST endpoint. Alerting on 80% consumption is a cheap, high-credibility ops deliverable.</p>
+    </div>
+  </div>
+
+  <div class="note warn">
+    <span class="label">Say this in the room</span>
+    <p>“Before we add anything to the integration surface, I want to see the org’s current API consumption and what is eating it.” It is the correct first question, it is unglamorous, and it is exactly the kind of thing that separates an operator from a salesperson.</p>
+  </div>
+</section>
+
+<!-- ============================================================ 12 -->
+<section id="m12">
+  <div class="mod-head">
+    <span class="mod-num">12</span>
+    <h2>Environments, deployment, and ops hygiene</h2>
+    <span class="chip p2">Important</span>
+  </div>
+  <p class="serves">Serves tech-brief problem <b>#6 there’s no one to keep the machine running</b>, and directly answers “can you work without touching production?”</p>
+
+  <h3>Sandboxes</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Type</th><th>Contains</th><th>Refresh cadence</th><th>Use for</th></tr></thead>
+      <tbody>
+        <tr><td>Developer</td><td>Metadata only, small storage</td><td class="num">Daily</td><td>Building and testing config</td></tr>
+        <tr><td>Developer Pro</td><td>Metadata only, more storage</td><td class="num">Daily</td><td>Same, with room for test data</td></tr>
+        <tr><td>Partial Copy</td><td>Metadata + a sample of production data</td><td class="num">Every 5 days</td><td>Integration testing, UAT</td></tr>
+        <tr><td>Full Copy</td><td>Metadata + <em>all</em> production data</td><td class="num">Every 29 days</td><td>Migration rehearsal, performance testing, training</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p>Sandbox availability is edition-dependent — orgs get a mix, and Full Copy is not universal. That is why “is a sandbox available?” is one of the questions the tech brief flagged as worth asking. If the answer is no, our approach has to change: staged changes with a backout plan, deployed in a maintenance window, rather than test-then-promote.</p>
+
+  <div class="note warn">
+    <span class="label">The sandbox trap that has burned everyone once</span>
+    <p>A Full Copy sandbox contains <strong>real contact data with real email addresses</strong>. If email deliverability is not disabled and a flow fires, you have just emailed live prospects from a test environment. Salesforce defaults new sandboxes to no-access email, but a refreshed one can be reconfigured by anyone. Check it first, every time.</p>
+  </div>
+
+  <h3>How changes move</h3>
+  <ul>
+    <li><strong>Change Sets</strong> — the point-and-click path. Slow, error-prone, no version control, but it needs no tooling and any admin can run it.</li>
+    <li><strong>Metadata API / Salesforce CLI</strong> — <code>sf project deploy start</code> against a git repo. This is the professional path, and it is where our engineering background pays: config becomes reviewable, diffable, and revertible.</li>
+    <li><strong>Unlocked packages</strong> — versioned bundles of metadata; the most disciplined option, and usually more ceremony than a small nonprofit needs.</li>
+    <li><strong>75% Apex test coverage</strong> is required to deploy Apex to production. If we inherit undertested code, that is a real, schedulable cost — flag it rather than discover it.</li>
+  </ul>
+
+  <div class="note good">
+    <span class="label">The ops layer the RFP is actually buying</span>
+    <p>“Integrations fail quietly by default; someone has to be watching.” The monitoring stack we should describe is unglamorous and entirely achievable: the connector’s sync-error queue with an alert on non-zero; API consumption alerting; <em>Setup → Scheduled Jobs</em> and <em>Apex Jobs</em> checked on a cadence; failed-flow error emails routed to a monitored address rather than the last admin who edited the flow; Setup Audit Trail reviewed monthly; and a monthly support log — which the RFP names as a deliverable, making it free points.</p>
+  </div>
+
+  <h3>Backup — the question they will ask and few vendors answer well</h3>
+  <p>Salesforce’s own guidance is that data protection is a shared responsibility. The Recycle Bin holds deleted records for 15 days. Native <strong>weekly data export</strong> produces CSVs you must retrieve. Anything better — point-in-time restore, metadata backup, relationship-aware restore — is a paid product (Salesforce Backup, OwnBackup/Own, Gearset, and others). For a nonprofit, the honest answer is usually: scheduled native export to storage they control, plus a documented restore procedure that has actually been tested once. Untested backups are not backups.</p>
+</section>
+
+<!-- ============================================================ 13 -->
+<section id="m13">
+  <div class="mod-head">
+    <span class="mod-num">13</span>
+    <h2>Nonprofit specifics — the thing to ask about early</h2>
+    <span class="chip p3">Context</span>
+  </div>
+  <p class="serves">InvestPR is a 501(c)(3). Whether they are on a nonprofit-flavoured Salesforce changes real behaviour, and asking shows we have thought about who they are.</p>
+
+  <ul>
+    <li><strong>Power of Us</strong> — Salesforce’s nonprofit program grants eligible 501(c)(3)s ten free licenses plus discounts beyond that. Many nonprofits run on exactly those ten, which is a real constraint on any “just give everyone access” plan and a fact worth knowing when we discuss training scale.</li>
+    <li><strong>NPSP (Nonprofit Success Pack)</strong> — a long-established managed package layered on Sales Cloud. It brings its own account model, its own objects (Affiliations, Relationships, General Accounting Units, Recurring Donations), and its own trigger framework. Salesforce has been steering new customers toward the newer <strong>Nonprofit Cloud</strong> instead, so an org may be on either — or on plain Sales Cloud.</li>
+    <li><strong>Why it matters concretely.</strong> NPSP’s <em>Household Account</em> model changes what happens at lead conversion, and its <em>Affiliation</em> object models a person’s relationship to multiple organizations — which, for an investment-attraction agency tracking site selectors who move between firms, is genuinely useful rather than incidental.</li>
+    <li><strong>The likely reality.</strong> An economic development organization is B2B: companies, site selectors, projects. Standard Sales Cloud probably fits them better than a donor-shaped package. Their job posting says “the CRM platform, Salesforce” with no further qualifier — so ask, do not assume.</li>
+  </ul>
+
+  <div class="note">
+    <span class="label">One question, well framed</span>
+    <p>“Are you running standard Sales Cloud, or a nonprofit package like NPSP or Nonprofit Cloud on top of it?” It takes ten seconds, it is impossible to answer wrong, and it tells you whether an entire layer of managed-package automation is sitting between you and every save.</p>
+  </div>
+</section>
+<!-- ============================================================ DECODER -->
+<section id="decoder">
+  <div class="mod-head">
+    <span class="mod-num">★</span>
+    <h2>The decoder: Salesforce word → engineer’s word</h2>
+    <span class="chip p1">Critical</span>
+  </div>
+  <p class="serves">Salesforce renamed most of computer science. Click a card to flip it. Filter to drill a subset.</p>
+
+  <div style="max-width:420px;margin:20px 0 4px">
+    <input class="ui" type="search" id="decFilter" placeholder="Filter — try “sync”, “permission”, “limit”…" aria-label="Filter decoder cards">
+  </div>
+  <div class="btnrow">
+    <button class="ui" type="button" id="decFlipAll">Reveal all</button>
+    <button class="ui" type="button" id="decHideAll">Hide all</button>
+    <span class="kv" style="align-self:center;margin-left:6px" id="decCount"></span>
+  </div>
+  <div class="cards" id="decCards"></div>
+</section>
+
+<!-- ============================================================ GRILL -->
+<section id="grill">
+  <div class="mod-head">
+    <span class="mod-num">★</span>
+    <h2>Grill me: what they will actually ask</h2>
+    <span class="chip p1">Critical</span>
+  </div>
+  <p class="serves">Fifteen questions a CRM-literate stakeholder or their incoming administrator is likely to put to us — with an answer that is short, true, and does not overclaim.</p>
+
+  <details class="qa"><summary>“We’re thinking about consolidating — should we just run everything in HubSpot and drop the CRM?”</summary>
+    <div class="body">
+      <p>Sometimes yes, usually no, and it is not a question to answer before seeing the data. The test is where the <em>relationship of record</em> lives: an EDO tracking multi-year projects with board-reported outcomes needs an object model built for long, multi-stakeholder deals and granular record-level access. Consolidation also throws away years of history and forces a re-migration mid-engagement.</p>
+      <p>What we would say: “Consolidation is a strategy decision with a real price tag. Our engagement makes the current seam work correctly and gives you the data dictionary you would need before anyone could responsibly evaluate consolidating. If the analysis then says consolidate, you will make that call from evidence rather than frustration.”</p>
+      <div class="say no"><b>Don’t say</b>One platform is always better. It reads as a product pitch and invites a fight we cannot win in the room.</div>
+    </div>
+  </details>
+
+  <details class="qa"><summary>“Why do our two dashboards show different pipeline numbers?”</summary>
+    <div class="body">
+      <p>Run the seven-item checklist in module 09 out loud: running user, report type, converted leads, date field, time zone, formula vs. stored field, filter drift. Then land the real point — <em>the fix is not a better dashboard, it is one written definition per metric.</em> This is the single question where a precise answer does the most for our credibility, because everyone in the room has felt this pain and nobody has been given a mechanical explanation of it.</p>
+    </div>
+  </details>
+
+  <details class="qa"><summary>“Can you get rid of our duplicates permanently?”</summary>
+    <div class="body">
+      <p>Two halves, and being explicit about both is the honest answer. <strong>Existing duplicates</strong> get merged in a controlled pass — rules defined, dry-run in a sandbox, reviewed sample, then executed with a backup taken first. <strong>New duplicates</strong> get prevented by matching and duplicate rules at the point of creation, plus a scheduled cleanup job for whatever slips through.</p>
+      <p>The important caveat to volunteer: a rule strict enough to block all duplicates will also block legitimate records and your marketing sync. The design target is “near-zero and self-correcting,” not “zero.”</p>
+    </div>
+  </details>
+
+  <details class="qa"><summary>“How would we know if the integration stopped working?”</summary>
+    <div class="body">
+      <p>Today, most likely you would find out at reporting time, weeks later. That is the default behaviour of every sync — failures land in a queue and nothing escalates. What changes: the sync-error queue gets a threshold alert, API consumption gets a threshold alert, scheduled and Apex jobs get reviewed on a cadence, flow error emails route to a monitored address rather than whoever last edited the flow, and it all lands in the monthly support log the RFP already asks for.</p>
+      <div class="say yes"><b>Say</b>“Integrations fail quietly by default. The deliverable isn’t the integration — it’s knowing within hours when it breaks.”</div>
+    </div>
+  </details>
+
+  <details class="qa"><summary>“Can our ad platforms actually see which leads became real projects?”</summary>
+    <div class="body">
+      <p>Yes, and it is the highest-value single fix available. Walk the six steps in module 08. Be precise about the two dependencies people skip: the click ID and UTM values must be captured in hidden form fields <em>at the point of the form fill</em>, and they must survive lead conversion via explicit field mappings. Then CRM stage changes flow back through Enhanced Conversions for Leads, Meta’s Conversions API, and LinkedIn’s Conversions API, and bidding starts optimizing toward qualified projects instead of form fills.</p>
+      <p>Flag the migration: Google is retiring the legacy click-ID upload path in June 2026, mid-engagement.</p>
+    </div>
+  </details>
+
+  <details class="qa"><summary>“Will you be writing custom code in our system?”</summary>
+    <div class="body">
+      <p>As little as possible, and we will tell you before we do. Recite the ladder: configuration, then declarative automation, then native connectors, then middleware, then code. Every rung we stay above is something your administrator can maintain after we are gone. Where we do write code, it is documented, tested, and handed over.</p>
+      <div class="say yes"><b>Why this lands</b>They are hiring a CRM Administrator concurrently. This answer says we are building their capability, not our indispensability — README decision D5.</div>
+    </div>
+  </details>
+
+  <details class="qa"><summary>“How do you make changes without breaking what we have?”</summary>
+    <div class="body">
+      <p>Sandbox first, wherever a sandbox exists — build and test against a copy, then deploy the metadata. Changes go out in reviewed batches with a documented backout. Data operations get a full export taken immediately before, a dry run on a sample, and a spot-check afterwards. If no sandbox is available, we say so up front and shift to staged changes in an agreed window, which is slower and we will price it that way.</p>
+    </div>
+  </details>
+
+  <details class="qa"><summary>“Who owns which field? Marketing and BD keep overwriting each other.”</summary>
+    <div class="body">
+      <p>This is the field dictionary’s <em>owner system</em> column, and it is the deliverable that ends the argument. One field, one authoritative system, written down and enforced in the connector’s mapping direction. Two-way sync is a deliberate exception for a handful of fields, never a default. Where two teams genuinely need different values, the answer is two fields with different names, not one contested field.</p>
+    </div>
+  </details>
+
+  <details class="qa"><summary>“How long does the data cleanup take?”</summary>
+    <div class="body">
+      <p>The audit is fast and fixed; the remediation scales with what the audit finds. That is why our proposal states the assumptions it is priced against — record counts, user counts, and whether there is a backlog of known sync errors. If those turn out to be materially different, we re-baseline with you rather than absorb it silently or surprise you with a change order.</p>
+      <div class="say yes"><b>Why we phrase it this way</b>Decision D1 — we did not ask InvestPR sizing questions, so every scope variable is an explicit stated assumption. That turns a gap into evidence of cost clarity, which is 20% of the score.</div>
+    </div>
+  </details>
+
+  <details class="qa"><summary>“Do we have to buy more tools?”</summary>
+    <div class="body">
+      <p>Probably one, possibly none. Native duplicate and matching rules, native reports, Health Check, Optimizer, and the platform’s own monitoring cover most of this at no cost. The one category worth paying for is scheduled cross-system data hygiene, because that is the difference between a cleanup that holds and a cleanup that decays. We will make the case with a number, and you can decline it — the architecture does not depend on it.</p>
+    </div>
+  </details>
+
+  <details class="qa"><summary>“How will you work with the CRM Administrator we’re hiring?”</summary>
+    <div class="body">
+      <p>They own the system day to day; we are the architecture and attribution layer above that role. Concretely: we hand over the data dictionary, the automation inventory, the runbooks, and the SOPs, and we work alongside them so the knowledge lands in a person rather than a PDF. Their success is our exit criterion, not a threat to our renewal.</p>
+      <div class="say yes"><b>Say</b>“Counterintuitively, a team that doesn’t need us is what earns the next engagement.”</div>
+    </div>
+  </details>
+
+  <details class="qa"><summary>“Is our data safe? Where does it go?”</summary>
+    <div class="body">
+      <p>The data stays in their systems. We work in their org under named accounts with least-privilege access, we do not extract data to our own infrastructure except where an agreed migration or backup requires it, and access is revoked at engagement end. Anything sent to an ad platform for conversion feedback is hashed and limited to what the platform requires — and we would want a short, written agreement about consent and what is permitted to leave, before we build it.</p>
+    </div>
+  </details>
+
+  <details class="qa"><summary>“What about Agentforce / AI in the CRM?”</summary>
+    <div class="body">
+      <p>Genuinely interesting, and entirely downstream of this engagement. Every AI feature on a CRM is a function of the data underneath it — an assistant reading a database with three fields for the same fact and four spellings of Puerto Rico will produce confident, wrong answers faster than a human could. The work in this RFP is the prerequisite. We would rather earn that conversation in six months with a clean data foundation behind it.</p>
+      <div class="say no"><b>Don’t</b>Lead with AI. We are an AI-literate firm bidding a data-quality and integration engagement; leading with AI reads as a firm selling what it likes rather than what they asked for.</div>
+    </div>
+  </details>
+
+  <details class="qa"><summary>“You’re two people. What happens if one of you is unavailable?”</summary>
+    <div class="body">
+      <p>Answer with continuity, per decision D2, not with defensiveness. Both principals are on the engagement — there is no ramp-up, no internal handoff, and no staffing-substitution clause where the people who sold the work vanish after kickoff. Everything we build is documented as we build it, in their systems, so the work is legible to their administrator from week one rather than at the end. Specialist contractors are engaged by need, not to pad a bench.</p>
+    </div>
+  </details>
+
+  <details class="qa"><summary>“Have you done this on our exact platform?”</summary>
+    <div class="body">
+      <p>State our own history plainly — Salesforce on the growth team at Zocdoc, HubSpot at Masterworks running the marketing stack for up to $4M a month in paid media, plus Google, Meta, and LinkedIn advertising, GA, and GTM. That is decision D3: platform neutrality applies to <em>their</em> stack, never to ours. Then bring it back to the seam, which is the actual subject: “The specific work here is the integration between a CRM and a marketing platform, and that seam behaves the same way whichever two products sit on either side of it.”</p>
+    </div>
+  </details>
+</section>
+
+<!-- ============================================================ QUIZ -->
+<section id="quiz">
+  <div class="mod-head">
+    <span class="mod-num">★</span>
+    <h2>Check yourself</h2>
+    <span class="chip p2">Important</span>
+  </div>
+  <p class="serves">Ten questions drawn from the parts of this guide most likely to come up unprompted. Answer, then read why.</p>
+  <div id="quizWrap"></div>
+  <div class="note" id="quizScore" style="display:none"><span class="label">Result</span><p class="score"></p><p id="quizAdvice" style="margin-bottom:0"></p></div>
+  <div class="btnrow"><button class="ui" type="button" id="quizReset">Reset quiz</button></div>
+</section>
+
+<!-- ============================================================ CHEAT -->
+<section id="cheat">
+  <div class="mod-head">
+    <span class="mod-num">★</span>
+    <h2>One-page cheat sheet</h2>
+    <span class="chip p1">Critical</span>
+  </div>
+  <p class="serves">Print this. Everything above, compressed to what you would want in front of you during the call.</p>
+
+  <div class="two">
+    <div class="box">
+      <h4>Record ID prefixes</h4>
+      <p style="font-size:.9rem;margin-bottom:0">
+        <code>001</code> Account · <code>003</code> Contact · <code>006</code> Opportunity · <code>00Q</code> Lead · <code>701</code> Campaign · <code>00v</code> CampaignMember · <code>00T</code> Task · <code>00U</code> Event · <code>005</code> User · <code>500</code> Case.<br>
+        IDs come in 15-character case-sensitive and 18-character case-insensitive forms — the same record, and a classic source of “duplicate” rows in a spreadsheet join.
+      </p>
+    </div>
+    <div class="box">
+      <h4>Governor limits worth reciting</h4>
+      <p style="font-size:.9rem;margin-bottom:0">100 SOQL queries · 50,000 rows returned · 150 DML statements · 10,000 records DML’d · 6 MB heap (12 async) · 10 s CPU (60 async) · 100 callouts. All <em>per transaction</em>. The API allocation is separate and <em>per org, per day</em>.</p>
+    </div>
+    <div class="box">
+      <h4>Top causes of a failing sync</h4>
+      <p style="font-size:.9rem;margin-bottom:0">Validation rule · restricted picklist value missing · required field empty · duplicate rule blocking · field-level security hiding the field from the integration user · record type restricting the value · record locked · daily API allocation exhausted · converted lead.</p>
+    </div>
+    <div class="box">
+      <h4>The ladder</h4>
+      <p style="font-size:.9rem;margin-bottom:0">Configuration → Flow → native connector → middleware → Apex. Never skip a rung to save an afternoon.</p>
+    </div>
+    <div class="box">
+      <h4>First-week screens to open</h4>
+      <p style="font-size:.9rem;margin-bottom:0">Setup Audit Trail · Scheduled Jobs · Apex Jobs · Health Check · Optimizer · Company Information (API usage, licenses, storage) · Object Manager → Lead → Map Lead Fields · Duplicate &amp; Matching Rules · installed managed packages · the connector’s sync-error queue.</p>
+    </div>
+    <div class="box">
+      <h4>Questions to ask them</h4>
+      <p style="font-size:.9rem;margin-bottom:0">Which edition and how many licenses? Is a sandbox available? Standard Sales Cloud or a nonprofit package? Is there an inclusion list on the marketing sync? What is the current sync-error backlog? Who owns tag management on the website? Which outcome does the board actually measure?</p>
+    </div>
+  </div>
+
+  <div class="note bad">
+    <span class="label">And the guardrail, once more</span>
+    <p>Their platform is <strong>inferred, not confirmed</strong>. Ask first, then be fluent. Our own Salesforce and HubSpot history is stated plainly; theirs is something they tell us.</p>
+  </div>
+</section>
+
+<footer class="end">
+  <p><strong>Internal preparation document.</strong> Companion to <span class="mono">rfp/TECH-BRIEF.html</span> (their ecosystem and the seven problems) and <span class="mono">rfp/PROPOSAL.md</span> (the deliverable). Platform identifications throughout are evidence-based inference — see README decision <strong>D3</strong> before repeating any of them to the client.</p>
+  <p>Platform behaviours described here are stable, long-standing Salesforce mechanics; specific limits, connector option labels, and product packaging change between releases. Verify anything you intend to quote as a number.</p>
+</footer>
+
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  /* ---------- theme ---------- */
+  var root = document.documentElement, btn = document.getElementById("themeBtn");
+  function prefersDark() { return window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches; }
+  function currentIsDark() {
+    var t = root.getAttribute("data-theme");
+    return t ? t === "dark" : prefersDark();
+  }
+  function syncBtn() { btn.textContent = currentIsDark() ? "Light" : "Dark"; }
+  btn.addEventListener("click", function () {
+    root.setAttribute("data-theme", currentIsDark() ? "light" : "dark");
+    syncBtn();
+  });
+  syncBtn();
+
+  /* ---------- scrollspy ---------- */
+  var links = Array.prototype.slice.call(document.querySelectorAll("nav.toc a"));
+  var sections = links.map(function (a) { return document.querySelector(a.getAttribute("href")); }).filter(Boolean);
+  if ("IntersectionObserver" in window) {
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (!e.isIntersecting) return;
+        links.forEach(function (a) {
+          var on = a.getAttribute("href") === "#" + e.target.id;
+          a.classList.toggle("active", on);
+          if (on && a.scrollIntoView) a.scrollIntoView({ block: "nearest", inline: "nearest" });
+        });
+      });
+    }, { rootMargin: "-60px 0px -70% 0px" });
+    sections.forEach(function (s) { io.observe(s); });
+  }
+
+  /* ---------- object explorer ---------- */
+  var OBJ = {
+    campaign: {
+      title: "Campaign",
+      role: "A marketing program you spend on: a paid search push, a webinar, a trade mission, a conference booth, a bought list.",
+      eng: "A dimension table for spend. Nests up to five levels deep with roll-ups across the branch.",
+      breaks: "Campaigns get created ad hoc with no naming convention or hierarchy, so spend cannot be rolled up by channel or by fiscal year — and cost fields sit empty, which makes every ROI number a guess.",
+      good: "A defined hierarchy (fiscal year → channel → market → push), a naming convention, cost fields populated, and campaign types that match how the board thinks about programs."
+    },
+    campaignmember: {
+      title: "CampaignMember",
+      role: "The junction connecting a Campaign to a Lead or a Contact, plus a per-campaign status — Sent, Responded, Registered, Attended.",
+      eng: "A join table with a status column. Points at either a Lead or a Contact, never both.",
+      breaks: "Statuses left at the default so 'responded' means nothing; membership created by hand for events, so attendance is never measurable; the link lost when leads are merged carelessly.",
+      good: "Status values customized per campaign type, membership created by the marketing sync rather than by hand, and membership surviving lead conversion — which it does automatically, by re-pointing to the new Contact."
+    },
+    lead: {
+      title: "Lead",
+      role: "An unqualified person plus their company, flattened into one record. Deliberately has no relationships to anything else.",
+      eng: "A denormalized staging row. Person and organization in one table because you do not yet know which organization it belongs to.",
+      breaks: "The single biggest source of duplicates in any org: the same person exists as three Leads and one Contact. Also where converted records quietly drop out of reports, and where custom fields die at conversion if unmapped.",
+      good: "Clear written criteria for when a Lead converts, assignment rules that route by sector and geography within minutes, duplicate rules that catch Lead↔Contact matches, and every custom field explicitly mapped for conversion."
+    },
+    account: {
+      title: "Account",
+      role: "The company: the investor, the site selector's firm, the operating business considering Puerto Rico.",
+      eng: "The organization table. Parent of Contacts and Opportunities; supports its own parent hierarchy for corporate structures.",
+      breaks: "'Acme Biotech' and 'Acme Biotech, LLC' as two records, because lead conversion creates an Account from free text with no matching. Industry and country stored as free text rather than picklists.",
+      good: "Duplicate rules on Account with sensible fuzzy matching, restricted picklists on industry and country drawn from global value sets, and an agreed convention for parent/subsidiary relationships."
+    },
+    contact: {
+      title: "Contact",
+      role: "A person attached to a company. The record BD actually works.",
+      eng: "The person table, with an AccountId foreign key. Every activity, campaign membership, and opportunity role hangs off it.",
+      breaks: "Contacts with no Account; the same human present as both an active Contact and an old Lead; email as the de facto key while nothing enforces its uniqueness.",
+      good: "Email uniqueness enforced by matching rules, an external ID field for integration keying so re-runs upsert instead of duplicating, and field-level security that does not accidentally blind the integration user."
+    },
+    opportunity: {
+      title: "Opportunity",
+      role: "The deal — for an EDO, the investment project. Stage, close date, amount, and a Primary Campaign Source.",
+      eng: "The fact table. Everything leadership reports on ultimately aggregates from here.",
+      breaks: "Stage definitions that mean different things to different directors; Amount used for something that is not currency; jobs and capital tracked in a spreadsheet rather than as fields; Primary Campaign Source never populated, so campaign ROI is empty.",
+      good: "Written stage definitions with entry criteria, custom fields for jobs created and capital invested, Primary Campaign Source populated automatically at conversion, and Campaign Influence enabled if multi-touch credit is genuinely needed."
+    },
+    activity: {
+      title: "Task / Event (Activity)",
+      role: "Calls, emails, and meetings. Task is a to-do or logged call; Event is a calendar item with a time.",
+      eng: "A polymorphic child: WhoId points at a Lead or Contact, WhatId at an Account, Opportunity, or Campaign. Reporting on them is awkward for exactly that reason.",
+      breaks: "This is tech-brief problem #4 entirely. Meetings booked through a scheduling tool never land on the record; outreach sent from a sequencing tool is not logged; 'when did we last talk to them' requires asking around.",
+      good: "Automatic activity capture from email and calendar, scheduling-tool bookings creating Events on the right record routed by sector and geography, and one activity timeline per contact that nobody has to maintain by hand."
+    },
+    user: {
+      title: "User",
+      role: "A BD director, a marketer, an administrator — or the integration account the marketing sync authenticates as.",
+      eng: "The principal. Carries a profile, permission sets, a role, and a license type; referenced by OwnerId on nearly every record.",
+      breaks: "The connector authenticating as a real employee, so the audit trail is meaningless and the sync dies when they leave. Permissions granted ad hoc per person with no reusable pattern. Deactivated users still owning live records.",
+      good: "A dedicated integration user with its own license and a documented permission set; access granted through permission sets rather than bespoke profiles; and a written offboarding step that reassigns ownership before deactivation."
+    }
+  };
+  var erPanel = document.getElementById("erPanel");
+  function showObj(key) {
+    var o = OBJ[key]; if (!o) return;
+    erPanel.innerHTML =
+      "<h3>" + o.title + "</h3>" +
+      '<div class="field role"><b>What it is</b>' + o.role + "</div>" +
+      '<div class="field eng"><b>In engineer terms</b>' + o.eng + "</div>" +
+      '<div class="field break"><b>What typically breaks</b>' + o.breaks + "</div>" +
+      '<div class="field good"><b>What good looks like</b>' + o.good + "</div>";
+    Array.prototype.forEach.call(document.querySelectorAll(".eco-node"), function (n) {
+      n.classList.toggle("selected", n.getAttribute("data-node") === key);
+    });
+  }
+  Array.prototype.forEach.call(document.querySelectorAll(".eco-node"), function (n) {
+    n.addEventListener("click", function () { showObj(n.getAttribute("data-node")); });
+    n.addEventListener("keydown", function (e) {
+      if (e.key === "Enter" || e.key === " ") { e.preventDefault(); showObj(n.getAttribute("data-node")); }
+    });
+  });
+
+  /* ---------- sync error triage ---------- */
+  var ERR = {
+    required: {
+      t: "REQUIRED_FIELD_MISSING",
+      m: "A field marked required on the object — or required on the page layout for the record type the integration is writing to — arrived empty.",
+      c: "Somebody made a field required for humans without considering that the marketing sync creates records too, and marketing has no value for it.",
+      f: "Either give the field a default, populate it in the connector mapping, or make it required through a validation rule that exempts the integration user rather than at the field level."
+    },
+    picklist: {
+      t: "INVALID_OR_NULL_FOR_RESTRICTED_PICKLIST",
+      m: "The incoming value is not in the target picklist's allowed list.",
+      c: "The two systems' value sets drifted — marketing says 'Life Sciences', the CRM only knows 'Biotech'. Or a record type restricts which values are valid for that record.",
+      f: "Reconcile the value sets and map them explicitly, value by value. Then move both sides onto a shared, documented list — a global value set on the CRM side — so they cannot drift again."
+    },
+    validation: {
+      t: "FIELD_CUSTOM_VALIDATION_EXCEPTION",
+      m: "A custom validation rule evaluated to TRUE and rejected the write. The error text is whatever the rule's author wrote.",
+      c: "The most common integration blocker of all. A rule written for a human data-entry problem applies equally to every API write, and nobody tested it against the sync.",
+      f: "Find the rule, read its formula, and decide deliberately: relax it, or exempt the integration user with a condition on the running user's profile. Exempting is fine — provided the data quality is enforced somewhere else."
+    },
+    dupe: {
+      t: "DUPLICATES_DETECTED",
+      m: "A duplicate rule set to Block prevented the record from being created.",
+      c: "Duplicate rules were tightened to stop humans creating duplicates, and the setting that applies them to API-created records was left on.",
+      f: "Typically: Block for manual entry, Allow-and-report for the integration, plus a scheduled dedupe pass. Blocking the sync does not prevent duplicates — it just moves them into a queue nobody reads."
+    },
+    fls: {
+      t: "INSUFFICIENT_ACCESS_ON_CROSS_REFERENCE_ENTITY",
+      m: "The integration user cannot see or write the record — or a record it references, such as the parent Account or the assigned Owner.",
+      c: "Org-wide defaults are Private and the integration user's role sits too low in the hierarchy, or a lookup points at something it has no access to.",
+      f: "Give the integration user a documented permission set and a role high enough to see what it must maintain. Watch for the silent variant of this: field-level security hiding a field produces no error at all, just a permanently empty column."
+    },
+    limit: {
+      t: "REQUEST_LIMIT_EXCEEDED",
+      m: "The org burned through its daily API allocation. Every integration in the org is now failing, not just this one.",
+      c: "A large initial sync, an over-broad inclusion list, a runaway middleware automation, or a script someone ran without batching.",
+      f: "Immediate: find the consumer in Setup → Company Information and stop it. Structural: batch with Bulk API, narrow the inclusion list, and alert at 80% consumption so this is a warning rather than an outage."
+    },
+    lock: {
+      t: "UNABLE_TO_LOCK_ROW",
+      m: "Two processes tried to write the same record — or its parent — at the same time.",
+      c: "Concurrent updates to many child records sharing one parent, a merge in progress, or an approval process holding a lock.",
+      f: "Usually solved by ordering the load so records sharing a parent land in the same batch, or by reducing batch size. Transient occurrences are normal; a persistent pattern points at competing automation."
+    },
+    converted: {
+      t: "CANNOT_UPDATE_CONVERTED_LEAD",
+      m: "Something tried to update a Lead that has already been converted. Converted leads are read-only, permanently.",
+      c: "The marketing platform still holds the Lead's ID as its sync target and never learned about the conversion, so it keeps writing to a record that no longer accepts writes.",
+      f: "Fix the record mapping so the marketing side follows the Contact after conversion. This error is a reliable signal that lead-conversion handling in the connector was never configured properly — treat it as a symptom, not an incident."
+    }
+  };
+  var errPanel = document.getElementById("errPanel");
+  Array.prototype.forEach.call(document.querySelectorAll("#errChips button"), function (b) {
+    b.addEventListener("click", function () {
+      var e = ERR[b.getAttribute("data-err")];
+      Array.prototype.forEach.call(document.querySelectorAll("#errChips button"), function (o) { o.classList.remove("on"); });
+      b.classList.add("on");
+      errPanel.innerHTML =
+        "<h3 class='mono' style='font-size:.95rem'>" + e.t + "</h3>" +
+        '<div class="field role"><b>What it means</b>' + e.m + "</div>" +
+        '<div class="field break"><b>Why it happens</b>' + e.c + "</div>" +
+        '<div class="field good"><b>How you fix it</b>' + e.f + "</div>";
+    });
+  });
+
+  /* ---------- attribution stepper ---------- */
+  var STEPS = [
+    {
+      t: "1 · Ad click",
+      where: "Google Ads, Meta, LinkedIn",
+      what: "Someone clicks an ad. The platform appends a click ID to the landing-page URL — <code>gclid</code> for Google, <code>fbclid</code> for Meta, <code>li_fat_id</code> for LinkedIn — alongside whatever UTM parameters the campaign was tagged with.",
+      sf: "Nothing has touched the CRM yet. Everything that follows depends on this string surviving the next thirty seconds.",
+      risk: "Auto-tagging disabled, or a redirect that strips query parameters. Both are silent."
+    },
+    {
+      t: "2 · Form capture",
+      where: "investpr.org form → marketing platform",
+      what: "Hidden fields on the form read the URL and store the click ID and UTM values with the submission. A cookie carries them across pages so a visitor who browses before converting is still attributed.",
+      sf: "The marketing platform now holds the source data. The CRM still knows nothing.",
+      risk: "The hidden fields were never added. This is the most common single failure in the whole loop, and it is invisible until someone goes looking."
+    },
+    {
+      t: "3 · Sync to CRM",
+      where: "Connector → Lead",
+      what: "The marketing platform creates or updates the CRM record and the source fields ride along.",
+      sf: "Custom fields on <strong>Lead</strong>: <code>gclid__c</code>, <code>fbclid__c</code>, <code>li_fat_id__c</code>, <code>utm_source__c</code>, <code>utm_campaign__c</code>, plus standard <code>LeadSource</code>. Each needs a connector field mapping with the marketing platform declared as the owner system.",
+      risk: "Mapping absent, or pointing the wrong way so the CRM's empty value overwrites the real one."
+    },
+    {
+      t: "4 · Conversion",
+      where: "Lead → Contact + Account + Opportunity",
+      what: "BD qualifies the lead and converts it. This is where attribution most often dies quietly.",
+      sf: "Every source field needs an explicit <strong>lead conversion mapping</strong> onto a Contact field <em>and</em> an Opportunity field. Setup → Object Manager → Lead → Fields → Map Lead Fields. Unmapped custom fields are discarded at conversion.",
+      risk: "The mapping was never configured. Discovered months later when nobody can attribute a single landed project."
+    },
+    {
+      t: "5 · Qualification",
+      where: "Opportunity stage change",
+      what: "Weeks or months later, the project reaches a stage that leadership agrees counts as a real outcome.",
+      sf: "A record-triggered <strong>Flow</strong> on Opportunity stage change stamps a conversion-event field and timestamps it. The prerequisite is a business decision, not a technical one: <em>which stage counts?</em> Qualified lead, meeting held, or landed project — leadership must choose.",
+      risk: "Nobody chose, so the feedback either never fires or fires on everything and teaches the ad platforms to buy noise."
+    },
+    {
+      t: "6 · Send back",
+      where: "CRM → ad platforms",
+      what: "The conversion event, with its click ID or hashed customer data and a value, is posted back to the platform that produced the click. Bidding starts optimizing toward projects rather than form fills.",
+      sf: "Google <strong>Enhanced Conversions for Leads</strong> and the Data Manager API (the legacy click-ID upload path retires June 15, 2026); <strong>Meta Conversions API</strong>; <strong>LinkedIn Conversions API</strong>. Delivered by native ad syncs, a scheduled job, or middleware — in that order of preference.",
+      risk: "Consent and privacy handling for hashed PII was never agreed. Settle it in writing before building."
+    }
+  ];
+  var attPanel = document.getElementById("attPanel");
+  function showStep(i) {
+    var s = STEPS[i];
+    attPanel.innerHTML =
+      "<h3>" + s.t + "</h3>" +
+      '<div class="field"><b>Where it happens</b>' + s.where + "</div>" +
+      '<div class="field role"><b>What happens</b>' + s.what + "</div>" +
+      '<div class="field eng"><b>In Salesforce</b>' + s.sf + "</div>" +
+      '<div class="field break"><b>How it breaks</b>' + s.risk + "</div>";
+    Array.prototype.forEach.call(document.querySelectorAll("#attSteps button"), function (b, j) {
+      b.classList.toggle("on", i === j);
+    });
+  }
+  Array.prototype.forEach.call(document.querySelectorAll("#attSteps button"), function (b) {
+    b.addEventListener("click", function () { showStep(parseInt(b.getAttribute("data-step"), 10)); });
+  });
+  showStep(0);
+
+  /* ---------- decoder cards ---------- */
+  var DEC = [
+    ["Org", "Your <em>tenant</em>. One customer's instance of the whole application."],
+    ["Object", "A <em>table</em>. Standard ones ship with the platform; custom ones you create end in <code>__c</code>."],
+    ["Record", "A <em>row</em>."],
+    ["Field", "A <em>column</em>. Custom fields end in <code>__c</code>; relationship traversal in queries uses <code>__r</code>."],
+    ["Picklist", "An <em>enum</em>. Restricted means the enum is actually enforced; unrestricted means the API can write anything."],
+    ["Record type", "A <em>row-level variant</em> that swaps the form layout and narrows which enum values are valid."],
+    ["Page layout", "A <em>form template</em> — which fields appear, in what order, and whether they are required in the UI."],
+    ["Profile", "A <em>role-based permission bundle</em>, exactly one per user. Legacy; the platform is moving to permission sets."],
+    ["Permission set", "An <em>additive grant</em> you attach to a user, like a policy attachment. Stackable, reusable."],
+    ["Org-wide default", "The <em>deny-by-default baseline</em> for record visibility, before roles and sharing rules open it back up."],
+    ["Sharing rule", "A <em>row-level access grant</em> by owner or by criteria."],
+    ["Metadata", "Your <em>configuration as deployable XML</em> — objects, fields, flows, permissions. Version it in git."],
+    ["Sandbox", "A <em>staging environment</em>: a copy of the metadata, with or without production data."],
+    ["Change set", "A <em>manual deployment bundle</em> assembled through the UI. Works, but has no version control."],
+    ["SOQL", "<em>SQL minus JOIN syntax.</em> Relationships are traversed with dot notation instead."],
+    ["SOSL", "<em>Full-text search</em> across multiple objects at once."],
+    ["Apex", "<em>Java-flavoured server-side code</em>, running under hard per-transaction quotas. 75% test coverage required to deploy."],
+    ["Trigger", "A <em>database trigger</em> with before/after phases. Always receives a <em>list</em> — write it bulk-safe or it fails at scale."],
+    ["Flow", "The <em>low-code workflow engine</em>. Record-triggered, scheduled, screen-based, or event-driven. The tool Salesforce is investing in."],
+    ["Governor limits", "<em>Per-transaction quotas</em> enforced by the multitenant runtime. The reason everything must be bulk."],
+    ["API allocation", "A <em>daily per-org request budget</em>, shared by every integration. Separate from governor limits, and easier to exhaust."],
+    ["External ID", "<em>Your foreign key</em>, indexed by the platform. Enables <code>upsert</code> — the difference between idempotent syncs and duplicate factories."],
+    ["Upsert", "<em>Create-or-update matched on an external ID.</em> The single most useful operation in integration work."],
+    ["Master-detail", "A <em>cascading foreign key</em> with ownership: delete the parent and children go too. Required for roll-up summaries."],
+    ["Lookup", "A <em>nullable foreign key</em>. No cascade, no roll-ups."],
+    ["Junction object", "A <em>join table</em> — a custom object with two master-detail relationships."],
+    ["Queue", "A <em>shared owner</em>. Records can be assigned to a group rather than a person."],
+    ["Managed package", "A <em>vendor's installed app</em> in its own namespace. You cannot edit its code, and its triggers run on your saves."],
+    ["Lightning Web Component", "The current <em>web components framework</em> for custom UI. Aura is the older one you may still find."],
+    ["Platform Event", "<em>Pub/sub messaging</em> inside the platform. The clean way to decouple an integration."],
+    ["Change Data Capture", "A <em>change stream</em> of record modifications, for replication without polling."],
+    ["Connected App", "An <em>OAuth client registration</em>. Every integration authenticates through one."],
+    ["Named Credential", "<em>Endpoint and secret held outside the code</em>, for outbound callouts. The right answer to 'where do we put the API key'."],
+    ["Lifecycle stage", "A <em>marketing-platform concept</em>, not a CRM one. Mapping it to a CRM picklist is where two teams' vocabularies collide."],
+    ["Inclusion list", "The <em>allow-list</em> deciding which marketing contacts are permitted to sync into the CRM at all."],
+    ["Lead conversion", "A <em>one-way transformation</em>: one flat record becomes an Account, a Contact, and optionally an Opportunity. Unmapped custom fields are discarded."],
+    ["Setup Audit Trail", "The <em>config change log</em> — who changed what, retained six months."],
+    ["Report type", "The <em>query shape</em> a report is allowed to use. 'With' versus 'with or without' silently changes your row count."],
+    ["Running user", "The <em>identity a dashboard renders through</em>. Two dashboards with different running users legitimately show different numbers."]
+  ];
+  var decWrap = document.getElementById("decCards"), decCount = document.getElementById("decCount");
+  DEC.forEach(function (d) {
+    var el = document.createElement("div");
+    el.className = "card";
+    el.setAttribute("tabindex", "0");
+    el.setAttribute("role", "button");
+    el.setAttribute("data-search", (d[0] + " " + d[1]).toLowerCase().replace(/<[^>]+>/g, ""));
+    el.innerHTML = '<span class="term">' + d[0] + '</span><span class="hint">tap to reveal</span>';
+    el.setAttribute("data-term", d[0]);
+    el.setAttribute("data-ans", d[1]);
+    function flip() {
+      var on = el.classList.toggle("flipped");
+      el.innerHTML = on
+        ? '<span class="ans">' + d[1] + "</span>"
+        : '<span class="term">' + d[0] + '</span><span class="hint">tap to reveal</span>';
+    }
+    el.addEventListener("click", flip);
+    el.addEventListener("keydown", function (e) { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); flip(); } });
+    decWrap.appendChild(el);
+  });
+  function setAll(reveal) {
+    Array.prototype.forEach.call(decWrap.children, function (el) {
+      var isFlipped = el.classList.contains("flipped");
+      if (isFlipped !== reveal) el.click();
+    });
+  }
+  document.getElementById("decFlipAll").addEventListener("click", function () { setAll(true); });
+  document.getElementById("decHideAll").addEventListener("click", function () { setAll(false); });
+  var decFilter = document.getElementById("decFilter");
+  function applyFilter() {
+    var q = decFilter.value.trim().toLowerCase(), shown = 0;
+    Array.prototype.forEach.call(decWrap.children, function (el) {
+      var hit = !q || el.getAttribute("data-search").indexOf(q) !== -1;
+      el.style.display = hit ? "" : "none";
+      if (hit) shown++;
+    });
+    decCount.textContent = shown + " of " + DEC.length + " terms";
+  }
+  decFilter.addEventListener("input", applyFilter);
+  applyFilter();
+
+  /* ---------- quiz ---------- */
+  var QUIZ = [
+    {
+      q: "A custom field on the Lead holds the Google click ID. After BD converts the lead, the value is nowhere to be found. What happened?",
+      o: ["The connector overwrote it during the next sync",
+          "It had no lead conversion field mapping, so it was discarded at conversion",
+          "Converted leads are deleted after 15 days",
+          "Click IDs expire and are cleared automatically"],
+      a: 1,
+      why: "Standard fields map themselves at conversion; custom fields need an explicit mapping to a Contact, Account, or Opportunity field. Missing that mapping silently drops the value at the exact moment the record starts mattering — module 03."
+    },
+    {
+      q: "Marketing reports 900 contacts created this month; the CRM shows 640, with no errors reported. Most likely cause?",
+      o: ["An inclusion list is gating which records are allowed to sync",
+          "The daily API allocation was exhausted",
+          "A validation rule is rejecting the writes",
+          "Duplicate rules are set to Block"],
+      a: 0,
+      why: "The other three all produce errors. A gap with no errors points at gate 1 — records that were never eligible to sync in the first place, or that predate the connector's installation — module 06."
+    },
+    {
+      q: "Which of these applies to records created through the API, not just through the user interface?",
+      o: ["Page layout field requirements",
+          "Validation rules",
+          "The 'required' asterisk shown on a form",
+          "Lightning page component visibility"],
+      a: 1,
+      why: "Validation rules run in the save path regardless of origin, which is why they are the leading cause of sync failures. Layout-level requirements are a UI concern and the API ignores them — module 07."
+    },
+    {
+      q: "An Apex trigger reads OwnerId on Lead insert and consistently sees the wrong value. Why?",
+      o: ["Assignment rules run after triggers in the order of execution",
+          "OwnerId is a formula field",
+          "Triggers cannot read OwnerId",
+          "The record has not been committed yet"],
+      a: 0,
+      why: "Assignment rules fire after both before- and after-triggers. Anything that depends on final ownership has to run later — an after-save flow, or async work — module 07."
+    },
+    {
+      q: "The proposal says 'native integrations before middleware, middleware before custom code.' What is the strongest argument for that order in this bid specifically?",
+      o: ["Native integrations are always faster",
+          "Middleware is insecure",
+          "Every rung above code is something InvestPR's own administrator can maintain after we leave",
+          "Salesforce charges extra for Apex"],
+      a: 2,
+      why: "They are hiring a CRM Administrator concurrently. Capability transfer rather than dependency is our counter-position — README decision D5, module 01."
+    },
+    {
+      q: "The safest way to make a repeated data load idempotent is to:",
+      o: ["Sort the file by email address",
+          "Use insert and delete duplicates afterwards",
+          "Upsert on an External ID field",
+          "Load in batches of 200"],
+      a: 2,
+      why: "External ID plus upsert means create-if-absent, update-if-present, matched on your key. Without it, every re-run of a load creates a fresh set of duplicates — modules 04 and 05."
+    },
+    {
+      q: "Two dashboards disagree about pipeline. Which explanation is NOT a plausible cause?",
+      o: ["They use different running users",
+          "One report type requires related records and the other does not",
+          "One counts converted leads and the other excludes them",
+          "Salesforce recalculates dashboards on different schedules per user"],
+      a: 3,
+      why: "Refresh timing can make a dashboard stale, but it does not produce a persistent structural disagreement. The other three do — module 09."
+    },
+    {
+      q: "The integration user can see a record and the sync reports no errors, yet one field stays permanently empty. First thing to check?",
+      o: ["Field-level security for that user's profile",
+          "The org-wide default for the object",
+          "The daily API allocation",
+          "Whether the record is locked"],
+      a: 0,
+      why: "Field-level security fails silently: the write is accepted, the field is not. It is the one gate-3 failure that produces no error at all — modules 06 and 10."
+    },
+    {
+      q: "A nonprofit asks whether they need to buy a data-quality tool. The most defensible answer is:",
+      o: ["Yes — native duplicate handling does not work",
+          "No — native matching and duplicate rules handle everything",
+          "Native rules prevent new duplicates but cannot clean up or run on a schedule; one tool covers that gap, and the architecture does not depend on it",
+          "It depends entirely on their record count"],
+      a: 2,
+      why: "It is the accurate description of the native capability boundary, it justifies the one spend we would recommend, and it leaves them free to decline — module 05."
+    },
+    {
+      q: "In the first meeting, InvestPR has not yet named their CRM. What do you do?",
+      o: ["Open by confirming we know they run Salesforce, to show we did our homework",
+          "Ask, and stay fluent in whichever answer comes back — while stating our own Salesforce and HubSpot history plainly",
+          "Avoid naming any platform, including our own experience",
+          "Describe a platform-agnostic approach with no specifics"],
+      a: 1,
+      why: "README decision D3. Platform neutrality applies to their stack, which we inferred and cannot assert; it explicitly does not apply to our own history, which is our strongest fit signal. Deleting that is the accidental over-correction the decision exists to prevent."
+    }
+  ];
+  var quizWrap = document.getElementById("quizWrap"), answered = 0, correct = 0;
+  QUIZ.forEach(function (item, i) {
+    var d = document.createElement("div");
+    d.className = "q";
+    var opts = item.o.map(function (o, j) {
+      return '<button type="button" data-i="' + i + '" data-j="' + j + '">' + o + "</button>";
+    }).join("");
+    d.innerHTML = '<span class="qtext"><span class="qnum">' + (i + 1) + ".</span>" + item.q + "</span>" +
+      '<div class="opts">' + opts + "</div>" +
+      '<div class="why"><strong>Why:</strong> ' + item.why + "</div>";
+    quizWrap.appendChild(d);
+  });
+  quizWrap.addEventListener("click", function (e) {
+    var b = e.target.closest ? e.target.closest("button[data-j]") : null;
+    if (!b || b.disabled) return;
+    var i = parseInt(b.getAttribute("data-i"), 10), j = parseInt(b.getAttribute("data-j"), 10);
+    var box = b.closest(".q");
+    if (box.getAttribute("data-done")) return;
+    box.setAttribute("data-done", "1");
+    Array.prototype.forEach.call(box.querySelectorAll("button[data-j]"), function (o) {
+      o.disabled = true;
+      var oj = parseInt(o.getAttribute("data-j"), 10);
+      if (oj === QUIZ[i].a) o.classList.add("right");
+      else if (oj === j) o.classList.add("wrong");
+    });
+    box.querySelector(".why").classList.add("show");
+    answered++;
+    if (j === QUIZ[i].a) correct++;
+    if (answered === QUIZ.length) {
+      var s = document.getElementById("quizScore");
+      s.style.display = "";
+      s.querySelector(".score").textContent = correct + " of " + QUIZ.length;
+      document.getElementById("quizAdvice").textContent = correct >= 9
+        ? "You can hold this conversation. Re-skim the cheat sheet before the call and you are done."
+        : correct >= 6
+          ? "Solid. Re-read modules 03, 06 and 09 — conversion, the sync seam, and reporting are where the follow-up questions land."
+          : "Worth another pass. Start with modules 02, 03 and 06; they carry most of what the rest depends on.";
+    }
+  });
+  document.getElementById("quizReset").addEventListener("click", function () {
+    answered = 0; correct = 0;
+    document.getElementById("quizScore").style.display = "none";
+    Array.prototype.forEach.call(quizWrap.querySelectorAll(".q"), function (box) {
+      box.removeAttribute("data-done");
+      box.querySelector(".why").classList.remove("show");
+      Array.prototype.forEach.call(box.querySelectorAll("button[data-j]"), function (o) {
+        o.disabled = false; o.classList.remove("right", "wrong");
+      });
+    });
+    document.getElementById("quiz").scrollIntoView({ block: "start" });
+  });
+})();
+</script>
+
+</body>
+</html>
