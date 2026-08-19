@@ -1,0 +1,960 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Inside the Store Agent</title>
+<style>
+  :root {
+    --bg: #F2F1EC;
+    --surface: #FBFAF6;
+    --surface-2: #ECEAE2;
+    --ink: #151512;
+    --muted: #6B6960;
+    --line: #D9D6CB;
+    --accent: #FF4E00;
+    --accent-soft: #FFE6D9;
+    --blue: #1355D8;
+    --blue-soft: #E3EBFB;
+    --good: #2F7D53;
+    --good-soft: #E1EFE7;
+    --warn: #A85B22;
+    --warn-soft: #F6E8DC;
+    --crit: #B3261E;
+    --crit-soft: #F8E1DF;
+    --code-bg: #EDEBE3;
+    --shadow: 0 1px 2px rgba(21,21,18,0.05);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #171613;
+      --surface: #1F1E1A;
+      --surface-2: #28261F;
+      --ink: #ECEAE2;
+      --muted: #A6A397;
+      --line: #393730;
+      --accent: #FF6A2A;
+      --accent-soft: #3A2114;
+      --blue: #86ABF2;
+      --blue-soft: #1B2A47;
+      --good: #6CBE93;
+      --good-soft: #1B3428;
+      --warn: #D9945C;
+      --warn-soft: #3A2A1B;
+      --crit: #E5766E;
+      --crit-soft: #3F1F1D;
+      --code-bg: #232219;
+      --shadow: 0 1px 2px rgba(0,0,0,0.3);
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #171613;
+    --surface: #1F1E1A;
+    --surface-2: #28261F;
+    --ink: #ECEAE2;
+    --muted: #A6A397;
+    --line: #393730;
+    --accent: #FF6A2A;
+    --accent-soft: #3A2114;
+    --blue: #86ABF2;
+    --blue-soft: #1B2A47;
+    --good: #6CBE93;
+    --good-soft: #1B3428;
+    --warn: #D9945C;
+    --warn-soft: #3A2A1B;
+    --crit: #E5766E;
+    --crit-soft: #3F1F1D;
+    --code-bg: #232219;
+    --shadow: 0 1px 2px rgba(0,0,0,0.3);
+  }
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    *, *::before, *::after { transition: none !important; animation: none !important; }
+  }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: "Charter", "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+    font-size: 1.03rem;
+    line-height: 1.66;
+  }
+  .sans, h1, h2, h3, h4, button, .chip, .step-nav, table, .stack-table, .risk-list { font-family: "Avenir Next", "Avenir", "Helvetica Neue", Helvetica, "Segoe UI", system-ui, sans-serif; }
+  .mono, code, pre, .eyebrow, .num-label { font-family: ui-monospace, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace; }
+  .wrap { max-width: 1120px; margin: 0 auto; padding: 0 24px 120px; }
+  .prose { max-width: 66ch; }
+  h1 { font-size: clamp(2.2rem, 5vw, 3.4rem); line-height: 1.04; letter-spacing: -0.02em; margin: 0.35em 0 0.35em; text-wrap: balance; font-weight: 600; }
+  h2 { font-size: 1.6rem; letter-spacing: -0.015em; margin: 0 0 0.45em; text-wrap: balance; font-weight: 600; }
+  h3 { font-size: 1.1rem; margin: 1.5em 0 0.45em; font-weight: 600; }
+  h4 { font-size: 0.95rem; margin: 1.1em 0 0.35em; font-weight: 600; }
+  p { margin: 0 0 1em; }
+  a { color: var(--blue); }
+  code { font-size: 0.86em; background: var(--code-bg); padding: 0.1em 0.35em; border-radius: 3px; }
+  pre { margin: 0; background: var(--code-bg); border: 1px solid var(--line); border-radius: 8px; padding: 14px 16px; font-size: 0.8rem; line-height: 1.5; overflow-x: auto; color: var(--ink); }
+  pre .k { color: var(--muted); }
+  pre .v { color: var(--blue); }
+  pre .hl { color: var(--accent); font-weight: 600; }
+  pre .cm { color: var(--muted); font-style: italic; }
+  .tnum, td, .stat { font-variant-numeric: tabular-nums; }
+
+  .eyebrow {
+    font-size: 0.72rem; font-weight: 500; text-transform: uppercase; letter-spacing: 0.16em;
+    color: var(--muted); margin: 0 0 0.7em; display: flex; gap: 0.6em; align-items: baseline;
+  }
+  .eyebrow .num { color: var(--accent); font-weight: 700; }
+  header.masthead { padding-top: 60px; border-bottom: 1px solid var(--line); padding-bottom: 30px; }
+  .subtitle { color: var(--muted); font-size: 1.15rem; max-width: 60ch; }
+  .meta-line { font-size: 0.78rem; color: var(--muted); margin-top: 20px; display: flex; flex-wrap: wrap; gap: 6px 22px; }
+  .meta-line b { color: var(--ink); font-weight: 500; }
+
+  nav.toc { display: flex; flex-wrap: wrap; gap: 8px; padding: 18px 0 4px; }
+  nav.toc a {
+    font-family: "Avenir Next", "Helvetica Neue", "Segoe UI", system-ui, sans-serif; font-size: 0.8rem; font-weight: 500;
+    text-decoration: none; color: var(--ink); background: var(--surface); border: 1px solid var(--line);
+    padding: 5px 12px; border-radius: 999px;
+  }
+  nav.toc a .num { color: var(--accent); margin-right: 0.35em; font-family: ui-monospace, Menlo, monospace; font-size: 0.72rem; }
+  nav.toc a:hover, nav.toc a:focus-visible { border-color: var(--ink); outline: none; }
+
+  section { margin-top: 84px; scroll-margin-top: 20px; }
+  .lede { font-size: 1.12rem; }
+
+  .note { border: 1px solid var(--line); border-left: 4px solid var(--blue); background: var(--surface); border-radius: 8px; padding: 14px 20px; margin: 20px 0; }
+  .note.warn { border-left-color: var(--warn); }
+  .note.accent { border-left-color: var(--accent); }
+  .note p:last-child { margin-bottom: 0; }
+  .note .sans { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); display: block; margin-bottom: 4px; }
+
+  figure { margin: 26px 0; }
+  figure svg { max-width: 100%; height: auto; display: block; }
+  figcaption { font-size: 0.86rem; color: var(--muted); margin-top: 10px; max-width: 74ch; }
+  .diagram-frame { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 16px; overflow-x: auto; }
+
+  /* architecture SVG */
+  .arch { color: var(--ink); }
+  .node { cursor: pointer; }
+  .node rect { fill: var(--surface-2); stroke: var(--line); stroke-width: 1.4; rx: 8; transition: stroke 0.15s, fill 0.15s; }
+  .node.agent rect { fill: var(--blue-soft); stroke: var(--blue); }
+  .node.gate rect { fill: var(--surface); stroke: var(--ink); stroke-width: 1.8; }
+  .node text { fill: var(--ink); font-family: "Avenir Next", "Helvetica Neue", "Segoe UI", system-ui, sans-serif; font-size: 12.5px; font-weight: 600; pointer-events: none; }
+  .node text.sub { fill: var(--muted); font-size: 10.5px; font-weight: 400; }
+  .node text.li { fill: var(--ink); font-size: 10.5px; font-weight: 400; font-family: ui-monospace, Menlo, monospace; }
+  .node:hover rect, .node:focus-visible rect { stroke: var(--accent); stroke-width: 2; }
+  .node:focus-visible { outline: none; }
+  .node.selected rect { stroke: var(--accent); stroke-width: 2.4; fill: var(--accent-soft); }
+  .edge { stroke: var(--muted); stroke-width: 1.4; fill: none; }
+  .edge.loop { stroke: var(--blue); stroke-dasharray: 5 4; stroke-width: 1.6; }
+  .edge.hot { stroke: var(--accent); stroke-width: 2; }
+  .elabel { fill: var(--muted); font-family: "Avenir Next", "Helvetica Neue", "Segoe UI", system-ui, sans-serif; font-size: 10.5px; }
+  .elabel.loop { fill: var(--blue); font-weight: 600; }
+  .elabel.hot { fill: var(--accent); font-weight: 600; }
+  #arrowMuted polygon { fill: var(--muted); }
+  #arrowBlue polygon { fill: var(--blue); }
+  #arrowHot polygon { fill: var(--accent); }
+  .lane { fill: none; stroke: var(--line); stroke-dasharray: 2 4; }
+  .lane-label { fill: var(--muted); font-family: ui-monospace, Menlo, monospace; font-size: 9.5px; letter-spacing: 0.12em; }
+
+  .arch-grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 14px; }
+  .panel { border: 1px solid var(--line); border-radius: 12px; background: var(--surface); padding: 18px 22px; min-height: 120px; }
+  .panel h3 { margin-top: 0; }
+  .panel .field { margin: 8px 0; font-size: 0.95rem; }
+  .panel .field b { font-family: "Avenir Next", "Helvetica Neue", "Segoe UI", system-ui, sans-serif; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); display: block; }
+  .panel .adr { display: inline-block; font-family: ui-monospace, Menlo, monospace; font-size: 0.74rem; padding: 2px 8px; border-radius: 999px; border: 1px solid var(--line); color: var(--muted); margin-top: 6px; }
+  .panel .adr b { color: var(--accent); }
+  .panel .hint { color: var(--muted); font-size: 0.92rem; }
+
+  /* stepper */
+  .stepper { border: 1px solid var(--line); border-radius: 12px; background: var(--surface); overflow: hidden; margin: 22px 0; }
+  .step-nav { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-bottom: 1px solid var(--line); background: var(--surface-2); flex-wrap: wrap; }
+  .step-nav .rail { display: flex; gap: 6px; flex: 1; min-width: 200px; }
+  .step-nav .rail button { flex: 1; height: 8px; border-radius: 4px; border: none; background: var(--line); cursor: pointer; padding: 0; }
+  .step-nav .rail button.done { background: var(--muted); }
+  .step-nav .rail button.cur { background: var(--accent); }
+  .step-nav .rail button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .step-nav .count { font-family: ui-monospace, Menlo, monospace; font-size: 0.78rem; color: var(--muted); min-width: 4ch; }
+  .btn { font-family: "Avenir Next", "Helvetica Neue", "Segoe UI", system-ui, sans-serif; font-size: 0.82rem; font-weight: 600; padding: 7px 14px; border-radius: 6px; border: 1px solid var(--ink); background: var(--surface); color: var(--ink); cursor: pointer; }
+  .btn:hover { background: var(--ink); color: var(--bg); }
+  .btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .btn.primary { background: var(--ink); color: var(--bg); }
+  .btn.primary:hover { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .btn:disabled { opacity: 0.4; cursor: default; }
+  .btn:disabled:hover { background: var(--surface); color: var(--ink); }
+  .step { display: none; padding: 20px 22px 24px; }
+  .step.active { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); gap: 22px; }
+  @media (max-width: 860px) { .step.active { grid-template-columns: 1fr; } }
+  .step .who { font-family: "Avenir Next", "Helvetica Neue", "Segoe UI", system-ui, sans-serif; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.14em; color: var(--muted); margin-bottom: 4px; }
+  .step .who .num { color: var(--accent); }
+  .step h3 { margin: 0 0 0.5em; font-size: 1.2rem; }
+  .step p { font-size: 0.97rem; }
+  .step .aside { font-size: 0.86rem; color: var(--muted); border-top: 1px solid var(--line); padding-top: 10px; margin-top: 12px; }
+
+  .chip { display: inline-block; font-size: 0.7rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; padding: 2px 8px; border-radius: 999px; border: 1px solid transparent; vertical-align: middle; }
+  .chip.auto { background: var(--good-soft); color: var(--good); }
+  .chip.review { background: var(--warn-soft); color: var(--warn); }
+  .chip.never { background: var(--crit-soft); color: var(--crit); }
+  .chip.agent { background: var(--blue-soft); color: var(--blue); }
+  .chip.op { background: var(--surface-2); color: var(--ink); border-color: var(--line); }
+  .chip.high { background: var(--crit-soft); color: var(--crit); }
+  .chip.med { background: var(--warn-soft); color: var(--warn); }
+  .chip.low { background: var(--surface-2); color: var(--muted); border-color: var(--line); }
+
+  /* breaker interactive */
+  .breaker { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 20px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); padding: 20px 22px; margin: 22px 0; }
+  @media (max-width: 860px) { .breaker { grid-template-columns: 1fr; } }
+  .breaker label { display: block; font-family: "Avenir Next", "Helvetica Neue", "Segoe UI", system-ui, sans-serif; font-size: 0.8rem; font-weight: 500; margin-top: 12px; }
+  .breaker label span { font-family: ui-monospace, Menlo, monospace; color: var(--muted); font-weight: 400; margin-left: 6px; }
+  .breaker input[type=range] { width: 100%; accent-color: var(--accent); margin: 6px 0 2px; }
+  .breaker input[type=range]:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
+  .verdict { border-radius: 10px; padding: 14px 16px; margin-top: 14px; font-family: "Avenir Next", "Helvetica Neue", "Segoe UI", system-ui, sans-serif; font-size: 0.92rem; border: 1px solid var(--line); background: var(--surface-2); }
+  .verdict.trip { background: var(--crit-soft); border-color: var(--crit); }
+  .verdict.trip b { color: var(--crit); }
+  .verdict.ok b { color: var(--good); }
+  .verdict .big { font-size: 1.5rem; font-weight: 700; display: block; font-variant-numeric: tabular-nums; }
+  .verdict ol { margin: 8px 0 0 18px; padding: 0; font-size: 0.86rem; }
+  .verdict ol li { margin: 2px 0; }
+  .spark { color: var(--ink); }
+  .spark .base { stroke: var(--muted); stroke-dasharray: 3 3; }
+  .spark .bound { stroke: var(--crit); stroke-dasharray: 5 3; }
+  .spark .cpl { stroke: var(--blue); stroke-width: 2; fill: none; }
+  .spark .cpl-obs { stroke: var(--accent); stroke-width: 2; fill: none; }
+  .spark .lab { font-family: ui-monospace, Menlo, monospace; font-size: 10px; fill: var(--muted); }
+  .spark .grid { stroke: var(--line); }
+
+  /* cards & tables */
+  .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; margin: 20px 0; }
+  .card { border: 1px solid var(--line); border-radius: 10px; background: var(--surface); padding: 16px 18px; }
+  .card h4 { margin: 0 0 6px; }
+  .card p { font-size: 0.93rem; margin-bottom: 0.6em; }
+  .card p:last-child { margin-bottom: 0; }
+  .card .stat { font-family: "Avenir Next", "Helvetica Neue", "Segoe UI", system-ui, sans-serif; font-size: 1.6rem; font-weight: 700; letter-spacing: -0.02em; display: block; margin: 4px 0 2px; }
+  .card .stat small { font-size: 0.8rem; font-weight: 500; color: var(--muted); letter-spacing: 0; margin-left: 4px; }
+  table { border-collapse: collapse; width: 100%; font-size: 0.86rem; margin: 14px 0; }
+  th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); font-weight: 600; }
+  td.r, th.r { text-align: right; }
+  .table-wrap { overflow-x: auto; }
+  tr.total td { border-bottom: none; font-weight: 600; }
+
+  .stack-table td:first-child { font-weight: 600; white-space: nowrap; }
+  .stack-table td:last-child { color: var(--muted); }
+  .risk-list { list-style: none; padding: 0; margin: 20px 0; display: grid; gap: 10px; }
+  .risk-list li { border: 1px solid var(--line); border-radius: 10px; background: var(--surface); padding: 14px 16px; display: grid; grid-template-columns: 90px 1fr; gap: 14px; align-items: start; }
+  @media (max-width: 600px) { .risk-list li { grid-template-columns: 1fr; } }
+  .risk-list li b { display: block; margin-bottom: 2px; }
+  .risk-list li p { font-size: 0.9rem; margin: 0; color: var(--ink); font-family: "Charter", "Iowan Old Style", Palatino, Georgia, serif; }
+  .risk-list li p .m { color: var(--muted); }
+  .rule { border: none; border-top: 1px solid var(--line); margin: 40px 0; }
+  .two-col { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px 32px; }
+  .two-col ul { margin: 0; padding-left: 18px; font-size: 0.95rem; }
+  .two-col li { margin: 4px 0; }
+  .kicker { font-family: "Avenir Next", "Helvetica Neue", "Segoe UI", system-ui, sans-serif; font-weight: 600; }
+  footer { margin-top: 90px; border-top: 1px solid var(--line); padding-top: 18px; font-size: 0.78rem; color: var(--muted); font-family: ui-monospace, Menlo, monospace; display: flex; flex-wrap: wrap; gap: 6px 20px; }
+  .flow { display: flex; flex-wrap: wrap; gap: 8px; align-items: stretch; margin: 16px 0; }
+  .flow .stage { flex: 1 1 140px; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; }
+  .flow .stage b { font-family: "Avenir Next", "Helvetica Neue", "Segoe UI", system-ui, sans-serif; display: block; font-size: 0.86rem; }
+  .flow .stage span { font-size: 0.82rem; color: var(--muted); line-height: 1.4; display: block; margin-top: 2px; }
+  .flow .stage.hot { border-color: var(--accent); }
+  .flow .stage.hot b { color: var(--accent); }
+</style>
+<div class="wrap">
+
+<header class="masthead">
+  <div class="eyebrow"><span class="num">RES · INTERNAL</span><span>Builder walkthrough · Group 1 agentic ads operating layer</span></div>
+  <h1>Inside the Store Agent</h1>
+  <p class="subtitle">How the system in the pitch actually works, traced one Cycle at a time — for the people who have to build it. Everything the Operator sees in the console has a mechanism behind it; this is the mechanism.</p>
+  <div class="meta-line">
+    <span><b>Audience</b> Res + build contractors</span>
+    <span><b>Vocabulary</b> CONTEXT.md — canonical terms are capitalized</span>
+    <span><b>Decisions</b> ADR 0001–0003</span>
+    <span><b>Numbers</b> SIM-FACTS.md, illustrative</span>
+    <span><b>Status</b> design, pre-build</span>
+  </div>
+  <nav class="toc" aria-label="Sections">
+    <a href="#machina"><span class="num">I</span>Architecture map</a>
+    <a href="#cyclus"><span class="num">II</span>One Cycle, traced</a>
+    <a href="#custos"><span class="num">III</span>Circuit Breaker</a>
+    <a href="#portfolium"><span class="num">IV</span>Portfolio Agent</a>
+    <a href="#tutela"><span class="num">V</span>Safety engineering</a>
+    <a href="#apparatus"><span class="num">VI</span>Reference stack</a>
+    <a href="#pericula"><span class="num">VII</span>Build risks</a>
+  </nav>
+</header>
+
+<div class="note accent prose" style="margin-top:28px">
+  <span class="sans">The one-sentence version</span>
+  <p>One <b>Store Agent</b> per dealership reads its Store's Signals and Guardrails, decides, and proposes <b>Actions</b>; every Action passes through one <b>Execution Gateway</b> that classifies it Auto / Review / Never in code, writes the <b>Decision Ledger</b>, and either mutates Google Ads, raises an <b>Exception</b> to the Operator, or refuses; Outcomes from the CDP flow back over each Action's <b>Evaluation Window</b> into <b>Store Memory</b> and the <b>Portfolio Agent</b>'s calibration. That loop, 147 times a day.</p>
+</div>
+
+<!-- ============================ I · MACHINA ============================ -->
+<section id="machina">
+  <div class="eyebrow"><span class="num">I · MACHINA</span><span>the parts and how they talk</span></div>
+  <h2>The architecture map</h2>
+  <p class="lede prose">Click any node. The map is left-to-right: what the agent observes, what it decides, how a decision becomes a mutation, and how the result comes back around. Solid arrows are the daily path; dashed blue arrows are the learning loop; the orange arrow is the only place the system writes to the outside world.</p>
+
+  <figure>
+    <div class="diagram-frame">
+      <svg class="arch" viewBox="0 0 1170 520" role="img" aria-label="Sources feed Signal ingestion, which assembles context for the Store Agent; the Store Agent invokes Specialists and proposes Actions to the Execution Gateway; the Gateway checks tier and guardrails, writes the Decision Ledger, and either mutates Google Ads or raises an Exception to the Operator; Outcomes return over the Evaluation Window into the Ledger, Store Memory, and the Portfolio Agent, which proposes guardrail changes and reallocations." id="archsvg">
+        <defs>
+          <marker id="arrowMuted" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><polygon points="0,0 10,5 0,10"/></marker>
+          <marker id="arrowBlue" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><polygon points="0,0 10,5 0,10"/></marker>
+          <marker id="arrowHot" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><polygon points="0,0 10,5 0,10"/></marker>
+        </defs>
+
+        <!-- lane labels -->
+        <text class="lane-label" x="20" y="34">OBSERVE</text>
+        <text class="lane-label" x="430" y="34">DECIDE</text>
+        <text class="lane-label" x="700" y="34">EXECUTE</text>
+        <text class="lane-label" x="960" y="34">OUTSIDE · MEASURE</text>
+        <line class="lane" x1="415" y1="24" x2="415" y2="500"/>
+        <line class="lane" x1="685" y1="24" x2="685" y2="500"/>
+        <line class="lane" x1="945" y1="24" x2="945" y2="500"/>
+
+        <!-- Sources -->
+        <g class="node" tabindex="0" data-id="gads-read"><rect x="20" y="52" width="170" height="44"/><text x="32" y="71">Google Ads API</text><text class="sub" x="32" y="86">read: perf · budgets · changes</text></g>
+        <g class="node" tabindex="0" data-id="cdp"><rect x="20" y="112" width="170" height="44"/><text x="32" y="131">CDP</text><text class="sub" x="32" y="146">leads · appts · sold units</text></g>
+        <g class="node" tabindex="0" data-id="inv"><rect x="20" y="172" width="170" height="44"/><text x="32" y="191">Inventory feed</text><text class="sub" x="32" y="206">units · days on lot · mix</text></g>
+        <g class="node" tabindex="0" data-id="bc"><rect x="20" y="232" width="170" height="44"/><text x="32" y="251">Business Conditions</text><text class="sub" x="32" y="266">Operator / GM flags</text></g>
+        <g class="node" tabindex="0" data-id="guardrails"><rect x="20" y="292" width="170" height="44"/><text x="32" y="311">Guardrails</text><text class="sub" x="32" y="326">enterprise → brand → Store</text></g>
+
+        <!-- Ingestion -->
+        <g class="node" tabindex="0" data-id="ingest"><rect x="240" y="52" width="140" height="284"/><text x="252" y="74">Signal</text><text x="252" y="90">ingestion</text><text class="sub" x="252" y="112">normalize</text><text class="sub" x="252" y="127">dedupe</text><text class="sub" x="252" y="142">window / diff</text><text class="sub" x="252" y="157">emit events</text></g>
+        <line class="edge" x1="190" y1="74" x2="238" y2="74" marker-end="url(#arrowMuted)"/>
+        <line class="edge" x1="190" y1="134" x2="238" y2="134" marker-end="url(#arrowMuted)"/>
+        <line class="edge" x1="190" y1="194" x2="238" y2="194" marker-end="url(#arrowMuted)"/>
+        <line class="edge" x1="190" y1="254" x2="238" y2="254" marker-end="url(#arrowMuted)"/>
+        <line class="edge" x1="190" y1="314" x2="238" y2="314" marker-end="url(#arrowMuted)"/>
+
+        <!-- Store Agent -->
+        <g class="node agent" tabindex="0" data-id="store-agent"><rect x="430" y="52" width="215" height="190"/><text x="444" y="76">Store Agent</text><text class="sub" x="444" y="92">one per Store · ×147</text><text class="li" x="444" y="122">1  assemble context</text><text class="li" x="444" y="140">2  observe deltas</text><text class="li" x="444" y="158">3  invoke Specialists</text><text class="li" x="444" y="176">4  decide</text><text class="li" x="444" y="194">5  propose Actions</text><text class="li" x="444" y="212">6  write reasoning</text></g>
+        <line class="edge" x1="380" y1="147" x2="428" y2="147" marker-end="url(#arrowMuted)"/>
+        <text class="elabel" x="386" y="140">packet</text>
+
+        <!-- Specialists -->
+        <g class="node" tabindex="0" data-id="specialists"><rect x="430" y="284" width="215" height="52"/><text x="444" y="304">Specialists</text><text class="sub" x="444" y="318">terms · keywords · bids</text><text class="sub" x="444" y="331">pacing · structure · creative</text></g>
+        <line class="edge" x1="537" y1="242" x2="537" y2="282" marker-start="url(#arrowMuted)" marker-end="url(#arrowMuted)"/>
+        <text class="elabel" x="545" y="266">invokes / proposals</text>
+
+        <!-- Store Memory -->
+        <g class="node" tabindex="0" data-id="memory"><rect x="430" y="392" width="215" height="48"/><text x="444" y="412">Store Memory</text><text class="sub" x="444" y="428">decision → Outcome history</text></g>
+        <path class="edge loop" d="M 430 416 H 405 V 100 H 428" marker-end="url(#arrowBlue)"/>
+        <text class="elabel loop" x="392" y="382" transform="rotate(-90 392 382)">context, every Cycle</text>
+
+        <!-- Gateway -->
+        <g class="node gate" tabindex="0" data-id="gateway"><rect x="700" y="52" width="205" height="190"/><text x="714" y="76">Execution Gateway</text><text class="sub" x="714" y="92">the only write path</text><text class="li" x="714" y="122">tier check   Auto/Review/Never</text><text class="li" x="714" y="140">guardrail check</text><text class="li" x="714" y="158">Ledger write (always)</text><text class="li" x="714" y="176">mutate  |  queue  |  refuse</text><text class="li" x="714" y="194">rollback</text><text class="li" x="714" y="212">idempotency · quotas</text></g>
+        <line class="edge" x1="645" y1="147" x2="698" y2="147" marker-end="url(#arrowMuted)"/>
+        <text class="elabel" x="650" y="140">Actions</text>
+
+        <!-- Ledger -->
+        <g class="node" tabindex="0" data-id="ledger"><rect x="700" y="284" width="205" height="52"/><text x="714" y="304">Decision Ledger</text><text class="sub" x="714" y="320">decisions · Actions · Outcomes · reasoning</text></g>
+        <line class="edge" x1="802" y1="242" x2="802" y2="282" marker-end="url(#arrowMuted)"/>
+        <text class="elabel" x="810" y="266">writes every Action</text>
+
+        <!-- Portfolio Agent -->
+        <g class="node agent" tabindex="0" data-id="portfolio"><rect x="700" y="392" width="205" height="48"/><text x="714" y="412">Portfolio Agent</text><text class="sub" x="714" y="428">one for Group 1 · weekly · on breaker clusters</text></g>
+        <line class="edge loop" x1="802" y1="336" x2="802" y2="390" marker-end="url(#arrowBlue)"/>
+        <text class="elabel loop" x="810" y="368">Outcomes across Stores</text>
+
+        <!-- Ledger -> Store Memory -->
+        <path class="edge loop" d="M 700 330 H 672 V 366 H 537 V 390" marker-end="url(#arrowBlue)"/>
+        <text class="elabel loop" x="548" y="360">Outcome write-back → memory</text>
+
+        <!-- Portfolio -> Store Agent (reallocation) -->
+        <path class="edge loop" d="M 700 404 H 660 V 200 H 647" marker-end="url(#arrowBlue)"/>
+        <text class="elabel loop" x="676" y="245" transform="rotate(-90 676 245)">reallocation</text>
+
+        <!-- Portfolio -> Guardrails (proposes) -->
+        <path class="edge loop" d="M 802 440 V 476 H 105 V 338" marker-end="url(#arrowBlue)"/>
+        <text class="elabel loop" x="330" y="470">proposes threshold / guardrail changes (Operator decides)</text>
+
+        <!-- Google Ads -->
+        <g class="node" tabindex="0" data-id="gads"><rect x="960" y="52" width="190" height="60"/><text x="974" y="74">Google Ads</text><text class="sub" x="974" y="90">Smart Bidding · PMax</text><text class="sub" x="974" y="103">run the auction</text></g>
+        <line class="edge hot" x1="905" y1="82" x2="958" y2="82" marker-end="url(#arrowHot)"/>
+        <text class="elabel hot" x="908" y="74">mutate</text>
+
+        <!-- Operator -->
+        <g class="node" tabindex="0" data-id="operator"><rect x="960" y="152" width="190" height="60"/><text x="974" y="174">Operator · Console</text><text class="sub" x="974" y="190">Exceptions · Guardrails</text><text class="sub" x="974" y="203">Objectives · Ledger</text></g>
+        <line class="edge" x1="905" y1="176" x2="958" y2="176" marker-end="url(#arrowMuted)"/>
+        <text class="elabel" x="908" y="169">Exception</text>
+        <path class="edge" d="M 958 198 H 930 V 220 H 907" marker-end="url(#arrowMuted)"/>
+        <text class="elabel" x="912" y="234">approve / modify / reject</text>
+
+        <!-- Evaluation Window -->
+        <g class="node" tabindex="0" data-id="evalwin"><rect x="960" y="284" width="190" height="52"/><text x="974" y="304">Evaluation Window</text><text class="sub" x="974" y="320">7 / 14 / 28 d · joins CDP Outcomes</text></g>
+        <line class="edge" x1="905" y1="300" x2="958" y2="300" marker-end="url(#arrowMuted)"/>
+        <text class="elabel" x="908" y="293">opens per Action</text>
+        <line class="edge loop" x1="958" y1="322" x2="907" y2="322" marker-end="url(#arrowBlue)"/>
+        <text class="elabel loop" x="932" y="350" text-anchor="middle">Outcome write-back</text>
+
+        <!-- Experiments -->
+        <g class="node" tabindex="0" data-id="experiments"><rect x="960" y="392" width="190" height="48"/><text x="974" y="412">Experiments</text><text class="sub" x="974" y="428">holdouts · budget splits</text></g>
+        <line class="edge loop" x1="905" y1="416" x2="958" y2="416" marker-start="url(#arrowBlue)" marker-end="url(#arrowBlue)"/>
+      </svg>
+    </div>
+    <figcaption>The daily path runs left to right; the learning loop (dashed blue) runs back from the Ledger into Store Memory and the Portfolio Agent. Only the orange <em>mutate</em> arrow leaves the system. The CDP is read on the left and joined to Actions on the right; the join is the Evaluation Window's job.</figcaption>
+  </figure>
+
+  <div class="arch-grid">
+    <div class="panel" id="archpanel" aria-live="polite">
+      <h3>Click a node</h3>
+      <p class="hint">Each node explains what it does, what goes in and out, and which decision record governs it. Try <b>Execution Gateway</b> first — it is where the autonomy story stops being a slide and becomes code.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ II · CYCLVS ============================ -->
+<section id="cyclus">
+  <div class="eyebrow"><span class="num">II · CYCLVS</span><span>one Cycle, traced from the inside</span></div>
+  <h2>Bayou City Toyota, Tuesday, 05:40 CT</h2>
+  <p class="lede prose">This is the same Exception the Operator approves in the user simulation, seen from inside the machine. The context packets are shown as readable YAML-ish blocks — an illustration of <em>shape</em>, not a schema. Step through with the buttons or the arrow keys.</p>
+
+  <div class="stepper" id="stepper">
+    <div class="step-nav">
+      <button class="btn" id="prevStep" type="button">← Prev</button>
+      <div class="rail" id="rail" role="tablist" aria-label="Cycle steps"></div>
+      <span class="count" id="stepCount">1 / 8</span>
+      <button class="btn primary" id="nextStep" type="button">Next →</button>
+    </div>
+
+    <div class="step active" data-step="1">
+      <div>
+        <div class="who"><span class="num">1 · TRIGGER</span> · scheduler</div>
+        <h3>The daily Cycle fires</h3>
+        <p>Google Ads' previous-day data settles overnight; the workflow runner starts one Cycle per Store around 05:30 local. This one is a <em>daily</em> Cycle, so it does a full review. (An intraday Cycle would only pace and look for anomalies; an event Cycle would be scoped to the Signal that fired it.)</p>
+        <p>Nothing has called a model yet. The runner is deterministic and durable — if the process dies mid-Cycle it resumes at the last completed step, and re-running a step never double-executes an Action (idempotency keys, §V).</p>
+        <p class="aside">A Cycle is a workflow, not a chat. The model is invoked at specific steps with a bounded packet, and every step's output is persisted before the next begins.</p>
+      </div>
+      <pre><span class="cm"># cycle envelope</span>
+<span class="k">cycle_id:</span>      <span class="v">cyc_2026-08-18_bct_daily</span>
+<span class="k">store:</span>         <span class="v">st_0417  Bayou City Toyota · Houston TX</span>
+<span class="k">kind:</span>          <span class="v">daily</span>          <span class="cm"># daily | intraday | event</span>
+<span class="k">trigger:</span>       <span class="v">schedule 05:30 America/Chicago</span>
+<span class="k">data_asof:</span>     <span class="v">2026-08-17 (Google Ads day complete)</span>
+<span class="k">idempotency:</span>   <span class="v">st_0417:2026-08-18:daily</span>
+<span class="k">steps:</span>         <span class="v">[assemble, observe, specialists, decide, gateway, ledger]</span></pre>
+    </div>
+
+    <div class="step" data-step="2">
+      <div>
+        <div class="who"><span class="num">2 · ASSEMBLE</span> · Signal ingestion → context packet</div>
+        <h3>The Store Agent gets its packet</h3>
+        <p>Ingestion has already normalized the sources into per-Store deltas. The packet is what the agent <em>sees</em>: Objectives, the applicable Guardrails after inheritance, yesterday's campaign state, the Signal deltas, and Store Memory excerpts retrieved because they resemble today's situation.</p>
+        <p>Two deltas jump out: new Tacoma inventory has fallen from 31 to 4 units, and aged used inventory (≥ 60 days) has risen from 29 to 47. Google Ads cannot see either.</p>
+        <p class="aside">The Guardrails block is <em>resolved</em> — enterprise defaults, brand overrides and Store overrides already merged — so the agent reasons about one set of numbers. The Gateway re-resolves independently at execution time; the agent's copy is for reasoning only.</p>
+      </div>
+      <pre><span class="cm"># context packet (excerpt)</span>
+<span class="k">objectives:</span>
+  <span class="k">used_cost_per_sold_unit_max:</span> <span class="v">310</span>
+  <span class="k">new_cost_per_sold_unit_max:</span>  <span class="v">260</span>
+  <span class="k">priorities:</span> <span class="v">[aged_inventory_60d, used_share_min_0.40]</span>
+  <span class="k">monthly_envelope:</span> <span class="v">38400</span>   <span class="k">mtd_spend:</span> <span class="v">21910</span>
+<span class="k">guardrails (resolved):</span>
+  <span class="k">budget_shift_auto_max_pct:</span> <span class="hl">0.10</span>   <span class="cm"># brand:Toyota inherits enterprise</span>
+  <span class="k">target_move_auto_max_pct:</span>  <span class="v">0.15</span>
+  <span class="k">campaign_pause_or_create:</span>  <span class="v">review</span>
+  <span class="k">coop_campaigns:</span>            <span class="v">review</span>
+  <span class="k">never:</span> <span class="v">[exceed_monthly_cap, conversion_tracking, locked:*]</span>
+<span class="k">signals.inventory:</span>
+  <span class="k">new.tacoma.units:</span>          <span class="hl">31 → 4</span>   <span class="k">eta:</span> <span class="v">unconfirmed</span>
+  <span class="k">used.aged_60d.units:</span>       <span class="hl">29 → 47</span>
+<span class="k">signals.cdp (7d):</span>
+  <span class="k">leads:</span> <span class="v">142</span>  <span class="k">appointments:</span> <span class="v">61</span>  <span class="k">sold_units_attributed:</span> <span class="v">19</span>
+<span class="k">campaigns (yesterday):</span>
+  <span class="k">New · Tacoma:</span>     <span class="v">budget 3000/d  spend 2940  cpl 34  impr 18.4k</span>
+  <span class="k">Used · Trucks&amp;SUVs:</span> <span class="v">budget 1800/d  spend 1795  cpl 41  impr 9.1k</span>
+<span class="k">memory (retrieved, 2 of 14):</span>
+  <span class="v">- 2026-05-12 shift new→used +$380/d · used leads +22% · cpl flat · 6 aged sold/14d</span>
+  <span class="v">- 2026-03-03 negatives sweep on 'tacoma lease' cut converting impr; be conservative</span></pre>
+    </div>
+
+    <div class="step" data-step="3">
+      <div>
+        <div class="who"><span class="num">3 · SPECIALISTS</span> · shared skills, invoked by the Store Agent</div>
+        <h3>Each Specialist proposes; none decides</h3>
+        <p>The Store Agent invokes the Specialists relevant to a daily Cycle. Each returns candidate Actions with evidence and an expected effect. They are skills with narrow prompts and deterministic helpers (a search-term sweep is mostly a query, not a conversation), not agents with their own agenda — see <a href="#adr1">ADR 0001</a>.</p>
+        <p>Pacing and Search Terms return routine housekeeping. Structure returns nothing this Cycle. The interesting proposal is Pacing's reallocation, which the Store Agent will weigh against Store Memory.</p>
+        <p class="aside">Specialists are where most tuning will live: their thresholds are the parameters the Portfolio Agent calibrates (§IV).</p>
+      </div>
+      <pre><span class="cm"># specialist proposals (this Cycle)</span>
+<span class="k">search_terms:</span>
+  <span class="v">- add_negative  "tacoma for sale by owner"  wasted 7d: $86</span>
+  <span class="v">- add_negative  "tundra"  (routes to wrong campaign)</span>
+<span class="k">bids:</span>
+  <span class="v">- none  (tCPA within band; Smart Bidding stable)</span>
+<span class="k">pacing:</span>
+  <span class="hl">- shift_budget  from "New · Tacoma" to "Used · Trucks&amp;SUVs"
+                  amount 420/d  = 14% of source
+                  why: inventory 4 units; ~$300/d of impressions on
+                       unavailable stock; aged used rising</span>
+<span class="k">creative:</span>
+  <span class="v">- swap RSA headline  "47 Certified Trucks &amp; SUVs on the lot"</span>
+<span class="k">structure:</span>
+  <span class="v">- none</span></pre>
+    </div>
+
+    <div class="step" data-step="4">
+      <div>
+        <div class="who"><span class="num">4 · DECIDE</span> · Store Agent</div>
+        <h3>The agent decides and writes its reasoning</h3>
+        <p>The Store Agent accepts the routine proposals and adopts the reallocation, citing the May 12 memory as precedent and setting its own reversal condition. It emits a list of Actions, each with the reasoning that will appear verbatim in the Ledger and on the Operator's Exception card.</p>
+        <p>Note what the agent does <em>not</em> do: it does not classify its own Actions as Auto or Review, and it does not touch Google Ads. It proposes.</p>
+        <p class="aside">The reasoning field is the product. If it is vague, the Operator will not trust the Auto tier and the Exception queue becomes the bottleneck the pitch says it is not.</p>
+      </div>
+      <pre><span class="cm"># decision (excerpt)</span>
+<span class="k">actions:</span>
+  <span class="k">- id:</span> <span class="v">a1</span> <span class="k">type:</span> <span class="v">add_negative</span>  <span class="k">campaign:</span> <span class="v">New · Tacoma</span>  <span class="k">term:</span> <span class="v">"tacoma for sale by owner"</span>
+  <span class="k">- id:</span> <span class="v">a2</span> <span class="k">type:</span> <span class="v">add_negative</span>  <span class="k">campaign:</span> <span class="v">New · Tacoma</span>  <span class="k">term:</span> <span class="v">"tundra"</span>
+  <span class="k">- id:</span> <span class="v">a3</span> <span class="k">type:</span> <span class="v">swap_asset</span>    <span class="k">campaign:</span> <span class="v">Used · Trucks&amp;SUVs</span>
+  <span class="hl">- id: a4 type: shift_budget
+    from: New · Tacoma   to: Used · Trucks&amp;SUVs   amount_per_day: 420
+    expected: used leads +15–25% /14d · new leads −8%
+    reverse_when: new.tacoma.units &gt; 12
+    evaluation_window_days: 14</span>
+<span class="k">reasoning:</span> <span class="v">|</span>
+  <span class="v">Tacoma inventory is 4 units with no confirmed ETA. Yesterday's
+  $2,940 bought 18.4k impressions on stock we largely can't sell.
+  Aged used inventory rose to 47; the used truck campaign converts
+  at $41 CPL and is budget-capped. On May 12 a similar $380/d shift
+  lifted used leads 22% at flat CPL and cleared 6 aged units in
+  14 days. Proposing $420/d, reversing when Tacoma stock exceeds 12.</span></pre>
+    </div>
+
+    <div class="step" data-step="5">
+      <div>
+        <div class="who"><span class="num">5 · GATEWAY</span> · tier check, in code</div>
+        <h3>The Execution Gateway classifies each Action</h3>
+        <p>The Gateway re-resolves the Guardrails for this Store and runs each Action through the classifier. It is a rules engine, not a model: type → applicable rule → magnitude → tier. Negatives and asset swaps are Auto. The budget shift is 14% of the source campaign's daily budget; the Auto ceiling is 10%; the shift is inside the monthly cap and touches no locked or Co-op Campaign, so it is <b>Review</b>, not Never.</p>
+        <p>Auto Actions are executed now, in a single idempotent batch, and confirmed against the API response. The Review Action is queued as an Exception. Everything — including what was refused — is written to the Ledger before any external call. See <a href="#adr2">ADR 0002</a>.</p>
+      </div>
+      <pre><span class="cm"># gateway verdicts</span>
+<span class="k">a1 add_negative</span>    <span class="v">rule: negatives.auto</span>                <span class="hl">→ AUTO</span>   <span class="v">executed</span>
+<span class="k">a2 add_negative</span>    <span class="v">rule: negatives.auto</span>                <span class="hl">→ AUTO</span>   <span class="v">executed</span>
+<span class="k">a3 swap_asset</span>      <span class="v">rule: creative.template_ok</span>          <span class="hl">→ AUTO</span>   <span class="v">executed</span>
+<span class="k">a4 shift_budget</span>    <span class="v">rule: budget_shift_auto_max_pct</span>
+                   <span class="v">magnitude 0.14 &gt; limit 0.10</span>
+                   <span class="v">monthly_cap ok · locked no · coop no</span>
+                                                       <span class="hl">→ REVIEW</span>
+                   <span class="v">queued as Exception exc_88213</span>
+
+<span class="cm"># mutate batch (Auto only)</span>
+<span class="k">google_ads.mutate</span> <span class="v">customer 417-…  ops 3  idempotency st_0417:cyc…:a1-a3</span>
+<span class="k">response</span>          <span class="v">3/3 ok · partial_failure none · quota used 3</span></pre>
+    </div>
+
+    <div class="step" data-step="6">
+      <div>
+        <div class="who"><span class="num">6 · LEDGER</span> · the record</div>
+        <h3>The Ledger entry, as written</h3>
+        <p>One row per Action, plus one for the Cycle. The Operator's console is a view over this table; the learn step is a query over it. Because the entry carries the reasoning, the packet hash, and the evaluation window, a decision can be replayed later — which is how we intend to evaluate agent behavior offline before widening the Auto tier (§VII).</p>
+        <p class="aside">The Ledger is append-only. A rollback is a new Action that references the one it reverses, never an edit.</p>
+      </div>
+      <pre><span class="cm"># ledger rows (abridged)</span>
+<span class="k">ts</span>                 <span class="k">actor</span>        <span class="k">action</span>       <span class="k">tier</span>    <span class="k">status</span>    <span class="k">eval_until</span>
+<span class="v">2026-08-18 05:41   store_agent  a1 negative  AUTO    executed  08-25</span>
+<span class="v">2026-08-18 05:41   store_agent  a2 negative  AUTO    executed  08-25</span>
+<span class="v">2026-08-18 05:41   store_agent  a3 asset     AUTO    executed  09-01</span>
+<span class="hl">2026-08-18 05:41   store_agent  a4 shift     REVIEW  queued    —</span>
+<span class="v">2026-08-18 05:41   system       cycle done   —       ok        —</span>
+
+<span class="k">a4.reasoning_ref:</span>   <span class="v">dec_5f2c…</span>   <span class="k">packet_hash:</span> <span class="v">9be1…</span>
+<span class="k">a4.evidence:</span>        <span class="v">[inventory delta, cpl 7d, memory 2026-05-12]</span></pre>
+    </div>
+
+    <div class="step" data-step="7">
+      <div>
+        <div class="who"><span class="num">7 · OPERATOR</span> · 07:12 CT, the Exception queue</div>
+        <h3>Ask, then Approve</h3>
+        <p>The Operator opens exc_88213 in the console, sees the reasoning and evidence, and Asks: <em>“Why not wait for the shipment?”</em> The Ask is routed back to the Store Agent with the Exception's packet as context; the reply is short and specific. The Operator approves. The Gateway executes a4 now — same batch path, same idempotency, tier recorded as <code>REVIEW · approved by operator</code>.</p>
+        <p class="aside">Modify is the same path with a changed magnitude; Reject writes a refusal to the Ledger and the agent's stated reminder condition becomes a watch.</p>
+      </div>
+      <pre><span class="cm"># ask / reply</span>
+<span class="k">operator:</span> <span class="v">Why not wait for the shipment?</span>
+<span class="k">store_agent:</span> <span class="v">ETA is unconfirmed (3+ weeks per feed). Every day of
+  Tacoma spend at 4 units is ~$300 of impressions on unavailable
+  inventory. I'll propose reversing when inventory &gt; 12.</span>
+
+<span class="cm"># resolution</span>
+<span class="k">exc_88213:</span> <span class="hl">APPROVED</span> <span class="v">by operator@group1  07:14 CT  (queue age 1h 33m)</span>
+<span class="k">google_ads.mutate</span> <span class="v">ops 2 (budget −420 New·Tacoma, +420 Used·Trucks&amp;SUVs)</span>
+<span class="k">ledger a4:</span> <span class="v">executed · eval_until 2026-09-01</span></pre>
+    </div>
+
+    <div class="step" data-step="8">
+      <div>
+        <div class="who"><span class="num">8 · OUTCOME</span> · 14 days later</div>
+        <h3>The Evaluation Window closes</h3>
+        <p>On Sept 1 the window for a4 closes. The Evaluation Window job joins CDP Outcomes for the Store to the Action's period and campaigns, computes the deltas against the pre-period, and writes them back to the Ledger row. That row becomes a Store Memory entry the next time a similar situation appears, and one more data point in the Portfolio Agent's calibration of the budget-shift threshold.</p>
+        <p class="aside">This is the whole “learn” mechanism: a measured Outcome attached to a decision, retrieved as context later. No retraining — <a href="#adr3">ADR 0003</a>.</p>
+      </div>
+      <pre><span class="cm"># outcome write-back (a4)</span>
+<span class="k">window:</span>        <span class="v">2026-08-18 → 2026-09-01</span>
+<span class="k">used_leads:</span>    <span class="v">+19%  vs prior 14d</span>     <span class="k">used_cpl:</span> <span class="v">$41 → $40</span>
+<span class="k">new_leads:</span>     <span class="v">−7%</span>
+<span class="k">aged_60d_sold:</span> <span class="v">5</span>                      <span class="k">aged_60d_units:</span> <span class="v">47 → 39</span>
+<span class="k">cost_per_sold_unit (used):</span> <span class="v">$304  (objective ≤ 310)</span>
+<span class="k">verdict:</span>       <span class="hl">consistent with expectation (+15–25%)</span>
+<span class="k">memory:</span>        <span class="v">appended as mem_2026-08-18_shift_new_used</span>
+<span class="k">calibration:</span>   <span class="v">datapoint → budget_shift threshold review (Toyota)</span></pre>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ III · CVSTOS ============================ -->
+<section id="custos">
+  <div class="eyebrow"><span class="num">III · CVSTOS</span><span>the guardrail that acts on its own</span></div>
+  <h2>Circuit Breaker mechanics</h2>
+  <p class="lede prose">A Circuit Breaker is a performance Guardrail with a hand on the switch. It watches a leading indicator over a short window against a longer baseline; when it trips it freezes the Auto tier for that Store, rolls back the most plausible cause, and raises an Exception. It runs inside intraday Cycles and is deterministic — no model call to decide whether to trip.</p>
+
+  <div class="flow">
+    <div class="stage"><b>Detect</b><span>3-day mean of CPL vs 14-day baseline; trip if +35% (enterprise default) and volume is significant</span></div>
+    <div class="stage hot"><b>Freeze</b><span>Auto tier suspended for the Store; intraday pacing continues read-only</span></div>
+    <div class="stage"><b>Roll back</b><span>most recent Action in scope that could plausibly move the indicator (here: a tCPA change)</span></div>
+    <div class="stage"><b>Raise</b><span>Exception with the trace, hypotheses and a proposed way back to normal</span></div>
+    <div class="stage"><b>Resume</b><span>only by Operator decision; Portfolio Agent watches for clusters</span></div>
+  </div>
+
+  <div class="breaker">
+    <div>
+      <div class="who sans" style="font-size:.72rem;text-transform:uppercase;letter-spacing:.14em;color:var(--muted)">Sooner Ridge Honda · Oklahoma City · Aug 3–16</div>
+      <figure style="margin:8px 0 0">
+        <svg class="spark" viewBox="0 0 520 200" role="img" aria-label="CPL over fourteen days at Sooner Ridge Honda: a stable baseline near thirty-eight dollars, a target change on August 13, then a rise to fifty-three dollars by August 16 crossing the plus thirty-five percent bound." id="sparksvg">
+          <line class="grid" x1="40" y1="20" x2="40" y2="160"/>
+          <line class="grid" x1="40" y1="160" x2="500" y2="160"/>
+          <line class="base" x1="40" y1="0" x2="500" y2="0" id="baseLine"/>
+          <text class="lab" x="44" y="0" id="baseLab">baseline $38</text>
+          <line class="bound" x1="40" y1="0" x2="500" y2="0" id="boundLine"/>
+          <text class="lab" x="44" y="0" id="boundLab" style="fill:var(--crit)">bound +35% · $51.30</text>
+          <polyline class="cpl" id="cplLine" points=""/>
+          <polyline class="cpl-obs" id="cplObs" points=""/>
+          <line class="grid" x1="0" y1="20" x2="0" y2="160" id="changeLine" style="stroke:var(--accent);stroke-dasharray:2 3"/>
+          <text class="lab" x="0" y="14" id="changeLab" style="fill:var(--accent)">tCPA $40→$46</text>
+          <text class="lab" x="40" y="176">Aug 3</text>
+          <text class="lab" x="500" y="176" text-anchor="end">Aug 16</text>
+          <text class="lab" x="36" y="164" text-anchor="end">$30</text>
+          <text class="lab" x="36" y="24" text-anchor="end">$60</text>
+        </svg>
+        <figcaption>Blue: the observed history. Orange: what the last three days look like at the CPL you set below. Red dashed: the trip bound at the tolerance you set.</figcaption>
+      </figure>
+    </div>
+    <div>
+      <label>Observed CPL, last 3 days <span id="obsVal">$53</span>
+        <input type="range" id="obsCpl" min="30" max="60" step="1" value="53" aria-label="Observed CPL over the last three days">
+      </label>
+      <label>Trip bound above baseline <span id="boundVal">+35%</span>
+        <input type="range" id="boundPct" min="15" max="60" step="5" value="35" aria-label="Trip bound as percent above baseline">
+      </label>
+      <label>Baseline, 14 days <span>$38 · fixed</span></label>
+      <div class="verdict trip" id="verdict" aria-live="polite">
+        <b>TRIPPED</b> <span class="big" id="deltaVal">+39.5%</span>
+        <ol id="verdictSteps">
+          <li>Freeze Auto tier for Sooner Ridge Honda</li>
+          <li>Roll back tCPA $46 → $40 (Aug 13 Action, in scope)</li>
+          <li>Raise Exception with hypotheses: Smart Bidding relearning after the target move; competitor “0% APR CR-V” event — “cr-v 0% apr” queries +180%</li>
+          <li>Proposal on the card: resume Auto, tCPA $42, watch 7 days; watch-list competitor terms rather than negating them</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+
+  <div class="two-col prose" style="max-width:none">
+    <div>
+      <h4>What is in scope for rollback</h4>
+      <ul>
+        <li>Actions on this Store within the detection window that touch the tripped indicator's campaigns: target moves, budget shifts, structural changes.</li>
+        <li>Never negatives or asset swaps by default — low blast radius, and reverting them can reintroduce waste. They are listed on the Exception for the Operator.</li>
+        <li>Rollback is itself an Action through the Gateway: idempotent, Ledgered, reversible.</li>
+      </ul>
+    </div>
+    <div>
+      <h4>Why the breaker is dumb on purpose</h4>
+      <ul>
+        <li>It must fire even if the model is down, slow, or wrong. It is a query and a threshold.</li>
+        <li>The <em>explanation</em> is where the model helps: the Store Agent writes the hypotheses and the way back, and that is what the Operator reads.</li>
+        <li>Volume gate: no trip on tiny denominators (a Store with 6 leads a day will swing 40% on noise). Minimum-volume rules are part of the Guardrail.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ IV · PORTFOLIVM ============================ -->
+<section id="portfolium">
+  <div class="eyebrow"><span class="num">IV · PORTFOLIVM</span><span>the one agent that sees across Stores</span></div>
+  <h2>The Portfolio Agent</h2>
+  <p class="lede prose">Store Agents cannot see each other. The Portfolio Agent reads the Ledger across all 147 Stores on a weekly Cycle (and immediately on Circuit Breaker clusters) and does three things: reallocate budget between Stores within corporate limits, calibrate the thresholds the Specialists and the Gateway use, and design Experiments so that “learn” is measured against a control.</p>
+
+  <div class="cards">
+    <div class="card">
+      <h4>Weekly reallocation</h4>
+      <span class="stat">$18,400<small>/ week</small></span>
+      <p>Moved from 9 Stores pacing under plan with soft demand (New Mexico, Kansas, Mississippi) to 12 Stores in DFW and Houston with aged used inventory rising.</p>
+      <p>Corporate limits: no Store below 85% of its envelope, none above 110%. Cross-Store moves are always Review — the Operator approves the packet as a whole.</p>
+    </div>
+    <div class="card">
+      <h4>Threshold calibration</h4>
+      <span class="stat">10% → 15%<small>Toyota · Auto budget shift</small></span>
+      <p>In 30 days the 23 Toyota Stores raised 38 Exceptions for shifts of 10–15%; 38 of 38 approved, median 4h 12m in queue. The Portfolio Agent proposes raising the Auto ceiling at brand scope.</p>
+      <p>Projected Toyota Exceptions per week: 11 → 4. The Operator moves the slider; the Gateway reads the new value on its next resolve. This is how autonomy grows: by evidence, one scope at a time.</p>
+    </div>
+    <div class="card">
+      <h4>Experiment readout</h4>
+      <span class="stat">+9.4%<small>used sold units vs holdout</small></span>
+      <p>12 weeks, 24-Store holdout, aged-inventory prioritization tactic on the rest. Cost per sold unit −11% versus the holdout.</p>
+      <p>Recommendation on the card: make aged-inventory priority an enterprise default Objective. The Operator decides; the Ledger records the Experiment as the reason.</p>
+    </div>
+  </div>
+
+  <h3>How a holdout is chosen</h3>
+  <div class="two-col prose" style="max-width:none">
+    <div>
+      <ul>
+        <li>Stratify Stores by brand, market and monthly budget; pick the holdout so each stratum is represented (24 of 147 ≈ 16%).</li>
+        <li>Holdout Stores keep running the agent, with the tactic under test disabled — they are not “unmanaged”, or the comparison measures the agent, not the tactic.</li>
+        <li>Pre-register the metric (used sold units, cost per sold unit), the window (12 weeks) and the minimum detectable effect before starting; the readout is computed by a fixed job, not by the model.</li>
+      </ul>
+    </div>
+    <div>
+      <ul>
+        <li>Guardrails still apply inside the Experiment. No Store is exposed beyond its envelope to make a test significant.</li>
+        <li>Seasonality is handled by the control, not by modeling; that is the point of holding out.</li>
+        <li>Results write to the Ledger and become Portfolio-level memory: “this tactic was measured, here is the effect, here is when.”</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ V · TVTELA ============================ -->
+<section id="tutela">
+  <div class="eyebrow"><span class="num">V · TVTELA</span><span>the boring parts that make autonomy acceptable</span></div>
+  <h2>Safety engineering</h2>
+  <p class="lede prose">The pitch's credibility rests on this section more than on the model. Each item below is a Gateway or workflow concern, implemented once, and none of them depend on a prompt behaving.</p>
+
+  <div class="cards">
+    <div class="card"><h4>The Never list is code</h4><p>Exceeding a monthly cap, editing conversion tracking, touching locked or Co-op Campaigns: rules in configuration the Gateway evaluates. The model can propose anything; the Gateway refuses and Ledgers the refusal. Prompts describe intent; they are never the safety mechanism.</p></div>
+    <div class="card"><h4>Credentials never reach the model</h4><p>The Store Agent has no Google Ads token. It emits Actions as data; only the Gateway holds credentials, and it holds them per customer account with the narrowest scope Google allows.</p></div>
+    <div class="card"><h4>Idempotent mutations</h4><p>Every Action carries an idempotency key (Store · Cycle · Action). A retried step or a duplicate event cannot double-shift a budget. The Ledger row is written before the API call and finalized after.</p></div>
+    <div class="card"><h4>Rollback is first-class</h4><p>Every mutating Action records enough to reverse it (previous budget, previous target, removed negative). Rollback is a new Action through the same Gateway — Ledgered and reversible again.</p></div>
+    <div class="card"><h4>Dry-run mode</h4><p>Per Store, per scope, or global: the Gateway classifies, Ledgers and returns as if executed, without mutating. This is the shadow mode of any rollout and the mode for offline evaluation.</p></div>
+    <div class="card"><h4>Quotas and rate limits</h4><p>Google Ads API operations are budgeted per Cycle and batched; the Gateway backs off on rate errors and defers non-urgent Auto Actions rather than dropping them. Test accounts for anything structural before it runs against a live customer.</p></div>
+    <div class="card"><h4>Blast-radius bounds</h4><p>Beyond per-Action Guardrails: a per-Store per-day cap on total budget moved, and a portfolio-level cap on Actions per hour. A misbehaving Specialist cannot rewrite 147 Stores before anyone notices.</p></div>
+    <div class="card"><h4>Everything is replayable</h4><p>Packets are hashed and stored; decisions can be re-run against history with a newer prompt or threshold to see what would have changed. This is how we earn each widening of the Auto tier.</p></div>
+  </div>
+</section>
+
+<!-- ============================ VI · APPARATVS ============================ -->
+<section id="apparatus">
+  <div class="eyebrow"><span class="num">VI · APPARATVS</span><span>a reference stack — reference, not decided</span></div>
+  <h2>What we would build it with</h2>
+  <div class="note warn prose">
+    <span class="sans">Status</span>
+    <p><b>Reference, not decided.</b> Implementation strategy is a post-win conversation (README D1). This is the shape we would start from so the estimates below have something to stand on; every row is swappable.</p>
+  </div>
+
+  <div class="table-wrap">
+    <table class="stack-table">
+      <thead><tr><th>Concern</th><th>Reference choice</th><th>Why this shape</th></tr></thead>
+      <tbody>
+        <tr><td>Agents</td><td>Claude via the Agent SDK — one Store Agent definition instantiated per Store; Specialists as tools/skills; Portfolio Agent as a second definition</td><td>Tool-use with bounded packets; the model reasons, the harness executes</td></tr>
+        <tr><td>Cycles</td><td>Durable workflow runner (step-based, resumable)</td><td>A Cycle must survive crashes and never double-execute; that is a workflow, not a cron + script</td></tr>
+        <tr><td>Ledger and state</td><td>Postgres — append-only Ledger, resolved Guardrails, Store Memory rows, Experiment registry</td><td>Queryable by the console, by the evaluation job, and by the Portfolio Agent; boring on purpose</td></tr>
+        <tr><td>Signals</td><td>Event bus — ingestion emits per-Store deltas; event Cycles subscribe</td><td>Inventory and CDP changes arrive on their own schedules; the agent should react, not poll</td></tr>
+        <tr><td>Google Ads</td><td>Official Google Ads API client, behind the Gateway; GAQL for reads, batched mutate for writes</td><td>One place for auth, quotas, idempotency, partial-failure handling</td></tr>
+        <tr><td>CDP / inventory</td><td>Read-only connectors into ingestion; Store-level identity resolution lives here</td><td>The system never writes to the CDP or DMS (ADR 0002)</td></tr>
+        <tr><td>Console</td><td>Web app over the Ledger and Guardrails tables; Ask routes to the Store Agent with the Exception's packet</td><td>The console is a view, not a second source of truth</td></tr>
+        <tr><td>Evaluation</td><td>Offline replay harness over stored packets; dry-run Gateway</td><td>Compare decisions across prompt/threshold versions before widening Auto</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Cost-of-thinking sanity check <span class="chip low">estimate</span></h3>
+  <div class="two-col prose" style="max-width:none">
+    <div>
+      <p>Order-of-magnitude model calls per day, at 147 Stores:</p>
+      <ul>
+        <li><b>Daily Cycles:</b> 147 × ~8 calls (assemble/decide plus Specialist calls that need a model; several Specialists are mostly queries) ≈ <b>1,200</b></li>
+        <li><b>Intraday checks:</b> 4 × 147 = 588 runs, deterministic unless an anomaly needs explaining; ~10% escalate to a model call ≈ <b>60</b></li>
+        <li><b>Event Cycles:</b> ~50 Signals/day across the portfolio × ~3 calls ≈ <b>150</b></li>
+        <li><b>Asks, Portfolio, Experiments:</b> tens, not hundreds</li>
+      </ul>
+    </div>
+    <div>
+      <p>≈ <b>1,400–1,600 model calls a day</b>, each carrying a bounded packet — call it 30–60K tokens in, a few K out — so roughly <b>50–90M input tokens/day</b> before caching. Packets share large stable prefixes (Objectives, resolved Guardrails, campaign structure), which is what prompt caching exists for; expect the effective number to be well under that.</p>
+      <p class="kicker" style="font-size:.9rem;color:var(--muted)">This is a design-stage estimate to show the shape is affordable relative to a $4.6M/month media budget, not a quote. Price it properly against the current rate card when the stack is decided.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ VII · PERICVLA ============================ -->
+<section id="pericula">
+  <div class="eyebrow"><span class="num">VII · PERICVLA</span><span>what could make this hard — internal, candid</span></div>
+  <h2>Open questions and build risks</h2>
+  <p class="lede prose">None of these are reasons not to build. They are the places where the estimate is most likely to be wrong and where the first design spikes should go.</p>
+
+  <ul class="risk-list">
+    <li><span class="chip high">high</span><div><b>Attribution latency</b><p>Sold units land days to weeks after the click; Evaluation Windows of 14–28 days mean the learn loop is slow by construction. <span class="m">Mitigation: steer on leading indicators daily, reconcile to sales on window close (D11); accept that calibration is a monthly rhythm, not a daily one.</span></p></div></li>
+    <li><span class="chip high">high</span><div><b>CDP data quality and Store-level identity</b><p>Outcomes are only as good as the CDP's join from lead to sale to Store. Cross-Store shoppers, duplicate leads and DMS timing will make store-level Outcomes noisy. <span class="m">Mitigation: identity resolution is an ingestion concern with its own tests; minimum-volume gates on any threshold that reads Outcomes; expect a data-quality discovery phase before Auto widens.</span></p></div></li>
+    <li><span class="chip high">high</span><div><b>Trusting Auto before it has earned it</b><p>The pitch's operating model only works if the Operator lets ~96% of Actions run unreviewed. That trust has to be earned per Action type. <span class="m">Mitigation: dry-run everything first; offline replay against history; widen the Auto tier by evidence (the §IV calibration story), never by fiat.</span></p></div></li>
+    <li><span class="chip med">medium</span><div><b>Exception fatigue</b><p>31 Exceptions a day is fine; 300 is a queue nobody reads and an Auto tier by neglect. <span class="m">Mitigation: Exception volume is itself a metric the Portfolio Agent watches; batching similar Exceptions; the “make this Auto going forward” affordance is the pressure valve.</span></p></div></li>
+    <li><span class="chip med">medium</span><div><b>Smart Bidding relearning</b><p>Every target move perturbs Google's own model; too many small moves keep it in permanent relearning, which looks like a breaker trip. <span class="m">Mitigation: minimum dwell time between target moves per campaign, encoded as a Guardrail; the Sooner Ridge case is the canonical example.</span></p></div></li>
+    <li><span class="chip med">medium</span><div><b>PMax opacity</b><p>Performance Max exposes little that an agent can act on beyond budgets, asset groups, and some signals; the Specialist toolkit shrinks there. <span class="m">Mitigation: be explicit about which Specialists apply per campaign type; treat PMax as budget-and-assets territory.</span></p></div></li>
+    <li><span class="chip med">medium</span><div><b>Co-op compliance</b><p>OEM-funded campaigns carry copy, keyword and reporting rules; a wrong Auto Action can cost reimbursement. <span class="m">Mitigation: Co-op Campaigns Review or locked by default (D2); the compliance rulebook is a Guardrail set per brand, ideally supplied by Group 1's OEM relationships.</span></p></div></li>
+    <li><span class="chip med">medium</span><div><b>Google API and policy drift</b><p>Google Ads API versions sunset roughly yearly; features move; policies change what an automation may do. <span class="m">Mitigation: the Gateway isolates the surface; version upgrades are a Gateway concern; monitor Google's automation policy for third-party tools.</span></p></div></li>
+    <li><span class="chip low">low</span><div><b>Model cost per Cycle</b><p>The §VI estimate is comfortable against the media budget, but a chatty Specialist design could multiply it. <span class="m">Mitigation: Specialists that are queries stay queries; cache stable packet prefixes; measure tokens per Cycle from day one.</span></p></div></li>
+    <li><span class="chip low">low</span><div><b>Operator adoption</b><p>The console replaces agency status calls with a queue and a Ledger. If the reasoning fields are weak, the Operator will route around the system. <span class="m">Mitigation: reasoning quality is a first-class evaluation target; the Ask path exists to keep humans in dialogue rather than in approval mode.</span></p></div></li>
+  </ul>
+
+  <hr class="rule">
+  <div class="two-col prose" style="max-width:none">
+    <div>
+      <h4 id="adr1">ADR 0001 · Two-level topology</h4>
+      <p style="font-size:.93rem">One Store Agent per Store, one Portfolio Agent, Specialists as skills. Rejected: per-function agents (no store context), 147 monoliths (no portfolio layer), Specialists as sub-agents (conflicting agendas, no single owner).</p>
+    </div>
+    <div>
+      <h4 id="adr2">ADR 0002 · Single Execution Gateway</h4>
+      <p style="font-size:.93rem">All mutations through one path; tier and Never enforced in code; Ledger always; CDP and DMS read-only. Prompts are never the safety mechanism.</p>
+    </div>
+    <div>
+      <h4 id="adr3">ADR 0003 · Learning without retraining</h4>
+      <p style="font-size:.93rem">Store Memory + calibrated thresholds + designed Experiments. Retraining rejected: opaque, slow, unauditable — and not the bottleneck.</p>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <span>Res AI · internal builder walkthrough</span>
+  <span>Numbers illustrative · fictional Stores · real brands and markets</span>
+  <span>Vocabulary: CONTEXT.md · Decisions: docs/adr/ · Facts: SIM-FACTS.md</span>
+</footer>
+</div>
+
+<script>
+(function () {
+  // theme param for verification: ?theme=dark|light
+  try {
+    var q = new URLSearchParams(location.search);
+    var t = q.get('theme');
+    if (t === 'dark' || t === 'light') document.documentElement.setAttribute('data-theme', t);
+  } catch (e) {}
+
+  // ---------- architecture map ----------
+  var NODES = {
+    'gads-read': { title: 'Google Ads API (read)', role: 'Source', what: 'Yesterday’s and intraday performance at campaign, ad group, keyword, search-term and asset level; budgets; bid strategies and targets; change history; Google’s own recommendations (read, never blindly applied).', inn: 'GAQL queries, scheduled and on demand', out: 'Normalized per-Store metrics and deltas into Signal ingestion', adr: '0002 — reads happen outside the Gateway; only writes go through it' },
+    'cdp': { title: 'CDP', role: 'Source of Outcomes', what: 'Leads, appointments, showroom visits, sold units and website activity, resolved to a Store. This is where the North Star (cost per sold unit) and the Leading Indicators come from — the business signals Google cannot see.', inn: 'Read-only connector; identity resolution at ingestion', out: 'Outcomes joined to Actions by the Evaluation Window; 7-day rollups in the context packet', adr: '0002 — read-only; the system never writes to the CDP or DMS' },
+    'inv': { title: 'Inventory feed', role: 'Source', what: 'Per-Store units on hand, days on lot, model mix, incoming. Almost certainly already flowing to the website and vehicle-listing feeds, so it exists; ingestion diffs it and emits deltas (“Tacoma 31 → 4”).', inn: 'Feed pull or event', out: 'Inventory deltas in the packet; event Cycles when a threshold crosses', adr: '—' },
+    'bc': { title: 'Business Conditions', role: 'Source (human)', what: 'Flags entered by the Operator or a Store’s GM describing what data cannot show: a tent sale, an OEM incentive, a BDC staffing gap, a closure. Free text plus a few structured fields (dates, campaigns in scope).', inn: 'Console form', out: 'An event Cycle for the Store, scoped to the flag; the flag text in the packet', adr: '—' },
+    'guardrails': { title: 'Guardrails', role: 'Configuration', what: 'Limits and rules the agent must respect, set by the Operator at three scopes — enterprise default, brand/region override, Store override — with narrower scopes inheriting from wider ones. Includes Autonomy Tier thresholds, the Never list, and Circuit Breaker bounds.', inn: 'Console Guardrails screen; Portfolio Agent proposals (Operator approves)', out: 'A resolved set per Store, read by the agent for reasoning and re-resolved by the Gateway for enforcement', adr: '0002 — the Gateway’s resolve is authoritative' },
+    'ingest': { title: 'Signal ingestion', role: 'Pipeline', what: 'Normalizes every source into per-Store facts, dedupes, computes windows and diffs, and emits events. Assembles the context packet a Store Agent receives at the start of a Cycle: Objectives, resolved Guardrails, campaign state, Signal deltas, and retrieved Store Memory.', inn: 'All sources', out: 'Context packets; events onto the bus', adr: '— (owns identity resolution and data-quality gates)' },
+    'store-agent': { title: 'Store Agent', role: 'Agent × 147', what: 'One per Store. Holds that Store’s context, runs the observe → decide → propose steps of a Cycle, invokes Specialists, weighs their proposals against Store Memory, and emits Actions with written reasoning. It has no credentials and does not classify its own tier — it proposes.', inn: 'Context packet; Specialist proposals; Portfolio reallocations; Asks from the Operator', out: 'Actions with reasoning to the Gateway; replies to Asks', adr: '0001 — one agent per Store keeps business context in one place' },
+    'specialists': { title: 'Specialists', role: 'Skills', what: 'Shared capabilities for one job function each: search-term hygiene, keywords and match types, bidding targets, pacing, campaign structure, creative. Narrow prompts plus deterministic helpers; many are mostly queries. They propose; the Store Agent decides.', inn: 'The packet slice relevant to the function; thresholds (calibrated by the Portfolio Agent)', out: 'Candidate Actions with evidence and expected effect', adr: '0001 — skills, not sub-agents with agendas' },
+    'memory': { title: 'Store Memory', role: 'Learning (per Store)', what: 'This Store’s own decision → Outcome history, retrieved by similarity to today’s situation and supplied as context every Cycle. “Last time we did X here, Y happened.” Populated by Outcome write-back.', inn: 'Ledger rows whose Evaluation Window has closed', out: 'Memory excerpts in the packet', adr: '0003 — memory instead of retraining' },
+    'gateway': { title: 'Execution Gateway', role: 'The only write path', what: 'Re-resolves Guardrails, classifies each Action into Auto / Review / Never in code, writes the Ledger before any external call, executes Auto in idempotent batches, queues Review as Exceptions, refuses Never, and performs rollbacks. Holds the Google Ads credentials; the model never does. Enforces per-Store and portfolio blast-radius caps and API quotas.', inn: 'Actions from agents; approvals/modifications from the Operator', out: 'Google Ads mutations; Exceptions; Ledger rows', adr: '0002 — tier and Never enforced here, not in prompts' },
+    'ledger': { title: 'Decision Ledger', role: 'Record', what: 'Append-only. Every observation → decision → Action → Outcome, with reasoning, packet hash, tier, status and evaluation window. The console is a view over it; learning is a query over it; offline replay reads it.', inn: 'Gateway writes; Evaluation Window write-backs; Experiment results', out: 'Console; Store Memory; Portfolio Agent; replay harness', adr: '0002 / 0003' },
+    'portfolio': { title: 'Portfolio Agent', role: 'Agent × 1', what: 'Sees across all Stores on a weekly Cycle and on Circuit Breaker clusters. Reallocates budget between Stores within corporate limits (always Review), calibrates Specialist and Gateway thresholds from measured Outcomes, designs and reads out Experiments, and proposes Guardrail changes to the Operator.', inn: 'Ledger across Stores; Objectives; corporate limits', out: 'Reallocation packets; threshold proposals; Experiment plans and readouts', adr: '0001 — the home for cross-Store decisions; 0003 — calibration and Experiments' },
+    'gads': { title: 'Google Ads', role: 'Outside', what: 'Smart Bidding, Performance Max and responsive search ads run the auction. The agent sets targets, budgets, structure, negatives, assets and business context; Google does what Google does best. This is the division of labor the ask specified.', inn: 'Mutations from the Gateway only', out: 'Performance data back through the read API', adr: '—' },
+    'operator': { title: 'Operator · Console', role: 'Human', what: 'Group 1 corporate. Sets Objectives and Guardrails, works the Exception queue (Approve / Modify / Reject / Ask), reads the Ledger, approves Portfolio packets. Manages strategy and Exceptions, not campaigns.', inn: 'Exceptions; Portfolio proposals; Ledger views', out: 'Decisions back into the Gateway; Guardrail and Objective edits; Business Conditions', adr: '—' },
+    'evalwin': { title: 'Evaluation Window', role: 'Measurement job', what: 'Opens per Action (7 / 14 / 28 days by type). On close, joins CDP Outcomes for the Store and period to the Action, computes deltas versus the pre-period, and writes the Outcome back to the Ledger row. Deterministic; the model does not grade its own work.', inn: 'Ledger rows with open windows; CDP Outcomes', out: 'Outcome write-back → Ledger → Store Memory and calibration', adr: '0003' },
+    'experiments': { title: 'Experiments', role: 'Measurement design', what: 'Store or geo holdouts and budget splits, pre-registered with metric, window and minimum detectable effect, run by the Portfolio Agent to measure incrementality apart from seasonality and Google’s own automation. Guardrails still apply inside an Experiment.', inn: 'Portfolio Agent plans; Operator approval', out: 'Readouts to the Ledger; recommendations to change Objectives or Guardrails', adr: '0003' }
+  };
+  var panel = document.getElementById('archpanel');
+  var svg = document.getElementById('archsvg');
+  var nodes = svg.querySelectorAll('.node');
+  function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;'); }
+  function select(id) {
+    nodes.forEach(function (n) { n.classList.toggle('selected', n.getAttribute('data-id') === id); });
+    var d = NODES[id]; if (!d) return;
+    panel.innerHTML =
+      '<div class="who sans" style="font-size:.72rem;text-transform:uppercase;letter-spacing:.14em;color:var(--muted)">' + esc(d.role) + '</div>' +
+      '<h3>' + esc(d.title) + '</h3>' +
+      '<p>' + esc(d.what) + '</p>' +
+      '<div class="field"><b>Inputs</b>' + esc(d.inn) + '</div>' +
+      '<div class="field"><b>Outputs</b>' + esc(d.out) + '</div>' +
+      '<span class="adr"><b>ADR</b> ' + esc(d.adr) + '</span>';
+  }
+  nodes.forEach(function (n) {
+    n.addEventListener('click', function () { select(n.getAttribute('data-id')); });
+    n.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); select(n.getAttribute('data-id')); } });
+  });
+
+  // ---------- stepper ----------
+  var steps = Array.prototype.slice.call(document.querySelectorAll('#stepper .step'));
+  var rail = document.getElementById('rail');
+  var count = document.getElementById('stepCount');
+  var prev = document.getElementById('prevStep');
+  var next = document.getElementById('nextStep');
+  var cur = 0;
+  steps.forEach(function (s, i) {
+    var b = document.createElement('button');
+    b.type = 'button'; b.setAttribute('role', 'tab'); b.setAttribute('aria-label', 'Step ' + (i + 1));
+    b.addEventListener('click', function () { go(i); });
+    rail.appendChild(b);
+  });
+  function go(i) {
+    cur = Math.max(0, Math.min(steps.length - 1, i));
+    steps.forEach(function (s, k) { s.classList.toggle('active', k === cur); });
+    Array.prototype.forEach.call(rail.children, function (b, k) {
+      b.classList.toggle('cur', k === cur); b.classList.toggle('done', k < cur);
+      b.setAttribute('aria-selected', k === cur ? 'true' : 'false');
+    });
+    count.textContent = (cur + 1) + ' / ' + steps.length;
+    prev.disabled = cur === 0; next.disabled = cur === steps.length - 1;
+  }
+  prev.addEventListener('click', function () { go(cur - 1); });
+  next.addEventListener('click', function () { go(cur + 1); });
+  document.addEventListener('keydown', function (e) {
+    var tag = (e.target && e.target.tagName) || '';
+    if (tag === 'INPUT' || tag === 'TEXTAREA') return;
+    if (e.key === 'ArrowRight') { go(cur + 1); }
+    if (e.key === 'ArrowLeft') { go(cur - 1); }
+  });
+  try { var s0 = parseInt(new URLSearchParams(location.search).get('step'), 10); if (s0 > 0) go(s0 - 1); else go(0); } catch (e) { go(0); }
+
+  // ---------- circuit breaker ----------
+  var BASE = 38;
+  var hist = [37, 38, 39, 38, 37, 38, 39, 38, 40, 38, 40, 46, 50, 53]; // Aug 3..16; change on Aug 13 (index 10)
+  var obs = document.getElementById('obsCpl');
+  var bound = document.getElementById('boundPct');
+  var obsVal = document.getElementById('obsVal');
+  var boundVal = document.getElementById('boundVal');
+  var verdict = document.getElementById('verdict');
+  var deltaVal = document.getElementById('deltaVal');
+  var vsteps = document.getElementById('verdictSteps');
+  var X0 = 40, X1 = 500, Y0 = 20, Y1 = 160, VMIN = 30, VMAX = 60;
+  function x(i) { return X0 + (X1 - X0) * i / (hist.length - 1); }
+  function y(v) { v = Math.max(VMIN, Math.min(VMAX, v)); return Y1 - (Y1 - Y0) * (v - VMIN) / (VMAX - VMIN); }
+  function render() {
+    var o = parseInt(obs.value, 10), b = parseInt(bound.value, 10);
+    obsVal.textContent = '$' + o; boundVal.textContent = '+' + b + '%';
+    var boundCpl = BASE * (1 + b / 100);
+    // history line: fixed through index 10 (Aug 13); last three days scaled to observed mean
+    var base = hist.slice(0, 11);
+    var pts = base.map(function (v, i) { return x(i) + ',' + y(v); }).join(' ');
+    document.getElementById('cplLine').setAttribute('points', pts);
+    // observed last 3 days: ramp from hist[10] to values whose mean = o
+    var last = [o - 4, o, o + 4].map(function (v) { return v; });
+    var mean = (last[0] + last[1] + last[2]) / 3; var adj = o - mean;
+    last = last.map(function (v) { return v + adj; });
+    var opts = [x(10) + ',' + y(hist[10])].concat(last.map(function (v, k) { return x(11 + k) + ',' + y(v); })).join(' ');
+    document.getElementById('cplObs').setAttribute('points', opts);
+    var bl = document.getElementById('baseLine'); bl.setAttribute('y1', y(BASE)); bl.setAttribute('y2', y(BASE));
+    var blab = document.getElementById('baseLab'); blab.setAttribute('y', y(BASE) - 4);
+    var bo = document.getElementById('boundLine'); bo.setAttribute('y1', y(boundCpl)); bo.setAttribute('y2', y(boundCpl));
+    var bolab = document.getElementById('boundLab'); bolab.setAttribute('y', y(boundCpl) - 4); bolab.textContent = 'bound +' + b + '% · $' + boundCpl.toFixed(2);
+    var cl = document.getElementById('changeLine'); cl.setAttribute('x1', x(10)); cl.setAttribute('x2', x(10));
+    document.getElementById('changeLab').setAttribute('x', x(10) - 96);
+    var delta = (o - BASE) / BASE * 100;
+    var trip = delta >= b;
+    deltaVal.textContent = (delta >= 0 ? '+' : '') + delta.toFixed(1) + '% vs baseline';
+    verdict.classList.toggle('trip', trip); verdict.classList.toggle('ok', !trip);
+    verdict.firstElementChild.textContent = trip ? 'TRIPPED' : 'WITHIN BOUND';
+    if (trip) {
+      vsteps.innerHTML = '<li>Freeze Auto tier for Sooner Ridge Honda</li>' +
+        '<li>Roll back tCPA $46 → $40 (Aug 13 Action, in scope)</li>' +
+        '<li>Raise Exception with hypotheses: Smart Bidding relearning after the target move; competitor “0% APR CR-V” event — “cr-v 0% apr” queries +180%</li>' +
+        '<li>Proposal on the card: resume Auto, tCPA $42, watch 7 days; watch-list competitor terms rather than negating them</li>';
+    } else {
+      vsteps.innerHTML = '<li>No trip. Intraday Cycle continues; Auto tier stays on.</li>' +
+        '<li>Delta is logged; three consecutive days inside the bound but above +20% raises a soft note on the Store view, not an Exception.</li>' +
+        '<li>Move the observed CPL or tighten the bound to see the trip path.</li>';
+    }
+  }
+  obs.addEventListener('input', render); bound.addEventListener('input', render); render();
+})();
+</script>
