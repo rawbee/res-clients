@@ -6,17 +6,20 @@
 
 **D1 — Pitch the all-in end-state, not a pilot.** (Aug 18, 2026, Robby.) The deck sells agents as the operating layer across all 147 dealerships, and covers the path to get there only enough to be credible. Implementation/phasing strategy is a post-win conversation. *Consequence:* the user simulation shows the steady-state system, not a shadow-mode pilot.
 
+**D12 — Deck trimmed per Robby's Aug 19 feedback (`feedback-9-43-am.md`): 21 → 16 slides.** Slide 3 now states what Res would build (one Store Agent per dealership, one Portfolio Agent across all 147, one console for the humans) instead of arguing feasibility; the five dark divider slides before Parts I–V are gone (only the Part VI "RES" divider remains — Robby said "the rest are good," so it was kept; easy to drop for consistency); feasibility columns renamed What exists / What we'll build / Limitations; guardrail slide headline "A robust guardrail system."; console slide "A bird's-eye view, not 147 dashboards." with the walkthrough subline removed. DECK-COPY.md re-synced. *Amended same day:* all "you asked / you described / we heard you" framing removed — the deck speaks about the solution, not back to the email (slide 2 is now "The proposition"; cover says Scope instead of In reply to; Latin eyebrows Propositvm / Solvtio).
+
 ## File map
 
 | File | What it is |
 | :--- | :--- |
 | `ask.md` | Group 1's email — the ask. Reference only |
+| `feedback-9-43-am.md` | Robby's voice-note feedback on the deck, Aug 19 — applied (D12) |
 | `CONTEXT.md` | Glossary of the system's language (Operator, Store Agent, Guardrail, Autonomy Tier, Exception, …). Definitions only, no implementation |
 | `docs/adr/` | 0001 two-level agent topology · 0002 single Execution Gateway, Never enforced in code · 0003 learning = memory + calibration + experiments |
 | `SIM-FACTS.md` | The fictional dataset seeds and the numbers every deliverable must agree on. Illustrative only |
 | `DECK-COPY.md` | Copy master for the deck — every string on the slides. Edit here, then re-sync the deck |
 | `USER-SIM.html` | Guided interactive walkthrough of the Operator's morning (persona 1, D3/D4): seven beats, real interactions (Ask/Approve/Modify/Reject, Circuit Breaker, Business Condition stream, guardrail slider, weekly reallocation), plus a browsable console (Portfolio · Exceptions · Stores · Guardrails · Objectives) over a deterministic 147-store dataset. `open USER-SIM.html` (`?beat=N`). Also at <https://claude.ai/code/artifact/7d6a2fc4-cf02-40e1-84ed-58548bcfa24f> |
-| `PITCH-DECK.html` | 21-slide 16:9 non-interactive deck in the tryres.ai brand system (D6) — a rendering of DECK-COPY.md. `open PITCH-DECK.html`; `?slide=N` shows one slide (screen only); ⌘P prints widescreen PDF. Also at <https://claude.ai/code/artifact/38d9ac9f-2975-4053-b7b7-66787a9226c1> |
+| `PITCH-DECK.html` | 16-slide 16:9 non-interactive deck in the tryres.ai brand system (D6) — a rendering of DECK-COPY.md. `open PITCH-DECK.html`; `?slide=N` shows one slide (screen only); ⌘P prints widescreen PDF. Also at <https://claude.ai/code/artifact/38d9ac9f-2975-4053-b7b7-66787a9226c1> |
 | `STAFF-SIM.html` | Internal builder walkthrough (D5): clickable architecture map, one Cycle traced end-to-end (Bayou City Toyota), Circuit Breaker interactive, Portfolio Agent, safety engineering, reference stack (*reference, not decided*), candid build risks. `open STAFF-SIM.html` (`?theme=light|dark`, `?step=N`). Also at <https://claude.ai/code/artifact/64dec847-5dbb-4fd5-b159-eda84e14ad00>. **Internal — not for Group 1** |
 
 ## Where things stand (Aug 18, 2026)
@@ -44,4 +47,4 @@
 
 **D10 — Files and build order** (Aug 18, Robby): `USER-SIM.html`, `STAFF-SIM.html`, `PITCH-DECK.html` in `group1/`, all self-contained, published as private artifacts with URLs recorded here. `DECK-COPY.md` is the single copy master for the deck (the deck is a rendering of it); sims carry their own narration. Build order: user sim → deck → staff sim. One deterministic fictional dataset (147 stores) generated in JS inside the user sim; the deck's numbers are hand-copied from it.
 
-**D11 — North star is cost per sold unit; leads/appointments are leading indicators the agents steer by; the Ledger reconciles them to sales.** (Aug 18, Robby.) Skai is mentioned only on the "we heard you" slide because Group 1 raised it — one line, no comparison slide.
+**D11 — North star is cost per sold unit; leads/appointments are leading indicators the agents steer by; the Ledger reconciles them to sales.** (Aug 18, Robby.) Skai is never named in any deliverable (Robby, Aug 19) — the contrast is "not another platform the team still has to operate."

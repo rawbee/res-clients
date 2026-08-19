@@ -1,8 +1,8 @@
 # DECK-COPY.md — Copy master for PITCH-DECK.html
 
-> **This file owns every string in the deck.** `PITCH-DECK.html` is a rendering of it — edit here, then ask an agent to re-sync the deck (it does not auto-update). Numbers come from `SIM-FACTS.md` (illustrative) and the InvestPR README's sourced credentials (D7); nothing else is invented. Vocabulary follows `CONTEXT.md`.
+> **This file owns every string in the deck.** *(Re-synced Aug 19 after Robby's feedback in `feedback-9-43-am.md`: 21 → 16 slides; then all "you asked…" framing replaced with solution framing.)* `PITCH-DECK.html` is a rendering of it — edit here, then ask an agent to re-sync the deck (it does not auto-update). Numbers come from `SIM-FACTS.md` (illustrative) and the InvestPR README's sourced credentials (D7); nothing else is invented. Vocabulary follows `CONTEXT.md`.
 >
-> Conventions: `EYEBROW` = small mono label top-left. `FOOT` = the numeral · Latin · italic descriptor strip. Divider slides are dark. Part system (Roman numeral · Latin label):
+> Conventions: `EYEBROW` = small mono label top-left. `FOOT` = the numeral · Latin · italic descriptor strip. Only Part VI keeps a dark divider slide (Aug 19 feedback removed the others); the Part system still runs in the footers:
 
 | Part | Latin | Gloss | Covers |
 | :--- | :--- | :--- | :--- |
@@ -22,55 +22,39 @@
 - EYEBROW: A response to Group 1 · in six parts
 - HEADLINE: Agents as the operating layer.
 - SUB: Day-to-day Google Ads management across 147 dealerships, performed by agents. Strategy, budgets, guardrails and exceptions kept by Group 1.
-- FACTS: Prepared for · Group 1 Automotive — Prepared by · Hai Tran, Res AI — Date · August 2026 — In reply to · "another agentic AI use case"
+- FACTS: Prepared for · Group 1 Automotive — Prepared by · Hai Tran, Res AI — Date · August 2026 — Scope · Google Ads management · 147 dealerships
 
-## Slide 2 — We heard you
+## Slide 2 — The proposition
 
-- EYEBROW: Avdivimvs · we heard you
-- HEADLINE: You didn't ask for a smarter dashboard.
-- LEDE: You asked whether agents could *be* the operating layer — perform the day-to-day management your agency does today, working with Google's auction automation, informed by your own first-party data, inside rules and limits you set.
-- THE TWELVE (grid, verbatim from the ask): Manage budgets and pacing · Analyze search terms, add/remove negatives · Manage keywords and match types · Manage bidding strategies and targets · Identify wasted spend and underperformers · Adjust campaign and ad group structure · Manage targeting and settings · Optimize ads, messaging and creative · React to inventory, demand and business conditions · Reallocate spend across campaigns · Execute through the Google Ads API · Measure downstream impact and learn from it
-- OPERATING MODEL (three lines): Group 1 sets strategy, objectives, budgets and guardrails. · Agents perform the day-to-day management. · Humans manage strategy and exceptions, not campaigns.
-- CLOSING LINE: And not Skai — not another platform your team would still have to operate.
-- FOOT: Avdivimvs · *the ask, restated*
+- EYEBROW: Propositvm · the proposition
+- HEADLINE: An agentic operating layer for Google Ads, across every Group 1 store.
+- LEDE: Agents perform the day-to-day management — working *with* Google's auction automation, informed by Group 1's own first-party data, inside rules and limits Group 1 sets. Twelve jobs, run continuously:
+- THE TWELVE (grid, the twelve jobs from the ask, verbatim): Manage budgets and pacing · Analyze search terms, add/remove negatives · Manage keywords and match types · Manage bidding strategies and targets · Identify wasted spend and underperformers · Adjust campaign and ad group structure · Manage targeting and settings · Optimize ads, messaging and creative · React to inventory, demand and business conditions · Reallocate spend across campaigns · Execute through the Google Ads API · Measure downstream impact and learn from it
+- OPERATING MODEL (two lines): Group 1 sets strategy, objectives, budgets and guardrails — and decides the exceptions. · Agents perform the day-to-day management.
+- CLOSING LINE: Not another platform the team still has to operate. The agents are the operating layer.
+- FOOT: Propositvm · *the proposition*
 
-## Slide 3 — Our answer
+## Slide 3 — What Res would build
 
-- EYEBROW: Responsvm · our answer
-- HEADLINE: Yes. It's buildable now — and the hard part isn't the AI.
+- EYEBROW: Solvtio · the solution
+- HEADLINE: What Res would build for Group 1.
 - THREE STATEMENTS:
-  1. **Feasible.** Every one of the twelve functions is a Google Ads API operation an agent can perform with the business context Google doesn't have. The model is not the bottleneck.
-  2. **Not a platform.** An operating layer: one Store Agent per dealership, one Portfolio Agent across all 147, a single console for the humans who set strategy and decide exceptions.
-  3. **Bounded.** Autonomy is mechanical, not a promise: every action is classified Auto, Review or Never against guardrails you own, enforced in code before it reaches Google.
-- KICKER LINE: Group 1 corporate runs the show. The agents do the work.
-- FOOT: Responsvm · *in one breath*
+  1. **One Store Agent per dealership.** 147 of them. Each holds its store's guardrails, inventory, first-party outcomes, campaign state and its own decision history — and runs that store's day-to-day Google Ads management.
+  2. **One Portfolio Agent across all 147.** Moves budget between stores within your limits, spots systemic patterns, runs experiments, and proposes guardrail changes to the people in charge.
+  3. **One console for the humans.** Where Group 1 corporate sets strategy, objectives, budgets and guardrails — and decides the exceptions the agents escalate. Not 147 dashboards.
+- KICKER LINE: An operating layer, not another platform. Group 1 corporate runs the show; the agents do the work.
+- FOOT: Solvtio · *what it is*
 
-## Slide 4 — Divider I (dark)
-
-- KICKER: I · Fieri Potest
-- DISPLAY WORD: FEASIBLE
-- QUOTE: The question isn't whether an agent can change a bid. It's whether you can trust it to.
-- ATTRIB: Part I · Feasibility
-- FOOT: I · Fieri Potest · *it can be done*
-
-## Slide 5 — The feasibility perspective
+## Slide 4 — The feasibility perspective
 
 - EYEBROW: I · Feasibility
-- HEADLINE: What's proven, what's actually hard, and where we'll be honest.
-- COL 1 — PROVEN TODAY: Agents that read data, reason, and act through tools are in production across industries. The Google Ads API is mature and complete — budgets, bids, keywords, negatives, assets, structure, reporting, change history. Model context is large enough to hold a store's whole picture: guardrails, inventory, outcomes, its own history.
-- COL 2 — ACTUALLY HARD (and where the work is): **Guardrails** — enforced mechanically, in code, not by asking the model nicely. **Measurement** — joining ad activity to leads, appointments and sold units from your CDP, with lag. **Trust** — every decision explained, every outcome written back, autonomy widened as it's earned.
-- COL 3 — HONEST LIMITS: Performance Max exposes few levers; the agent works the ones it has (budgets, asset groups, signals, exclusions). Smart Bidding relearns after big moves — the agent moves deliberately and watches. Google's API and policies change; that's maintenance, not magic. Agent judgment is evaluated against your history before it's allowed to act alone.
-- FOOT: I · Fieri Potest · *the perspective you asked for*
+- HEADLINE: What exists, what we'll build, and the limitations.
+- COL 1 — WHAT EXISTS: Agents that read data, reason, and act through tools are in production across industries. The Google Ads API is mature and complete — budgets, bids, keywords, negatives, assets, structure, reporting, change history. Model context is large enough to hold a store's whole picture: guardrails, inventory, outcomes, its own history.
+- COL 2 — WHAT WE'LL BUILD: **Guardrails** — enforced mechanically, in code, not by asking the model nicely. **Measurement** — joining ad activity to leads, appointments and sold units from your CDP, with lag. **Trust** — every decision explained, every outcome written back, autonomy widened as it's earned.
+- COL 3 — LIMITATIONS: Performance Max exposes few levers; the agent works the ones it has (budgets, asset groups, signals, exclusions). Smart Bidding relearns after big moves — the agent moves deliberately and watches. Google's API and policies change; that's maintenance, not magic. Agent judgment is evaluated against your history before it's allowed to act alone.
+- FOOT: I · Fieri Potest · *what exists, what we build*
 
-## Slide 6 — Divider II (dark)
-
-- KICKER: II · Ordo
-- DISPLAY WORD: MODEL
-- QUOTE: One agent per store. One across all of them. One console for the humans.
-- ATTRIB: Part II · The operating model
-- FOOT: II · Ordo · *the order of things*
-
-## Slide 7 — The operating model
+## Slide 5 — The operating model
 
 - EYEBROW: II · Operating model
 - HEADLINE: Operator, Portfolio Agent, Store Agents.
@@ -81,7 +65,7 @@
 - LINE: Every observation, decision, action and outcome lands in one Decision Ledger. That's what the Operator reads and what learning feeds on.
 - FOOT: II · Ordo · *three roles*
 
-## Slide 8 — A Store Agent's day
+## Slide 6 — A Store Agent's day
 
 - EYEBROW: II · The cycle
 - HEADLINE: Observe, decide, execute, measure, learn — on three rhythms.
@@ -92,10 +76,10 @@
 - MEASURE LINE: Measure is decoupled from execute: each action carries an evaluation window — 7, 14 or 28 days — and its outcome is written back when the window closes. That is what makes "learn" real.
 - FOOT: II · Ordo · *what a day looks like*
 
-## Slide 9 — Your twelve functions, answered
+## Slide 7 — Your twelve functions, answered
 
 - EYEBROW: II · The twelve
-- HEADLINE: Every line of your list, and which part of the system does it.
+- HEADLINE: The twelve jobs, and which part of the system does each.
 - TABLE (function → done by → tier by default):
   | Manage budgets and pacing | Store Agent · pacing | Auto within cap; cross-store = Portfolio Agent |
   | Search terms; add/remove negatives | Store Agent · search-term hygiene | Auto |
@@ -111,18 +95,10 @@
   | Measure downstream impact; learn | Ledger + Portfolio Agent | continuous |
 - FOOT: II · Ordo · *nothing left off the list*
 
-## Slide 10 — Divider III (dark)
-
-- KICKER: III · Tvtela
-- DISPLAY WORD: BOUNDED
-- QUOTE: Requiring approval for every action defeats the purpose. So does approval for none.
-- ATTRIB: Part III · Autonomy, bounded
-- FOOT: III · Tvtela · *guardianship*
-
-## Slide 11 — Autonomy, bounded
+## Slide 8 — Autonomy, bounded
 
 - EYEBROW: III · Guardrails
-- HEADLINE: Auto. Review. Never.
+- HEADLINE: A robust guardrail system.
 - THREE TIERS:
   - **Auto** — executes now, logged. Negatives; budget shifts ≤ 10% within the store's monthly cap; target moves ±15%; pausing an ad that's statistically worse.
   - **Review** — the agent prepares the change with its evidence and waits for the Operator. Budget moves above threshold or across stores; pausing or creating campaigns; structural changes; anything touching an OEM co-op campaign.
@@ -132,25 +108,16 @@
 - FOOTNOTE: Thresholds shown are illustrative defaults. Group 1 tunes them; the sim shows how.
 - FOOT: III · Tvtela · *the boundary is mechanical*
 
-## Slide 12 — What the Operator sees
+## Slide 9 — What the Operator sees
 
 - EYEBROW: III · The console
-- HEADLINE: A morning's work, not 147 dashboards.
+- HEADLINE: A bird's-eye view, not 147 dashboards.
 - STILL 1 — Portfolio, 7:05am: Yesterday · $148,900 spent vs $151,600 plan · 98% pace · 1,204 actions · 1,167 Auto · 31 Exceptions · 6 Circuit Breakers · Cost per sold unit $296.
 - STILL 2 — An Exception card: Bayou City Toyota · Shift $420/day from New · Tacoma to Used · Trucks & SUVs. Why: Tacoma inventory 31 → 4; aged used 29 → 47. Last time (May 12): used leads +22%, CPL flat. Crosses the 10% Auto threshold → Review. Approve · Modify · Reject · Ask.
 - STILL 3 — A guardrail moves: Toyota stores · 38 Exceptions in 30 days for "budget shift 10–15%" · 38 of 38 approved. Raise the Auto threshold to 15%? Projected Exceptions per week: 11 → 4.
-- LINE: The interactive walkthrough shows the whole morning: 22 minutes, five decisions, 1,204 actions.
 - FOOT: III · Tvtela · *from the walkthrough*
 
-## Slide 13 — Divider IV (dark)
-
-- KICKER: IV · Discere
-- DISPLAY WORD: LEARN
-- QUOTE: Not "self-improving AI." Memory, calibration, and experiments you can inspect.
-- ATTRIB: Part IV · Measure and learn
-- FOOT: IV · Discere · *to learn*
-
-## Slide 14 — Learn, concretely
+## Slide 10 — Learn, concretely
 
 - EYEBROW: IV · Learning
 - HEADLINE: Three mechanisms, all inspectable. The model itself is not retrained.
@@ -161,25 +128,17 @@
 - NORTH STAR: Outcomes come from your CDP — leads, appointments, showroom visits, sold units — not Google's proxy metrics. The north star is cost per sold unit; leads and appointments are the leading indicators the agents steer by day-to-day.
 - FOOT: IV · Discere · *what "learn" means*
 
-## Slide 15 — Working with Google, not against it
+## Slide 11 — Working with Google, not against it
 
 - EYEBROW: IV · Division of labor
 - HEADLINE: Google runs the auction. The agent runs the business context.
 - TWO COLUMNS:
   - **Google's automation keeps** — Smart Bidding's auction-time bids; Performance Max's channel and asset mixing; responsive search ad assembly; audience expansion.
   - **The agent decides** — targets, budgets and pacing; structure and negatives; which assets and which messages; what inventory to push and when; what a store's business conditions mean this week; and whether any of it is working, measured in sold units.
-- LINE: Exactly the layer you described: the broader day-to-day decisions Google doesn't have the context to make.
+- LINE: The agent layer makes the broader day-to-day decisions Google doesn't have the context to make.
 - FOOT: IV · Discere · *with, not against*
 
-## Slide 16 — Divider V (dark)
-
-- KICKER: V · Machina
-- DISPLAY WORD: SYSTEM
-- QUOTE: One path in, one path out, everything on the record.
-- ATTRIB: Part V · Architecture and the path
-- FOOT: V · Machina · *the machine*
-
-## Slide 17 — Architecture
+## Slide 12 — Architecture
 
 - EYEBROW: V · Architecture
 - HEADLINE: Reads from everything. Writes to one place.
@@ -187,7 +146,7 @@
 - LINES: Every mutation goes through one Execution Gateway that enforces the tier, checks the guardrail, writes the ledger, and can roll back. Nothing writes to your CDP or DMS. The Never list lives in code, not in a prompt.
 - FOOT: V · Machina · *one gateway*
 
-## Slide 18 — The path to the end-state
+## Slide 13 — The path to the end-state
 
 - EYEBROW: V · The path
 - HEADLINE: Autonomy is earned, by tier and by store.
@@ -198,7 +157,7 @@
 - LINE: The Operator's "make this Auto going forward" is the mechanism. How fast, and in what order, is a conversation for after we've agreed to do this together.
 - FOOT: V · Machina · *earned, not assumed*
 
-## Slide 19 — Divider VI (dark)
+## Slide 14 — Divider VI (dark)
 
 - KICKER: VI · Qvi Svmvs
 - DISPLAY WORD: RES
@@ -206,7 +165,7 @@
 - ATTRIB: Part VI · Who we are
 - FOOT: VI · Qvi Svmvs · *who we are*
 
-## Slide 20 — Why Res
+## Slide 15 — Why Res
 
 - EYEBROW: VI · Why Res
 - HEADLINE: We've run the spend, built the stack, and we already ship agents that act.
@@ -217,7 +176,7 @@
 - LINE: Twenty years working together across four companies. The people you meet are the people who build it.
 - FOOT: VI · Qvi Svmvs · *the argument from continuity*
 
-## Slide 21 — Next step
+## Slide 16 — Next step
 
 - EYEBROW: VI · Next
 - HEADLINE: A working session, not a proposal.
